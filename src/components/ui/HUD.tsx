@@ -1,6 +1,12 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState, useEffect } from "react";
 import { ClusterType } from "@/types/graph";
 import { RadarMiniMap } from "./RadarMiniMap";
+import {
+  isSoundMuted,
+  toggleSound,
+  subscribeSoundMute,
+  playKeyClick,
+} from "@/lib/soundEngine";
 
 interface HUDProps {
   activeCluster: ClusterType;
@@ -29,12 +35,33 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
     },
     telemetryRef
   ) => {
+    const [muted, setMuted] = useState(false);
+
+    useEffect(() => {
+      setMuted(isSoundMuted());
+      const unsub = subscribeSoundMute(setMuted);
+      return unsub;
+    }, []);
+
+    const handleToggleSound = () => {
+      const next = toggleSound();
+      setMuted(next);
+      if (!next) {
+        playKeyClick();
+      }
+    };
+
+    const handleClusterClick = (c: ClusterType) => {
+      playKeyClick();
+      onSelectCluster(c);
+    };
+
     return (
       <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-6 z-10">
         <header className="flex justify-between items-center gap-4">
           <div
             className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white pointer-events-auto cursor-pointer select-none px-4 py-2 rounded-xl border border-white/15 hover:border-accent-lime/50 bg-[#0c0d14]/90 backdrop-blur-md transition-all shadow-md"
-            onClick={() => onSelectCluster("root")}
+            onClick={() => handleClusterClick("root")}
             role="button"
             tabIndex={0}
           >
@@ -52,7 +79,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
                   : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
               }`}
-              onClick={() => onSelectCluster("root")}
+              onClick={() => handleClusterClick("root")}
             >
               [01 // ROOT <kbd>1</kbd>]
             </button>
@@ -62,7 +89,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
                   : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
               }`}
-              onClick={() => onSelectCluster("arch")}
+              onClick={() => handleClusterClick("arch")}
             >
               [02 // ARCH <kbd>2</kbd>]
             </button>
@@ -72,7 +99,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
                   : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
               }`}
-              onClick={() => onSelectCluster("projects")}
+              onClick={() => handleClusterClick("projects")}
             >
               [03 // PROJECTS <kbd>3</kbd>]
             </button>
@@ -82,7 +109,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
                   : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
               }`}
-              onClick={() => onSelectCluster("stack")}
+              onClick={() => handleClusterClick("stack")}
             >
               [04 // STACK <kbd>4</kbd>]
             </button>
@@ -92,19 +119,36 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
                   : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
               }`}
-              onClick={() => onSelectCluster("dossier")}
+              onClick={() => handleClusterClick("dossier")}
             >
               [05 // DOSSIER <kbd>5</kbd>]
             </button>
           </nav>
 
-          <div className="flex items-center gap-3.5 pointer-events-auto">
+          <div className="flex items-center gap-2.5 pointer-events-auto">
+            {/* Audio haptics toggle */}
+            <button
+              className={`font-mono text-[11px] px-3 py-1.5 rounded-xl cursor-pointer flex items-center gap-1.5 transition-all shadow-sm ${
+                muted
+                  ? "bg-white/[0.04] border border-white/15 text-zinc-400 hover:text-zinc-200 hover:border-white/30"
+                  : "bg-accent-lime/10 border border-accent-lime/45 text-accent-lime hover:bg-accent-lime/20 hover:text-white"
+              }`}
+              onClick={handleToggleSound}
+              title="Toggle Web Audio Synthesizer"
+            >
+              <span>{muted ? "AUDIO: OFF" : "AUDIO: ON"}</span>
+              <span className="text-[10px]">{muted ? "🔇" : "🔊"}</span>
+            </button>
+
             <button
               className="bg-accent-lime/10 border border-accent-lime/45 text-accent-lime font-mono text-[11px] px-3.5 py-1.5 rounded-xl cursor-pointer flex items-center gap-2 hover:bg-accent-lime/20 hover:border-accent-lime hover:text-white transition-all shadow-sm"
-              onClick={onOpenGuide}
+              onClick={() => {
+                playKeyClick();
+                onOpenGuide();
+              }}
               title="View Navigation Guide"
             >
-              <span>PRO GUIDE</span>
+              <span>GUIDE</span>
               <kbd>?</kbd>
             </button>
             <div
@@ -141,14 +185,20 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               <div className="flex gap-1.5">
                 <button
                   className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={onZoomIn}
+                  onClick={() => {
+                    playKeyClick();
+                    onZoomIn();
+                  }}
                   title="Dolly Forward (+)"
                 >
                   +
                 </button>
                 <button
                   className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={onZoomOut}
+                  onClick={() => {
+                    playKeyClick();
+                    onZoomOut();
+                  }}
                   title="Dolly Backward (-)"
                 >
                   &minus;
@@ -164,7 +214,10 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 </button>
                 <button
                   className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={onResetCamera}
+                  onClick={() => {
+                    playKeyClick();
+                    onResetCamera();
+                  }}
                   title="Reset View (1)"
                 >
                   &#8635;

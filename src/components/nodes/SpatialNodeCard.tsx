@@ -1,5 +1,6 @@
 import React, { forwardRef, useCallback, useRef } from "react";
-import { NodeData } from "@/types/graph";
+import { NodeData, SubsystemType } from "@/types/graph";
+import { playCardHover, playKeyClick } from "@/lib/soundEngine";
 
 interface SpatialNodeCardProps {
   node: NodeData;
@@ -14,13 +15,197 @@ export interface SpatialNodeElement extends HTMLDivElement {
   _scale?: number;
 }
 
+function SubsystemWidget({ type }: { type?: SubsystemType }) {
+  if (!type) return null;
+
+  switch (type) {
+    case "router":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+              ANYCAST INGRESS
+            </span>
+            <span className="text-zinc-300">p99: 1.18ms</span>
+          </div>
+          <div className="h-6 w-full relative overflow-hidden">
+            <svg className="w-full h-full" viewBox="0 0 280 24" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="router-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ccff00" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#ccff00" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0 16 Q 35 4, 70 14 T 140 8 T 210 16 T 276 6 L 276 24 L 0 24 Z"
+                fill="url(#router-grad)"
+              />
+              <path
+                d="M 0 16 Q 35 4, 70 14 T 140 8 T 210 16 T 276 6"
+                fill="none"
+                stroke="#ccff00"
+                strokeWidth="1.5"
+              />
+              <circle cx="276" cy="6" r="2.5" fill="#ccff00" />
+            </svg>
+          </div>
+          <div className="flex justify-between text-zinc-500 text-[8.5px] mt-1">
+            <span>EDGE: 120k req/s</span>
+            <span className="text-accent-lime font-semibold">DROP RATE: 0.00%</span>
+          </div>
+        </div>
+      );
+
+    case "stream":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-cyan font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse" />
+              KAFKA FANOUT
+            </span>
+            <span className="text-zinc-300">48.2k frames/s</span>
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500 w-12 text-[8px]">SOCKETS</span>
+              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-accent-cyan w-[78%] rounded-full animate-pulse" />
+              </div>
+              <span className="text-zinc-400 text-[8.5px]">24k/s</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500 w-12 text-[8px]">PIPELINES</span>
+              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-accent-lime w-[64%] rounded-full animate-pulse" />
+              </div>
+              <span className="text-zinc-400 text-[8.5px]">24k/s</span>
+            </div>
+          </div>
+        </div>
+      );
+
+    case "vectordb":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+              HNSW GRAPH
+            </span>
+            <span className="text-zinc-300">cos_sim: 0.984</span>
+          </div>
+          <div className="flex items-center justify-between gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2" strokeOpacity="0.4" />
+                <line x1="12" y1="2" x2="12" y2="22" strokeOpacity="0.3" />
+                <line x1="2" y1="8.5" x2="22" y2="8.5" strokeOpacity="0.3" />
+                <circle cx="12" cy="12" r="2.5" fill="#ccff00" />
+                <circle cx="2" cy="8.5" r="1.5" fill="#06b6d4" />
+                <circle cx="22" cy="15.5" r="1.5" fill="#06b6d4" />
+              </svg>
+              <span className="text-zinc-300 text-[8.5px]">1536-DIM SIMD</span>
+            </div>
+            <span className="px-2 py-0.5 rounded bg-accent-lime/10 text-accent-lime border border-accent-lime/30 text-[8px] font-semibold">
+              AVX-512 FMA
+            </span>
+          </div>
+        </div>
+      );
+
+    case "crdt":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-emerald font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-emerald animate-pulse" />
+              PEER MESH
+            </span>
+            <span className="text-emerald-400 font-semibold">CONVERGED</span>
+          </div>
+          <div className="flex items-center justify-between text-[8.5px] px-1 text-zinc-300">
+            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER A</span>
+            <span className="text-accent-emerald">&harr;</span>
+            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER B</span>
+            <span className="text-accent-emerald">&harr;</span>
+            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER C</span>
+          </div>
+          <div className="text-[8px] text-zinc-500 mt-1.5 text-center">
+            VECTOR CLOCK: [P1:42, P2:89, P3:15] &bull; 0 SPLIT-BRAIN
+          </div>
+        </div>
+      );
+
+    case "ebpf":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[8.5px] leading-tight">
+          <div className="flex justify-between items-center text-zinc-400 mb-1">
+            <span className="flex items-center gap-1.5 text-accent-cyan font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse" />
+              KERNEL PROBES
+            </span>
+            <span className="text-zinc-500">&lt; 0.8% CPU</span>
+          </div>
+          <div className="bg-[#050608] rounded p-1.5 border border-white/5 text-zinc-400 space-y-0.5">
+            <div className="text-accent-cyan truncate">&gt; sys_enter_connect: pid 3841 (0.12ms)</div>
+            <div className="text-zinc-500 truncate">&gt; ringbuf_submit: 64B [VERIFIED]</div>
+          </div>
+        </div>
+      );
+
+    case "cluster":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+              POD REPLICAS
+            </span>
+            <span className="text-emerald-400 font-semibold">128/128 HEALTHY</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1 text-[8px] text-center font-bold">
+            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">US-E</div>
+            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">US-W</div>
+            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EU-C</div>
+            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">AP-S</div>
+          </div>
+        </div>
+      );
+
+    case "identity":
+      return (
+        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
+          <div className="flex justify-between items-center text-zinc-400 mb-1">
+            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+              VERIFIED KEY
+            </span>
+            <span className="text-zinc-300 font-semibold">ED25519</span>
+          </div>
+          <div className="text-[8.5px] text-zinc-400 tracking-wider truncate">
+            FINGERPRINT: 4A7F 90B2 C811 09E4
+          </div>
+          <div className="flex justify-between text-[8px] text-zinc-500 mt-1">
+            <span>UPTIME: 99.99%</span>
+            <span className="text-accent-lime font-semibold">SYSTEM ARCHITECT</span>
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+}
+
 export const SpatialNodeCard = forwardRef<SpatialNodeElement, SpatialNodeCardProps>(
   ({ node, isActive, onFocusNode, onHoverConnection }, ref) => {
     const innerCardRef = useRef<HTMLDivElement | null>(null);
-    const cachedRectRef = useRef<DOMRect | null>(null);
 
     const handleMouseEnter = useCallback(
       () => {
+        playCardHover();
         const inner = innerCardRef.current;
         if (inner) {
           inner.style.transition = "border-color 200ms ease, box-shadow 200ms ease";
@@ -65,6 +250,7 @@ export const SpatialNodeCard = forwardRef<SpatialNodeElement, SpatialNodeCardPro
     const handleClick = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
+        playKeyClick();
         onFocusNode(node.id);
       },
       [node.id, onFocusNode]
@@ -120,10 +306,13 @@ export const SpatialNodeCard = forwardRef<SpatialNodeElement, SpatialNodeCardPro
           </div>
 
           {node.desc && (
-            <div className="font-sans text-[13px] leading-relaxed text-zinc-300 mb-4 line-clamp-3">
+            <div className="font-sans text-[13px] leading-relaxed text-zinc-300 mb-3.5 line-clamp-3">
               {node.desc}
             </div>
           )}
+
+          {/* Differentiated live subsystem telemetry widget */}
+          <SubsystemWidget type={node.subsystemType} />
 
           {node.tags && node.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-3.5">
@@ -151,3 +340,4 @@ export const SpatialNodeCard = forwardRef<SpatialNodeElement, SpatialNodeCardPro
 );
 
 SpatialNodeCard.displayName = "SpatialNodeCard";
+

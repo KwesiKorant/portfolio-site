@@ -17,6 +17,7 @@ import {
   SpatialCanvas,
   type SpatialCanvasHandle,
 } from "@/components/canvas/SpatialCanvas";
+import { playKeyClick } from "@/lib/soundEngine";
 
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
@@ -111,22 +112,29 @@ export default function SpatialPortfolioPage() {
       }
 
       if (e.key === "Escape") {
+        playKeyClick();
         setIsDrawerOpen(false);
         setIsGuideOpen(false);
       } else if (e.key === " ") {
         e.preventDefault();
         handleNetworkSurge();
       } else if (e.key === "1") {
+        playKeyClick();
         handleFocusNode("root");
       } else if (e.key === "2") {
+        playKeyClick();
         handleFocusNode("edge-gateway");
       } else if (e.key === "3") {
+        playKeyClick();
         handleFocusNode("hyperscale");
       } else if (e.key === "4") {
+        playKeyClick();
         handleFocusNode("infra-compute");
       } else if (e.key === "5") {
+        playKeyClick();
         handleFocusNode("dossier");
       } else if (e.key === "?") {
+        playKeyClick();
         setIsGuideOpen((prev) => !prev);
       }
     };

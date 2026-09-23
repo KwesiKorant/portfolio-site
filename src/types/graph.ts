@@ -7,12 +7,22 @@ export interface MetricItem {
   val: string;
 }
 
+export type SubsystemType =
+  | "router"
+  | "stream"
+  | "vectordb"
+  | "crdt"
+  | "ebpf"
+  | "cluster"
+  | "identity";
+
 export interface NodeData {
   id: string;
   title: string;
   category: string;
   badge: string;
   badgeColor?: BadgeColor;
+  subsystemType?: SubsystemType;
   desc?: string;
   x: number;
   y: number;

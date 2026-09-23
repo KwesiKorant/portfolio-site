@@ -17,6 +17,11 @@ import {
   WORLD_BOUNDS,
 } from "@/data/nodeGraph";
 import { SpatialNodeElement } from "@/components/nodes/SpatialNodeCard";
+import {
+  playWarpSound,
+  playKeyClick,
+  playSurgePulse,
+} from "@/lib/soundEngine";
 
 export interface SpatialCanvasHandle {
   focusNode: (nodeId: string) => void;
@@ -86,6 +91,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         activeNodeIdRef.current = nodeId;
         onNodeActivated(nodeId);
+        playWarpSound();
 
         if (nodeId === "root") {
           targetCamRef.current.x = 0;
@@ -112,6 +118,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           if (networkSurgeRef.current) networkSurgeRef.current();
         },
         dollyBy: (deltaZ: number) => {
+          playKeyClick();
           targetCamRef.current.z = Math.min(
             Math.max(targetCamRef.current.z + deltaZ, MIN_CAMERA_Z),
             MAX_CAMERA_Z
@@ -240,8 +247,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           vec4 texColor = texture2D(uTexture, vUv);
           float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
 
-          // Soft luma key
+          // Soft luma key to dissolve dark background
           float alpha = smoothstep(0.04, 0.26, luma);
+
+          // Edge falloff mask: dissolves the harsh rectangular boundary into the void
+          float edgeX = smoothstep(0.0, 0.10, vUv.x) * smoothstep(1.0, 0.90, vUv.x);
+          float edgeY = smoothstep(0.0, 0.26, vUv.y) * smoothstep(1.0, 0.96, vUv.y);
+          alpha *= edgeX * edgeY;
 
           // Perspective scanline CRT phosphor effect
           float scanlineFactor = clamp((uDist - 700.0) / 1200.0, 0.0, 1.0);
@@ -250,6 +262,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           vec3 finalColor = texColor.rgb - vec3(scanline);
           finalColor.g += scanlineFactor * 0.06;
           finalColor.r += scanlineFactor * 0.03;
+
+          // Cybernetic rim contour glow on midtone silhouette edges
+          float rim = smoothstep(0.12, 0.38, luma) * (1.0 - smoothstep(0.38, 0.72, luma));
+          finalColor += vec3(0.8, 1.0, 0.0) * rim * 0.09;
 
           gl_FragColor = vec4(finalColor, alpha);
         }
@@ -275,6 +291,67 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const heroMesh = new THREE.Mesh(heroMeshGeometry, videoMaterial);
       heroMesh.position.set(0, HERO_Y, 0);
       scene.add(heroMesh);
+
+      // Volumetric aura texture helper
+      function createGlowTexture(coreColor: string, haloColor: string) {
+        const gCanvas = document.createElement("canvas");
+        gCanvas.width = 256;
+        gCanvas.height = 256;
+        const ctx = gCanvas.getContext("2d");
+        if (ctx) {
+          const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+          grad.addColorStop(0, coreColor);
+          grad.addColorStop(0.35, haloColor);
+          grad.addColorStop(0.7, "rgba(9, 9, 20, 0.04)");
+          grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 256, 256);
+        }
+        return new THREE.CanvasTexture(gCanvas);
+      }
+
+      // Soft volumetric aura plane directly behind the hero portrait to eliminate square edges
+      const heroAuraTex = createGlowTexture("rgba(6, 182, 212, 0.25)", "rgba(204, 255, 0, 0.12)");
+      const heroAuraMat = new THREE.MeshBasicMaterial({
+        map: heroAuraTex,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      let heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
+      const heroAuraMesh = new THREE.Mesh(heroAuraGeo, heroAuraMat);
+      heroAuraMesh.position.set(0, HERO_Y, -25);
+      scene.add(heroAuraMesh);
+
+      // Volumetric cluster nebulas (ambient depth glow behind major node clusters)
+      const clusterNebulaGroup = new THREE.Group();
+      scene.add(clusterNebulaGroup);
+
+      const clusterCenters = [
+        { x: -600, y: 180, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 700 }, // Ingress / Edge
+        { x: 620, y: 200, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Consensus / DB
+        { x: -540, y: -260, color: "rgba(6, 182, 212, 0.12)", halo: "rgba(6, 182, 212, 0.03)", size: 650 }, // Observability / Kernel
+        { x: 580, y: -240, color: "rgba(204, 255, 0, 0.13)", halo: "rgba(204, 255, 0, 0.04)", size: 660 }, // Compute / Dossier
+      ];
+
+      const clusterNebulaGeos: THREE.BufferGeometry[] = [];
+      const clusterNebulaMats: THREE.Material[] = [];
+
+      clusterCenters.forEach((c) => {
+        const tex = createGlowTexture(c.color, c.halo);
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        });
+        const geo = new THREE.PlaneGeometry(c.size, c.size);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(c.x, c.y, -60);
+        clusterNebulaGroup.add(mesh);
+        clusterNebulaGeos.push(geo);
+        clusterNebulaMats.push(mat);
+      });
 
       // Packet radial gradient texture helper
       function createPacketTexture(colorHex: string) {
@@ -395,6 +472,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         heroMesh.geometry = heroMeshGeometry;
         heroMesh.position.set(0, HERO_Y, 0);
 
+        heroAuraGeo.dispose();
+        heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
+        heroAuraMesh.geometry = heroAuraGeo;
+        heroAuraMesh.position.set(0, HERO_Y, -25);
+
         rebuildCurves();
       }
 
@@ -403,13 +485,16 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       // Network surge trigger
       const triggerNetworkSurge = () => {
+        playSurgePulse();
+        cameraShakeAmount = 3.8;
+
         packetMeshes.forEach((p) => {
-          p.speed = p.baseSpeed * 3.2;
+          p.speed = p.baseSpeed * 3.4;
           setTimeout(() => (p.speed = p.baseSpeed), 1100);
         });
 
-        gridBaseMat.opacity = 0.9;
-        setTimeout(() => (gridBaseMat.opacity = 0.5), 350);
+        gridBaseMat.opacity = 0.95;
+        setTimeout(() => (gridBaseMat.opacity = 0.5), 400);
 
         onShowTemporaryHint(
           "⚡ NETWORK SURGE ACTIVE • 8 CLUSTERS SYNCHRONIZED"
@@ -515,6 +600,19 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       window.addEventListener("mousedown", handleMouseDown);
       window.addEventListener("mousemove", handleMouseMove);
       window.addEventListener("mouseup", handleMouseUp);
+
+      // Ambient mouse parallax tracking (Zero Reflow: normalized -1 to +1)
+      let mouseNormX = 0;
+      let mouseNormY = 0;
+      let ambientParallaxX = 0;
+      let ambientParallaxY = 0;
+      let cameraShakeAmount = 0;
+
+      const handlePointerMoveAmbient = (e: MouseEvent) => {
+        mouseNormX = (e.clientX / window.innerWidth) * 2.0 - 1.0;
+        mouseNormY = -(e.clientY / window.innerHeight) * 2.0 + 1.0;
+      };
+      window.addEventListener("mousemove", handlePointerMoveAmbient, { passive: true });
 
       // Touch interactions (Pinch dolly + touch drag pan)
       let touchStartDist = 0;
@@ -687,16 +785,42 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         currentCamRef.current.y += Math.abs(dy) < 0.04 ? dy : dy * lerpFactor;
         currentCamRef.current.z += Math.abs(dz) < 0.04 ? dz : dz * lerpFactor;
 
+        // Ambient mouse parallax interpolation (smooth 3D inertia)
+        const targetParallaxX = mouseNormX * 32;
+        const targetParallaxY = mouseNormY * 20;
+        ambientParallaxX += (targetParallaxX - ambientParallaxX) * lerpFactor;
+        ambientParallaxY += (targetParallaxY - ambientParallaxY) * lerpFactor;
+
+        // Camera shake decay (impulse on surge)
+        let shakeX = 0;
+        let shakeY = 0;
+        if (cameraShakeAmount > 0.02) {
+          shakeX = (Math.random() - 0.5) * cameraShakeAmount;
+          shakeY = (Math.random() - 0.5) * cameraShakeAmount;
+          cameraShakeAmount *= 0.91;
+        }
+
         camera.position.set(
-          currentCamRef.current.x,
-          currentCamRef.current.y,
+          currentCamRef.current.x + ambientParallaxX + shakeX,
+          currentCamRef.current.y + ambientParallaxY + shakeY,
           currentCamRef.current.z
         );
         camera.lookAt(
-          currentCamRef.current.x,
-          currentCamRef.current.y,
+          currentCamRef.current.x + ambientParallaxX * 0.35,
+          currentCamRef.current.y + ambientParallaxY * 0.35,
           0
         );
+
+        // Drifting starfield through 3D space
+        const posAttr = starGeo.attributes.position as THREE.BufferAttribute;
+        const posArray = posAttr.array as Float32Array;
+        for (let i = 0; i < particleCount; i++) {
+          posArray[i * 3 + 2] += 0.45;
+          if (posArray[i * 3 + 2] > 1100) {
+            posArray[i * 3 + 2] = -1100;
+          }
+        }
+        posAttr.needsUpdate = true;
 
         // Update shader uniforms
         videoMaterial.uniforms.uDist.value = currentCamRef.current.z;
@@ -789,10 +913,16 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         window.removeEventListener("touchmove", handleTouchMove);
         window.removeEventListener("touchend", handleTouchEnd);
         window.removeEventListener("resize", handleResize);
+        window.removeEventListener("mousemove", handlePointerMoveAmbient);
         video.removeEventListener("loadedmetadata", calibrateVideoDimensions);
 
         // Dispose Three.js objects
         heroMeshGeometry.dispose();
+        heroAuraGeo.dispose();
+        heroAuraMat.dispose();
+        heroAuraTex.dispose();
+        clusterNebulaGeos.forEach((g) => g.dispose());
+        clusterNebulaMats.forEach((m) => m.dispose());
         videoMaterial.dispose();
         videoTexture.dispose();
         starGeo.dispose();
