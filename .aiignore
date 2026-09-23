@@ -1,0 +1,17 @@
+# AI Ignore File - Prevent reading large binary, font, and media assets
+*.mp4
+*.webm
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mov
+*.avi
+*.webp
+*.wasm
+*.woff2
+*.woff
+*.ttf
+hero_loop.mp4
+hero_loop.webm
+fonts/
