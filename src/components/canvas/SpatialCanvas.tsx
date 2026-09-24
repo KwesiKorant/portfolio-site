@@ -749,8 +749,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       };
       window.addEventListener("resize", handleResize);
 
-      // High-performance 120 FPS render loop
-      let animFrameId: number;
+      // High-performance 120 FPS render loop with Viewport Culling
+      let animFrameId: number | null = null;
+      let isVisible = true;
       let lastTime = performance.now();
       let lastFrameTime = performance.now();
       let startTime = performance.now();
@@ -759,6 +760,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let radarFrameCounter = 0;
 
       const animate = () => {
+        if (!isVisible) {
+          animFrameId = null;
+          return;
+        }
         animFrameId = requestAnimationFrame(animate);
 
         const now = performance.now();
@@ -901,10 +906,34 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         renderer.render(scene, camera);
       };
 
+      // Viewport Culling Observer (Zero GPU/VRAM Waste Offscreen)
+      const viewportObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            const nowVisible = entry.isIntersecting;
+            if (nowVisible !== isVisible) {
+              isVisible = nowVisible;
+              if (isVisible) {
+                lastFrameTime = performance.now();
+                if (!animFrameId) {
+                  animFrameId = requestAnimationFrame(animate);
+                }
+              } else if (animFrameId) {
+                cancelAnimationFrame(animFrameId);
+                animFrameId = null;
+              }
+            }
+          });
+        },
+        { threshold: 0 }
+      );
+      viewportObserver.observe(canvas);
+
       animate();
 
       return () => {
-        cancelAnimationFrame(animFrameId);
+        viewportObserver.disconnect();
+        if (animFrameId) cancelAnimationFrame(animFrameId);
         window.removeEventListener("wheel", handleWheel);
         window.removeEventListener("mousedown", handleMouseDown);
         window.removeEventListener("mousemove", handleMouseMove);

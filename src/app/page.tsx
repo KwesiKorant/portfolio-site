@@ -18,6 +18,10 @@ import {
   type SpatialCanvasHandle,
 } from "@/components/canvas/SpatialCanvas";
 import { playKeyClick } from "@/lib/soundEngine";
+import { ImageRevealHero } from "@/components/sections/ImageRevealHero";
+import { ScrollVideoGate } from "@/components/sections/ScrollVideoGate";
+import { MouseScrubSection } from "@/components/sections/MouseScrubSection";
+import { FinaleSection } from "@/components/sections/FinaleSection";
 
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
@@ -103,7 +107,6 @@ export default function SpatialPortfolioPage() {
   // Keyboard navigation & interaction controller
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't capture when typing in inputs or textareas
       if (
         e.target instanceof HTMLInputElement ||
         e.target instanceof HTMLTextAreaElement
@@ -144,72 +147,87 @@ export default function SpatialPortfolioPage() {
   }, [handleFocusNode, handleNetworkSurge]);
 
   return (
-    <main style={{ position: "relative", width: "100vw", height: "100vh" }}>
-      {/* Three.js Perspective Canvas */}
-      <SpatialCanvas
-        ref={canvasHandleRef}
-        onNodeActivated={setActiveNodeId}
-        onShowTemporaryHint={handleShowTemporaryHint}
-        statementRef={statementRef}
-        heroBadgeRef={heroBadgeRef}
-        telemetryRef={telemetryRef}
-        radarCanvasRef={radarCanvasRef}
-        nodeRefs={nodeRefs}
-      />
+    <main className="w-full min-h-screen bg-[#050508] relative">
+      {/* STAGE 01: Image Reveal Hero (Cursor Spotlight Mask) */}
+      <ImageRevealHero />
 
-      {/* Spatial World: 3D perspective projected DOM elements */}
-      <div id="spatial-world">
-        {/* Bold All-Caps Statement Anchored 55px Above Video */}
-        <HeroStatement ref={statementRef} />
+      {/* STAGE 02: Scroll-Triggered Video Portal Gate */}
+      <ScrollVideoGate />
 
-        {/* Hero Node Status Badge Anchored 24px Below Video */}
-        <HeroMetaBadge
-          ref={heroBadgeRef}
-          onNetworkSurge={handleNetworkSurge}
+      {/* STAGE 03: 3D Spatial Canvas Dimension (Viewport Culled) */}
+      <section
+        id="section-spatial"
+        className="relative w-full h-[100dvh] overflow-hidden bg-[#050508]"
+      >
+        {/* Three.js Perspective Canvas */}
+        <SpatialCanvas
+          ref={canvasHandleRef}
+          onNodeActivated={setActiveNodeId}
+          onShowTemporaryHint={handleShowTemporaryHint}
+          statementRef={statementRef}
+          heroBadgeRef={heroBadgeRef}
+          telemetryRef={telemetryRef}
+          radarCanvasRef={radarCanvasRef}
+          nodeRefs={nodeRefs}
         />
 
-        {/* Multi-depth child node cards */}
-        {NODE_GRAPH.filter((n) => n.id !== "root").map((node) => (
-          <SpatialNodeCard
-            key={node.id}
-            ref={(el) => {
-              if (el) {
-                nodeRefs.current.set(node.id, el);
-              } else {
-                nodeRefs.current.delete(node.id);
-              }
-            }}
-            node={node}
-            isActive={activeNodeId === node.id}
-            onFocusNode={handleFocusNode}
-            onHoverConnection={handleHoverConnection}
+        {/* Spatial World: 3D perspective projected DOM elements */}
+        <div id="spatial-world">
+          <HeroStatement ref={statementRef} />
+          <HeroMetaBadge
+            ref={heroBadgeRef}
+            onNetworkSurge={handleNetworkSurge}
           />
-        ))}
-      </div>
 
-      {/* Technical HUD Overlay */}
-      <HUD
-        ref={telemetryRef}
-        activeCluster={activeCluster}
-        onSelectCluster={handleSelectCluster}
-        onOpenGuide={() => setIsGuideOpen(true)}
-        onZoomIn={() => canvasHandleRef.current?.dollyBy(-220)}
-        onZoomOut={() => canvasHandleRef.current?.dollyBy(220)}
-        onNetworkSurge={handleNetworkSurge}
-        onResetCamera={() => handleFocusNode("root")}
-        onWarpToCoords={(wx, wy) =>
-          canvasHandleRef.current?.warpToCoords(wx, wy)
-        }
-        radarCanvasRef={radarCanvasRef}
-      />
+          {/* Multi-depth child node cards */}
+          {NODE_GRAPH.filter((n) => n.id !== "root").map((node) => (
+            <SpatialNodeCard
+              key={node.id}
+              ref={(el) => {
+                if (el) {
+                  nodeRefs.current.set(node.id, el);
+                } else {
+                  nodeRefs.current.delete(node.id);
+                }
+              }}
+              node={node}
+              isActive={activeNodeId === node.id}
+              onFocusNode={handleFocusNode}
+              onHoverConnection={handleHoverConnection}
+            />
+          ))}
+        </div>
 
-      {/* Pro Hint Cycling Ticker Banner */}
-      <ProHintsBanner
-        onOpenGuide={() => setIsGuideOpen(true)}
-        temporaryHint={temporaryHint}
-      />
+        {/* Technical HUD Overlay */}
+        <HUD
+          ref={telemetryRef}
+          activeCluster={activeCluster}
+          onSelectCluster={handleSelectCluster}
+          onOpenGuide={() => setIsGuideOpen(true)}
+          onZoomIn={() => canvasHandleRef.current?.dollyBy(-220)}
+          onZoomOut={() => canvasHandleRef.current?.dollyBy(220)}
+          onNetworkSurge={handleNetworkSurge}
+          onResetCamera={() => handleFocusNode("root")}
+          onWarpToCoords={(wx, wy) =>
+            canvasHandleRef.current?.warpToCoords(wx, wy)
+          }
+          radarCanvasRef={radarCanvasRef}
+        />
 
-      {/* Slideover Project Deep-Dive Inspector */}
+        {/* Pro Hint Cycling Ticker Banner */}
+        <ProHintsBanner
+          onOpenGuide={() => setIsGuideOpen(true)}
+          temporaryHint={temporaryHint}
+        />
+      </section>
+
+      {/* STAGE 04: Interactive Turntable / Mouse-Controlled Scrub */}
+      <MouseScrubSection />
+
+      {/* STAGE 05: Finale / Direct Uplink & Dossier */}
+      <FinaleSection />
+
+      {/* Slideover Project Deep-Dive Inspector (Global Fixed Drawer) */}
       <ProjectDrawer
         node={selectedNode}
         isOpen={isDrawerOpen}
