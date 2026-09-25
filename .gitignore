@@ -49,6 +49,3 @@ Thumbs.db
 *.sublime-project
 # Local Working Raw Assets
 look/
-
-# Local Custom Fonts
-public/fonts/
