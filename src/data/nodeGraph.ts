@@ -2,8 +2,8 @@ import { NodeData } from "@/types/graph";
 
 export const HERO_Y = -60;
 export const DEFAULT_CAMERA_Z = 1100;
-export const MIN_CAMERA_Z = 300;
-export const MAX_CAMERA_Z = 2400;
+export const MIN_CAMERA_Z = 360;
+export const MAX_CAMERA_Z = 2050;
 
 export const WORLD_BOUNDS = {
   minX: -1300,

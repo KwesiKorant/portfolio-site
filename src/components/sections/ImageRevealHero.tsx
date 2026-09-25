@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { playCardHover, playKeyClick } from "@/lib/soundEngine";
 
 interface ImageRevealHeroProps {
   onScrollNext?: () => void;
@@ -11,7 +10,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
   const containerRef = useRef<HTMLDivElement | null>(null);
   const frontImageRef = useRef<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
-  const [hasCustomAssets, setHasCustomAssets] = useState(false);
+  const [hasCustomAssets, setHasCustomAssets] = useState(true);
 
   // Mouse coordinate refs for zero-reflow rAF throttle
   const targetX = useRef<number>(0);
@@ -20,26 +19,21 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
   const currentY = useRef<number>(0);
   const rafId = useRef<number | null>(null);
   const isMoving = useRef<boolean>(false);
+  const cachedRect = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
 
-  // Check if user has uploaded hero-front and hero-reveal images
-  useEffect(() => {
-    const imgA = new Image();
-    const imgB = new Image();
-    let loadedA = false;
-    let loadedB = false;
-
-    imgA.onload = () => {
-      loadedA = true;
-      if (loadedB) setHasCustomAssets(true);
-    };
-    imgB.onload = () => {
-      loadedB = true;
-      if (loadedA) setHasCustomAssets(true);
-    };
-
-    imgA.src = "/hero-front.jpg";
-    imgB.src = "/hero-reveal.jpg";
+  // Cache container bounds on mount and window resize (Zero layout thrashing)
+  const updateCachedBounds = useCallback(() => {
+    if (containerRef.current) {
+      const r = containerRef.current.getBoundingClientRect();
+      cachedRect.current = { left: r.left, top: r.top, width: r.width, height: r.height };
+    }
   }, []);
+
+  useEffect(() => {
+    updateCachedBounds();
+    window.addEventListener("resize", updateCachedBounds, { passive: true });
+    return () => window.removeEventListener("resize", updateCachedBounds);
+  }, [updateCachedBounds]);
 
   // Update CSS variables --reveal-x and --reveal-y inside single rAF loop
   const updateMask = useCallback(() => {
@@ -50,8 +44,8 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
     const dx = targetX.current - currentX.current;
     const dy = targetY.current - currentY.current;
 
-    currentX.current += dx * 0.22;
-    currentY.current += dy * 0.22;
+    currentX.current += dx * 0.28;
+    currentY.current += dy * 0.28;
 
     frontEl.style.setProperty("--reveal-x", `${currentX.current.toFixed(1)}px`);
     frontEl.style.setProperty("--reveal-y", `${currentY.current.toFixed(1)}px`);
@@ -64,11 +58,28 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
   }, []);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = containerRef.current?.getBoundingClientRect();
+    if (!cachedRect.current) {
+      updateCachedBounds();
+    }
+    const rect = cachedRect.current;
     if (!rect) return;
 
-    targetX.current = e.clientX - rect.left;
-    targetY.current = e.clientY - rect.top;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    targetX.current = x;
+    targetY.current = y;
+
+    // If first entry or not hovered yet, snap instantly to cursor position to eliminate any initial drag lag
+    if (!isHovered) {
+      setIsHovered(true);
+      currentX.current = x;
+      currentY.current = y;
+      if (frontImageRef.current) {
+        frontImageRef.current.style.setProperty("--reveal-x", `${x.toFixed(1)}px`);
+        frontImageRef.current.style.setProperty("--reveal-y", `${y.toFixed(1)}px`);
+      }
+    }
 
     if (!isMoving.current) {
       isMoving.current = true;
@@ -76,9 +87,22 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
     }
   };
 
-  const handlePointerEnter = () => {
+  const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    updateCachedBounds();
+    const rect = cachedRect.current;
+    if (rect) {
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      targetX.current = x;
+      targetY.current = y;
+      currentX.current = x;
+      currentY.current = y;
+      if (frontImageRef.current) {
+        frontImageRef.current.style.setProperty("--reveal-x", `${x.toFixed(1)}px`);
+        frontImageRef.current.style.setProperty("--reveal-y", `${y.toFixed(1)}px`);
+      }
+    }
     setIsHovered(true);
-    playCardHover();
   };
 
   const handlePointerLeave = () => {
@@ -102,14 +126,18 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
         {/* REVEAL LAYER (Underneath: Cybernetic / Digital Twin) */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           {hasCustomAssets ? (
-            <img
-              src="/hero-reveal.jpg"
-              alt="Kwesi Digital Twin"
-              className="w-full h-full object-cover object-center"
-              /* object-fit: contain option commented: className="w-full h-full object-contain" */
-            />
+            <picture className="w-full h-full block">
+              <source srcSet="/hero-reveal.webp" type="image/webp" />
+              <img
+                src="/hero-reveal.jpg"
+                alt="Kwesi Digital Twin"
+                className="w-full h-full object-cover object-center"
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
           ) : (
-            /* High-Craft Procedural Fallback while Google Flow asset is rendering */
+            /* High-Craft Procedural Fallback */
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#06b6d4]/20 via-[#050508] to-[#ccff00]/15 relative">
               <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ccff00_1px,transparent_1px)] [background-size:24px_24px]" />
               <div className="text-center font-mono text-xs text-accent-lime/60 tracking-widest uppercase">
@@ -136,12 +164,16 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
           }}
         >
           {hasCustomAssets ? (
-            <img
-              src="/hero-front.jpg"
-              alt="Kwesi Portrait"
-              className="w-full h-full object-cover object-center"
-              /* object-fit: contain option commented: className="w-full h-full object-contain" */
-            />
+            <picture className="w-full h-full block">
+              <source srcSet="/hero-front.webp" type="image/webp" />
+              <img
+                src="/hero-front.jpg"
+                alt="Kwesi Portrait"
+                className="w-full h-full object-cover object-center"
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
           ) : (
             /* High-Craft Editorial Portrait Fallback */
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#12131c] via-[#090a0f] to-[#050508]">
@@ -188,7 +220,6 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
 
         <button
           onClick={() => {
-            playKeyClick();
             if (onScrollNext) {
               onScrollNext();
             } else {
@@ -207,6 +238,9 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext }
           </span>
         </button>
       </div>
+
+      {/* Seamless bottom fade handoff into Stage 02 */}
+      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-10" />
     </section>
   );
 };

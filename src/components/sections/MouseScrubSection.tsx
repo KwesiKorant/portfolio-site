@@ -1,21 +1,38 @@
 "use client";
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
-import { playCardHover } from "@/lib/soundEngine";
 
 export const MouseScrubSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const progressTextRef = useRef<HTMLSpanElement | null>(null);
+  const durationTextRef = useRef<HTMLSpanElement | null>(null);
+  const stateLabelRef = useRef<HTMLDivElement | null>(null);
 
   const [duration, setDuration] = useState<number>(0);
-  const [currentProgress, setCurrentProgress] = useState<number>(0);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const cachedBounds = useRef<{ left: number; width: number } | null>(null);
+  const lastClientX = useRef<number>(-999);
 
   // Easing values for zero-reflow rAF loop
   const targetTimeRef = useRef<number>(0);
   const displayedTimeRef = useRef<number>(0);
   const rafId = useRef<number | null>(null);
   const isSettled = useRef<boolean>(true);
+
+  // Cache container bounds on mount and window resize
+  const updateCachedBounds = useCallback(() => {
+    if (containerRef.current) {
+      const r = containerRef.current.getBoundingClientRect();
+      cachedBounds.current = { left: r.left, width: r.width };
+    }
+  }, []);
+
+  useEffect(() => {
+    updateCachedBounds();
+    window.addEventListener("resize", updateCachedBounds, { passive: true });
+    return () => window.removeEventListener("resize", updateCachedBounds);
+  }, [updateCachedBounds]);
 
   // Wait for loadedmetadata before calculating targetTime
   useEffect(() => {
@@ -25,6 +42,9 @@ export const MouseScrubSection: React.FC = () => {
     const handleLoadedMetadata = () => {
       if (video.duration && !isNaN(video.duration)) {
         setDuration(video.duration);
+        if (durationTextRef.current) {
+          durationTextRef.current.textContent = `${video.duration.toFixed(2)}s`;
+        }
       }
     };
 
@@ -36,7 +56,7 @@ export const MouseScrubSection: React.FC = () => {
     }
   }, []);
 
-  // Single rAF easing loop
+  // Single rAF easing loop (Direct DOM mutations, zero React state re-renders)
   const easeScrub = useCallback(() => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
@@ -44,7 +64,7 @@ export const MouseScrubSection: React.FC = () => {
     const diff = targetTimeRef.current - displayedTimeRef.current;
 
     // Critically damped frame seek interpolation
-    displayedTimeRef.current += diff * 0.16;
+    displayedTimeRef.current += diff * 0.2;
 
     // Write currentTime at most once per rAF frame
     try {
@@ -53,25 +73,40 @@ export const MouseScrubSection: React.FC = () => {
       // Ignore rapid seek aborts
     }
 
-    setCurrentProgress(displayedTimeRef.current / video.duration);
+    // Update progress bar via compositor-only transform scaleX
+    const progressRatio = Math.max(0, Math.min(1, displayedTimeRef.current / video.duration));
+    if (progressBarRef.current) {
+      progressBarRef.current.style.transform = `scaleX(${progressRatio.toFixed(4)})`;
+    }
+    if (progressTextRef.current) {
+      progressTextRef.current.textContent = `${(progressRatio * 100).toFixed(1)}%`;
+    }
 
-    if (Math.abs(diff) > 0.02) {
+    if (Math.abs(diff) > 0.015) {
       rafId.current = requestAnimationFrame(easeScrub);
     } else {
       isSettled.current = true;
     }
   }, []);
 
-  // Mousemove updates targetTime from mouse X
+  // Mousemove updates targetTime strictly from mouse X (ignoring pure vertical movement)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // If horizontal motion is under 1.5px, treat as vertical move and bypass seek calculation
+    const deltaX = Math.abs(e.clientX - lastClientX.current);
+    if (deltaX < 1.5) return;
+    lastClientX.current = e.clientX;
+
     const video = videoRef.current;
     if (!video || !video.duration) return;
 
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    if (!cachedBounds.current) {
+      updateCachedBounds();
+    }
+    const bounds = cachedBounds.current;
+    if (!bounds || bounds.width <= 0) return;
 
-    const mouseX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
+    const mouseX = e.clientX - bounds.left;
+    const ratio = Math.max(0, Math.min(1, mouseX / bounds.width));
 
     targetTimeRef.current = ratio * video.duration;
 
@@ -81,13 +116,18 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    playCardHover();
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    updateCachedBounds();
+    lastClientX.current = e.clientX;
+    if (stateLabelRef.current) {
+      stateLabelRef.current.textContent = "STATE: ACTIVE // SCRUBBING";
+    }
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
+    if (stateLabelRef.current) {
+      stateLabelRef.current.textContent = "STATE: IDLE // MOVE MOUSE";
+    }
   };
 
   return (
@@ -107,18 +147,15 @@ export const MouseScrubSection: React.FC = () => {
         playsInline
         preload="auto"
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
-        /* object-fit: contain option commented: className="absolute inset-0 w-full h-full object-contain pointer-events-none z-0" */
       >
         <source src="/turntable_scrub.mp4" type="video/mp4" />
-        <source src="/hero_loop.webm" type="video/webm" />
-        <source src="/hero_loop.mp4" type="video/mp4" />
       </video>
 
       {/* Atmospheric Vignette */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/70 pointer-events-none z-[1]" />
 
       {/* Header Info */}
-      <div className="relative z-10 flex justify-between items-center w-full">
+      <div className="relative z-10 flex justify-between items-center w-full pointer-events-none">
         <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime" />
           <span>STAGE 04 // INTERACTION TURNTABLE</span>
@@ -128,8 +165,8 @@ export const MouseScrubSection: React.FC = () => {
         </div>
       </div>
 
-      {/* HUD Telemetry Overlay */}
-      <div className="relative z-10 max-w-md p-6 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-md shadow-2xl">
+      {/* HUD Telemetry Overlay (pointer-events-none so cursor moves across it without hit-test churn) */}
+      <div className="relative z-10 max-w-md p-6 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-md shadow-2xl pointer-events-none">
         <div className="font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-1 font-semibold">
           04 &bull; KINETIC FRAME SCRUB
         </div>
@@ -144,28 +181,32 @@ export const MouseScrubSection: React.FC = () => {
         <div className="space-y-1.5 font-mono text-[10px]">
           <div className="flex justify-between text-zinc-400">
             <span>SEEK PROGRESS:</span>
-            <span className="text-accent-lime font-bold">
-              {(currentProgress * 100).toFixed(1)}%
+            <span ref={progressTextRef} className="text-accent-lime font-bold">
+              0.0%
             </span>
           </div>
           <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
-              className="h-full bg-accent-lime rounded-full transition-none"
-              style={{ width: `${(currentProgress * 100).toFixed(1)}%` }}
+              ref={progressBarRef}
+              className="h-full w-full bg-accent-lime rounded-full origin-left will-change-transform"
+              style={{ transform: "scaleX(0)" }}
             />
           </div>
           <div className="flex justify-between text-[9px] text-zinc-500 pt-1">
             <span>0.00s</span>
-            <span>{duration ? `${duration.toFixed(2)}s` : "--"}</span>
+            <span ref={durationTextRef}>{duration ? `${duration.toFixed(2)}s` : "4.00s"}</span>
           </div>
         </div>
       </div>
 
       {/* Footer Info */}
-      <div className="relative z-10 flex justify-between items-end w-full font-mono text-[10px] text-zinc-400">
-        <div>STATE: {isHovered ? "ACTIVE // SCRUBBING" : "IDLE // MOVE MOUSE"}</div>
+      <div className="relative z-10 flex justify-between items-end w-full font-mono text-[10px] text-zinc-400 pointer-events-none">
+        <div ref={stateLabelRef}>STATE: IDLE // MOVE MOUSE</div>
         <div className="text-accent-lime font-semibold">SCROLL DOWN FOR FINALE &darr;</div>
       </div>
+
+      {/* Seamless bottom fade handoff into Stage 05 */}
+      <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-10" />
     </section>
   );
 };

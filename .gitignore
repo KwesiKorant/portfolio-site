@@ -47,6 +47,6 @@ Thumbs.db
 !.vscode/extensions.json
 *.sublime-workspace
 *.sublime-project
-*.swp
-*.swo
-*~
+# Local Working Raw Assets
+look/
+

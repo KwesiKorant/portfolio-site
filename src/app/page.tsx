@@ -17,7 +17,6 @@ import {
   SpatialCanvas,
   type SpatialCanvasHandle,
 } from "@/components/canvas/SpatialCanvas";
-import { playKeyClick } from "@/lib/soundEngine";
 import { ImageRevealHero } from "@/components/sections/ImageRevealHero";
 import { ScrollVideoGate } from "@/components/sections/ScrollVideoGate";
 import { MouseScrubSection } from "@/components/sections/MouseScrubSection";
@@ -115,29 +114,22 @@ export default function SpatialPortfolioPage() {
       }
 
       if (e.key === "Escape") {
-        playKeyClick();
         setIsDrawerOpen(false);
         setIsGuideOpen(false);
       } else if (e.key === " ") {
         e.preventDefault();
         handleNetworkSurge();
       } else if (e.key === "1") {
-        playKeyClick();
         handleFocusNode("root");
       } else if (e.key === "2") {
-        playKeyClick();
         handleFocusNode("edge-gateway");
       } else if (e.key === "3") {
-        playKeyClick();
         handleFocusNode("hyperscale");
       } else if (e.key === "4") {
-        playKeyClick();
         handleFocusNode("infra-compute");
       } else if (e.key === "5") {
-        playKeyClick();
         handleFocusNode("dossier");
       } else if (e.key === "?") {
-        playKeyClick();
         setIsGuideOpen((prev) => !prev);
       }
     };
@@ -152,13 +144,17 @@ export default function SpatialPortfolioPage() {
       <ImageRevealHero />
 
       {/* STAGE 02: Scroll-Triggered Video Portal Gate */}
-      <ScrollVideoGate />
+      <ScrollVideoGate onComplete={() => handleFocusNode("root")} />
 
       {/* STAGE 03: 3D Spatial Canvas Dimension (Viewport Culled) */}
       <section
         id="section-spatial"
         className="relative w-full h-[100dvh] overflow-hidden bg-[#050508]"
       >
+        {/* Seamless transition blends from Stage 02 and into Stage 04 */}
+        <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#050508] to-transparent pointer-events-none z-[2]" />
+        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-[2]" />
+
         {/* Three.js Perspective Canvas */}
         <SpatialCanvas
           ref={canvasHandleRef}

@@ -537,16 +537,87 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         return { screenX, screenY, scale, isVisible };
       }
 
-      // Input interactions: Wheel dolly along Z-axis
+      // State for boundary overscroll transitions between stages
+      let overscrollDown = 0;
+      let overscrollUp = 0;
+      let isNavigatingStage = false;
+      let overscrollTimer: NodeJS.Timeout | null = null;
+
+      // Input interactions: Wheel dolly along Z-axis (Natural 3D camera flight within Stage 03, seamless handoff at bounds)
       const handleWheel = (e: WheelEvent) => {
-        e.preventDefault();
+        // If not actively looking at Stage 03, do not intercept wheel
+        const spatialEl = document.getElementById("section-spatial");
+        if (!spatialEl) return;
+        const rect = spatialEl.getBoundingClientRect();
+        const isInSpatialFocus =
+          rect.top <= window.innerHeight * 0.45 &&
+          rect.bottom >= window.innerHeight * 0.55;
+
+        if (!isInSpatialFocus) {
+          return;
+        }
+
+        const target = e.target as HTMLElement | null;
+        if (isInteractiveTarget(target)) {
+          return;
+        }
+
         const dollySpeed =
-          (currentCamRef.current.z / DEFAULT_CAMERA_Z) * 80;
-        targetCamRef.current.z += (e.deltaY > 0 ? 1 : -1) * dollySpeed;
-        targetCamRef.current.z = Math.min(
-          Math.max(targetCamRef.current.z, MIN_CAMERA_Z),
-          MAX_CAMERA_Z
-        );
+          (currentCamRef.current.z / DEFAULT_CAMERA_Z) * 105;
+
+        // User scrolling DOWN (dollying back/out)
+        if (e.deltaY > 0) {
+          if (targetCamRef.current.z < MAX_CAMERA_Z - 30) {
+            e.preventDefault();
+            targetCamRef.current.z = Math.min(
+              MAX_CAMERA_Z,
+              targetCamRef.current.z + dollySpeed
+            );
+            overscrollDown = 0;
+          } else {
+            // Reached outer camera boundary -> continue scrolling to Stage 04
+            overscrollDown += Math.abs(e.deltaY);
+            if (overscrollDown > 75 && !isNavigatingStage) {
+              isNavigatingStage = true;
+              document
+                .getElementById("section-scrub")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              setTimeout(() => {
+                isNavigatingStage = false;
+                overscrollDown = 0;
+              }, 1200);
+            }
+          }
+        } else if (e.deltaY < 0) {
+          // User scrolling UP (dollying in towards root)
+          if (targetCamRef.current.z > MIN_CAMERA_Z + 30) {
+            e.preventDefault();
+            targetCamRef.current.z = Math.max(
+              MIN_CAMERA_Z,
+              targetCamRef.current.z - dollySpeed
+            );
+            overscrollUp = 0;
+          } else {
+            // Reached inner camera boundary -> continue scrolling back to Stage 02
+            overscrollUp += Math.abs(e.deltaY);
+            if (overscrollUp > 75 && !isNavigatingStage) {
+              isNavigatingStage = true;
+              document
+                .getElementById("section-portal")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              setTimeout(() => {
+                isNavigatingStage = false;
+                overscrollUp = 0;
+              }, 1200);
+            }
+          }
+        }
+
+        if (overscrollTimer) clearTimeout(overscrollTimer);
+        overscrollTimer = setTimeout(() => {
+          overscrollDown = 0;
+          overscrollUp = 0;
+        }, 400);
       };
       window.addEventListener("wheel", handleWheel, { passive: false });
 
@@ -932,6 +1003,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       animate();
 
       return () => {
+        if (overscrollTimer) clearTimeout(overscrollTimer);
         viewportObserver.disconnect();
         if (animFrameId) cancelAnimationFrame(animFrameId);
         window.removeEventListener("wheel", handleWheel);
