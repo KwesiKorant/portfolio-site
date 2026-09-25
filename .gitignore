@@ -50,3 +50,5 @@ Thumbs.db
 # Local Working Raw Assets
 look/
 
+# Local Custom Fonts
+public/fonts/

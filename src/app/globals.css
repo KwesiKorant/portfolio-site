@@ -18,52 +18,24 @@
   --color-text-secondary: #a1a1aa;
   --color-text-muted: #71717a;
 
-  --font-display: 'Space Grotesk', -apple-system, sans-serif;
-  --font-sans: 'Satoshi', -apple-system, sans-serif;
+  --font-display: 'ELNATH', -apple-system, sans-serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-/* Self-hosted Fontshare Fonts */
+/* Custom Typography: ELNATH (Display) & Inter Variable (Sans/UI) */
 @font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-400.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-500.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Space Grotesk';
-  src: url('/fonts/space-grotesk-700.woff2') format('woff2');
-  font-weight: 700;
+  font-family: 'ELNATH';
+  src: url('/fonts/ELNATH.otf') format('opentype');
+  font-weight: 100 900;
   font-display: swap;
   font-style: normal;
 }
 
 @font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi-400.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi-500.woff2') format('woff2');
-  font-weight: 500;
-  font-display: swap;
-  font-style: normal;
-}
-@font-face {
-  font-family: 'Satoshi';
-  src: url('/fonts/satoshi-700.woff2') format('woff2');
-  font-weight: 700;
+  font-family: 'Inter';
+  src: url('/fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
   font-display: swap;
   font-style: normal;
 }
@@ -75,8 +47,8 @@
   --accent-lime-glow: rgba(204, 255, 0, 0.22);
   --accent-cyan: #06b6d4;
   --accent-emerald: #10b981;
-  --font-display: 'Space Grotesk', -apple-system, sans-serif;
-  --font-sans: 'Satoshi', -apple-system, sans-serif;
+  --font-display: 'ELNATH', -apple-system, sans-serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
 }
 
 @layer base {
