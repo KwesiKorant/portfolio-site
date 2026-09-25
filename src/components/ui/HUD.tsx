@@ -14,10 +14,11 @@ interface HUDProps {
   onOpenGuide: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
-  onNetworkSurge: () => void;
   onResetCamera: () => void;
   onWarpToCoords: (wx: number, wy: number) => void;
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
+  onReturnToHero?: () => void;
+  isWarping?: boolean;
 }
 
 export const HUD = forwardRef<HTMLDivElement, HUDProps>(
@@ -28,10 +29,11 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       onOpenGuide,
       onZoomIn,
       onZoomOut,
-      onNetworkSurge,
       onResetCamera,
       onWarpToCoords,
       radarCanvasRef,
+      onReturnToHero,
+      isWarping = false,
     },
     telemetryRef
   ) => {
@@ -57,16 +59,35 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
     };
 
     return (
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-6 z-10">
+      <div
+        className={`absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-6 z-50 transition-opacity duration-300 ${
+          isWarping ? "opacity-0" : "opacity-100"
+        }`}
+      >
         <header className="flex justify-between items-center gap-4">
-          <div
-            className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white pointer-events-auto cursor-pointer select-none px-4 py-2 rounded-xl border border-white/15 hover:border-accent-lime/50 bg-[#0c0d14]/90 backdrop-blur-md transition-all shadow-md"
-            onClick={() => handleClusterClick("root")}
-            role="button"
-            tabIndex={0}
-          >
-            <span className="status-pulse" />
-            <span>KWESI // 3D SPATIAL KERNEL</span>
+          <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white pointer-events-auto cursor-pointer select-none px-4 py-2 rounded-xl border border-white/15 hover:border-accent-lime/50 bg-[#0c0d14]/90 backdrop-blur-md transition-all shadow-md"
+              onClick={() => handleClusterClick("root")}
+              role="button"
+              tabIndex={0}
+            >
+              <span className="status-pulse" />
+              <span>KWESI // 3D SPATIAL KERNEL</span>
+            </div>
+            {onReturnToHero && (
+              <button
+                className="hidden lg:flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-zinc-400 hover:text-white pointer-events-auto cursor-pointer select-none px-3 py-2 rounded-xl border border-white/10 hover:border-white/25 bg-[#0c0d14]/70 backdrop-blur-md transition-all"
+                onClick={() => {
+                  playKeyClick();
+                  onReturnToHero();
+                }}
+                title="Return to Hero Portrait via Reverse Portal [ESC / 0]"
+              >
+                <span>&larr;</span>
+                <span>HERO [0]</span>
+              </button>
+            )}
           </div>
 
           <nav
@@ -174,55 +195,51 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
           {/* Center spacer: leaves bottom-center completely clear for ProHintsBanner */}
           <div className="flex-1 pointer-events-none" />
 
-          {/* Right: Radar Mini-Map + Tactile Controls Grouped Together */}
-          <div className="flex items-end gap-2.5 pointer-events-auto">
+          {/* Right: Tactical Radar Navigation Pod & High-Contrast Flight Controls */}
+          <div className="flex items-center gap-2.5 pointer-events-auto bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group">
             <RadarMiniMap
               ref={radarCanvasRef}
               onWarpToCoords={onWarpToCoords}
             />
 
-            <div className="flex flex-col gap-1.5">
-              <div className="flex gap-1.5">
-                <button
-                  className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={() => {
-                    playKeyClick();
-                    onZoomIn();
-                  }}
-                  title="Dolly Forward (+)"
-                >
-                  +
-                </button>
-                <button
-                  className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={() => {
-                    playKeyClick();
-                    onZoomOut();
-                  }}
-                  title="Dolly Backward (-)"
-                >
-                  &minus;
-                </button>
-              </div>
-              <div className="flex gap-1.5">
-                <button
-                  className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={onNetworkSurge}
-                  title="Trigger Network Surge (Space)"
-                >
-                  &#9889;
-                </button>
-                <button
-                  className="w-[38px] h-[38px] flex items-center justify-center bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl text-zinc-300 font-mono text-[15px] hover:border-accent-lime/60 hover:text-white hover:bg-white/[0.1] active:scale-95 transition-all cursor-pointer shadow-md"
-                  onClick={() => {
-                    playKeyClick();
-                    onResetCamera();
-                  }}
-                  title="Reset View (1)"
-                >
-                  &#8635;
-                </button>
-              </div>
+            {/* High-Contrast Cockpit Action Keys */}
+            <div className="flex flex-col justify-between h-[122px] w-[50px] gap-1.5">
+              <button
+                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
+                onClick={() => {
+                  playKeyClick();
+                  onZoomIn();
+                }}
+                title="Dolly Forward / Zoom In (+)"
+                aria-label="Zoom In"
+              >
+                <span className="text-[17px] font-bold leading-none font-mono">+</span>
+                <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">IN</span>
+              </button>
+              <button
+                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
+                onClick={() => {
+                  playKeyClick();
+                  onZoomOut();
+                }}
+                title="Dolly Backward / Zoom Out (-)"
+                aria-label="Zoom Out"
+              >
+                <span className="text-[17px] font-bold leading-none font-mono">&minus;</span>
+                <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">OUT</span>
+              </button>
+              <button
+                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
+                onClick={() => {
+                  playKeyClick();
+                  onResetCamera();
+                }}
+                title="Reset Overview / Center (1)"
+                aria-label="Reset Overview"
+              >
+                <span className="text-[14px] font-bold leading-none font-mono">&#8635;</span>
+                <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">CTR</span>
+              </button>
             </div>
           </div>
         </footer>

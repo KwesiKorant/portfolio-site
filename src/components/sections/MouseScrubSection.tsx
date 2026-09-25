@@ -56,17 +56,36 @@ export const MouseScrubSection: React.FC = () => {
     }
   }, []);
 
+  // Cancel rAF loop on unmount
+  useEffect(() => {
+    return () => {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, []);
+
   // Single rAF easing loop (Direct DOM mutations, zero React state re-renders)
   const easeScrub = useCallback(() => {
     const video = videoRef.current;
-    if (!video || !video.duration) return;
+    if (!video || !video.duration) {
+      isSettled.current = true;
+      return;
+    }
 
     const diff = targetTimeRef.current - displayedTimeRef.current;
+    const absDiff = Math.abs(diff);
 
-    // Critically damped frame seek interpolation
-    displayedTimeRef.current += diff * 0.2;
+    // If difference is sub-millisecond, snap to exact target and settle
+    if (absDiff < 0.0005) {
+      displayedTimeRef.current = targetTimeRef.current;
+      isSettled.current = true;
+    } else {
+      // Responsive, critically damped easing:
+      // 0.32 provides immediate, tactile tracking while smoothing pointer jitter
+      displayedTimeRef.current += diff * 0.32;
+      rafId.current = requestAnimationFrame(easeScrub);
+    }
 
-    // Write currentTime at most once per rAF frame
+    // Direct hardware seek to currentTime
     try {
       video.currentTime = displayedTimeRef.current;
     } catch {
@@ -81,21 +100,10 @@ export const MouseScrubSection: React.FC = () => {
     if (progressTextRef.current) {
       progressTextRef.current.textContent = `${(progressRatio * 100).toFixed(1)}%`;
     }
-
-    if (Math.abs(diff) > 0.015) {
-      rafId.current = requestAnimationFrame(easeScrub);
-    } else {
-      isSettled.current = true;
-    }
   }, []);
 
-  // Mousemove updates targetTime strictly from mouse X (ignoring pure vertical movement)
+  // Mousemove updates targetTime continuously with zero deadband drops (fluid at all angles and speeds)
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    // If horizontal motion is under 1.5px, treat as vertical move and bypass seek calculation
-    const deltaX = Math.abs(e.clientX - lastClientX.current);
-    if (deltaX < 1.5) return;
-    lastClientX.current = e.clientX;
-
     const video = videoRef.current;
     if (!video || !video.duration) return;
 
@@ -107,8 +115,12 @@ export const MouseScrubSection: React.FC = () => {
 
     const mouseX = e.clientX - bounds.left;
     const ratio = Math.max(0, Math.min(1, mouseX / bounds.width));
+    const newTarget = ratio * video.duration;
 
-    targetTimeRef.current = ratio * video.duration;
+    // Only skip if mouse X has not moved at all
+    if (Math.abs(newTarget - targetTimeRef.current) < 0.0001) return;
+
+    targetTimeRef.current = newTarget;
 
     if (isSettled.current) {
       isSettled.current = false;
@@ -200,13 +212,13 @@ export const MouseScrubSection: React.FC = () => {
       </div>
 
       {/* Footer Info */}
-      <div className="relative z-10 flex justify-between items-end w-full font-mono text-[10px] text-zinc-400 pointer-events-none">
+      <div className="relative z-20 flex justify-between items-end w-full font-mono text-[10px] text-zinc-400 pointer-events-none">
         <div ref={stateLabelRef}>STATE: IDLE // MOVE MOUSE</div>
         <div className="text-accent-lime font-semibold">SCROLL DOWN FOR FINALE &darr;</div>
       </div>
 
       {/* Seamless bottom fade handoff into Stage 05 */}
-      <div className="absolute bottom-0 inset-x-0 h-36 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#050508] via-[#050508]/85 to-transparent pointer-events-none z-10" />
     </section>
   );
 };

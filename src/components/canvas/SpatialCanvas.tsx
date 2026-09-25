@@ -20,15 +20,14 @@ import { SpatialNodeElement } from "@/components/nodes/SpatialNodeCard";
 import {
   playWarpSound,
   playKeyClick,
-  playSurgePulse,
 } from "@/lib/soundEngine";
 
 export interface SpatialCanvasHandle {
   focusNode: (nodeId: string) => void;
-  triggerNetworkSurge: () => void;
   dollyBy: (deltaZ: number) => void;
   warpToCoords: (wx: number, wy: number) => void;
   highlightConnection: (nodeId: string, isHovered: boolean) => void;
+  triggerDimensionalBreach: (direction?: "enter" | "exit") => void;
 }
 
 interface SpatialCanvasProps {
@@ -39,6 +38,7 @@ interface SpatialCanvasProps {
   telemetryRef: React.RefObject<HTMLDivElement | null>;
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   nodeRefs: React.RefObject<Map<string, SpatialNodeElement>>;
+  onExitToPortal?: () => void;
 }
 
 interface PacketMesh {
@@ -69,6 +69,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       telemetryRef,
       radarCanvasRef,
       nodeRefs,
+      onExitToPortal,
     },
     ref
   ) => {
@@ -76,10 +77,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     // Camera & state refs to avoid React re-renders in RAF
-    const targetCamRef = useRef({ x: 0, y: 40, z: DEFAULT_CAMERA_Z });
-    const currentCamRef = useRef({ x: 0, y: 40, z: DEFAULT_CAMERA_Z });
+    const targetCamRef = useRef({ x: 0, y: 75, z: DEFAULT_CAMERA_Z });
+    const currentCamRef = useRef({ x: 0, y: 75, z: DEFAULT_CAMERA_Z });
+    const targetLookAtRef = useRef({ x: 0, y: -60, z: 0 });
+    const currentLookAtRef = useRef({ x: 0, y: -60, z: 0 });
     const activeNodeIdRef = useRef<string>("root");
-    const networkSurgeRef = useRef<(() => void) | null>(null);
     const highlightConnRef = useRef<
       ((nodeId: string, isHovered: boolean) => void) | null
     >(null);
@@ -95,14 +97,19 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         if (nodeId === "root") {
           targetCamRef.current.x = 0;
-          targetCamRef.current.y = 40;
+          targetCamRef.current.y = 75;
           targetCamRef.current.z = DEFAULT_CAMERA_Z;
+          targetLookAtRef.current.x = 0;
+          targetLookAtRef.current.y = -60;
+          targetLookAtRef.current.z = 0;
         } else {
-          // Offset camera X (+180 in world coords on desktop) so focused node sits at center of unobstructed viewport
-          const xOffset = typeof window !== "undefined" && window.innerWidth > 900 ? 180 : 0;
-          targetCamRef.current.x = (node.camTarget ? node.camTarget.x : node.x) + xOffset;
-          targetCamRef.current.y = node.camTarget ? node.camTarget.y : node.y;
-          targetCamRef.current.z = node.camTarget ? node.camTarget.z : 520;
+          // Center camera directly on focused card with comfortable landscape framing
+          targetCamRef.current.x = node.x;
+          targetCamRef.current.y = node.y;
+          targetCamRef.current.z = node.camTarget ? node.camTarget.z : node.z + 520;
+          targetLookAtRef.current.x = node.x;
+          targetLookAtRef.current.y = node.y;
+          targetLookAtRef.current.z = node.z;
         }
       },
       [onNodeActivated]
@@ -113,9 +120,6 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       () => ({
         focusNode: (nodeId: string) => {
           focusNodeInternal(nodeId);
-        },
-        triggerNetworkSurge: () => {
-          if (networkSurgeRef.current) networkSurgeRef.current();
         },
         dollyBy: (deltaZ: number) => {
           playKeyClick();
@@ -132,8 +136,30 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           if (highlightConnRef.current)
             highlightConnRef.current(nodeId, isHovered);
         },
+        triggerDimensionalBreach: (direction: "enter" | "exit" = "enter") => {
+          if (direction === "enter") {
+            // Camera swoops forward from hyperspace depth into elevated perspective
+            currentCamRef.current.z = 2100;
+            currentCamRef.current.x = 0;
+            currentCamRef.current.y = 75;
+            targetCamRef.current.x = 0;
+            targetCamRef.current.y = 75;
+            targetCamRef.current.z = DEFAULT_CAMERA_Z;
+            targetLookAtRef.current.x = 0;
+            targetLookAtRef.current.y = -60;
+            targetLookAtRef.current.z = 0;
+            currentLookAtRef.current.x = 0;
+            currentLookAtRef.current.y = -60;
+            currentLookAtRef.current.z = 0;
+            activeNodeIdRef.current = "root";
+            onNodeActivated("root");
+          } else {
+            // Symmetrical reverse warp pull
+            targetCamRef.current.z = 2400;
+          }
+        },
       }),
-      [focusNodeInternal]
+      [focusNodeInternal, onNodeActivated]
     );
 
     useEffect(() => {
@@ -149,7 +175,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       scene.fog = new THREE.FogExp2(0x050508, 0.00042);
 
       const camera = new THREE.PerspectiveCamera(50, width / height, 1, 6000);
-      camera.position.set(0, 40, DEFAULT_CAMERA_Z);
+      camera.position.set(0, 180, DEFAULT_CAMERA_Z);
+      camera.lookAt(0, -70, 0);
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -159,19 +186,404 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      // Multi-layer depth grids
-      const gridDeep = new THREE.GridHelper(7000, 140, 0x181822, 0x09090e);
-      gridDeep.rotation.x = Math.PI / 2;
-      gridDeep.position.z = -350;
-      scene.add(gridDeep);
+      // Cybernetic Ground Floor Plane (Perspective floor on X-Z axis at Y_FLOOR = -500)
+      const Y_FLOOR = -500;
 
-      const gridBase = new THREE.GridHelper(5000, 100, 0x222230, 0x0f0f15);
-      gridBase.rotation.x = Math.PI / 2;
-      gridBase.position.z = -80;
-      const gridBaseMat = gridBase.material as THREE.LineBasicMaterial;
-      gridBaseMat.transparent = true;
-      gridBaseMat.opacity = 0.5;
-      scene.add(gridBase);
+      const floorVertexShader = `
+        varying vec3 vWorldPos;
+        void main() {
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vWorldPos = worldPos.xyz;
+          gl_Position = projectionMatrix * viewMatrix * worldPos;
+        }
+      `;
+
+      const floorFragmentShader = `
+        varying vec3 vWorldPos;
+        uniform float uTime;
+
+        // Anti-aliased dual-scale grid
+        float getGrid(vec2 coord, float stepSize, float lineWidth) {
+          vec2 grid = abs(fract(coord / stepSize - 0.5) - 0.5) / fwidth(coord / stepSize);
+          float line = min(grid.x, grid.y);
+          return 1.0 - min(line / lineWidth, 1.0);
+        }
+
+        void main() {
+          vec2 p = vWorldPos.xz;
+          float dist = length(p);
+
+          // Radial falloff: dissolve cleanly into the void without hard borders
+          float alpha = smoothstep(1950.0, 320.0, dist);
+          if (alpha <= 0.001) discard;
+
+          // Dual-scale perspective cyber-grid
+          float fineGrid = getGrid(p, 50.0, 0.8) * 0.24;
+          float majorGrid = getGrid(p, 250.0, 1.2) * 0.7;
+          float grid = fineGrid + majorGrid;
+
+          // Glowing coordinate axes
+          float axisX = 1.0 - min(abs(p.y) / (fwidth(p.y) * 1.5), 1.0);
+          float axisZ = 1.0 - min(abs(p.x) / (fwidth(p.x) * 1.5), 1.0);
+          float axes = max(axisX, axisZ) * 0.45;
+
+          // Central holographic dais concentric rings beneath Kwesi's portrait (0, 0)
+          float r1 = abs(dist - 140.0);
+          float r2 = abs(dist - 260.0);
+          float r3 = abs(dist - 380.0);
+          float rings = (
+            smoothstep(3.0, 0.0, r1) * 0.6 +
+            smoothstep(2.5, 0.0, r2) * 0.45 +
+            smoothstep(2.0, 0.0, r3) * 0.35
+          );
+
+          // Subtle outward radiating energy pulse
+          float wave = sin(dist * 0.035 - uTime * 2.2);
+          float waveGlow = smoothstep(0.92, 1.0, wave) * smoothstep(550.0, 50.0, dist) * 0.25;
+
+          // Soft spotlight pool under the center stage
+          float centerSpot = smoothstep(450.0, 40.0, dist) * 0.14;
+
+          vec3 col = vec3(0.02, 0.04, 0.06);
+          col += vec3(0.04, 0.15, 0.22) * fineGrid;
+          col += vec3(0.8, 1.0, 0.0) * (majorGrid * 0.45);
+          col += vec3(0.06, 0.75, 0.85) * (axes + rings + waveGlow);
+          col += vec3(0.8, 1.0, 0.0) * centerSpot;
+
+          float finalAlpha = clamp((grid + axes + rings + waveGlow + centerSpot) * alpha, 0.0, 0.88);
+          gl_FragColor = vec4(col, finalAlpha);
+        }
+      `;
+
+      const floorMat = new THREE.ShaderMaterial({
+        vertexShader: floorVertexShader,
+        fragmentShader: floorFragmentShader,
+        uniforms: {
+          uTime: { value: 0.0 },
+        },
+        transparent: true,
+        depthWrite: false,
+      });
+
+      const floorGeo = new THREE.PlaneGeometry(3800, 3800, 1, 1);
+      const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+      floorMesh.rotation.x = -Math.PI / 2;
+      floorMesh.position.set(0, Y_FLOOR, 0);
+      floorMesh.renderOrder = 0;
+      scene.add(floorMesh);
+
+      // Packet radial gradient texture helper (for curves between avatar and cards)
+      function createPacketTexture(colorHex: string) {
+        const pCanvas = document.createElement("canvas");
+        pCanvas.width = 64;
+        pCanvas.height = 64;
+        const ctx = pCanvas.getContext("2d");
+        if (ctx) {
+          const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+          grad.addColorStop(0, colorHex);
+          grad.addColorStop(0.35, colorHex);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 64, 64);
+        }
+        return new THREE.CanvasTexture(pCanvas);
+      }
+
+      // Vertical connecting beam texture helper
+      function createBeamTexture(colorHex: string) {
+        const pCanvas = document.createElement("canvas");
+        pCanvas.width = 64;
+        pCanvas.height = 256;
+        const ctx = pCanvas.getContext("2d");
+        if (ctx) {
+          const grad = ctx.createLinearGradient(0, 0, 64, 0);
+          grad.addColorStop(0, "rgba(0,0,0,0)");
+          grad.addColorStop(0.2, "rgba(0,0,0,0)");
+          grad.addColorStop(0.38, colorHex);
+          grad.addColorStop(0.5, "#ffffff");
+          grad.addColorStop(0.62, colorHex);
+          grad.addColorStop(0.8, "rgba(0,0,0,0)");
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 64, 256);
+        }
+        return new THREE.CanvasTexture(pCanvas);
+      }
+
+      // Descending light pulse texture helper
+      function createPulseTexture(colorHex: string) {
+        const pCanvas = document.createElement("canvas");
+        pCanvas.width = 64;
+        pCanvas.height = 128;
+        const ctx = pCanvas.getContext("2d");
+        if (ctx) {
+          const grad = ctx.createRadialGradient(32, 64, 2, 32, 64, 30);
+          grad.addColorStop(0, "#ffffff");
+          grad.addColorStop(0.25, colorHex);
+          grad.addColorStop(0.65, colorHex);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 64, 128);
+        }
+        return new THREE.CanvasTexture(pCanvas);
+      }
+
+      // Contact flare impact texture helper
+      function createFlareTexture(colorHex: string) {
+        const pCanvas = document.createElement("canvas");
+        pCanvas.width = 128;
+        pCanvas.height = 128;
+        const ctx = pCanvas.getContext("2d");
+        if (ctx) {
+          const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+          grad.addColorStop(0, "#ffffff");
+          grad.addColorStop(0.2, colorHex);
+          grad.addColorStop(0.55, colorHex);
+          grad.addColorStop(1, "rgba(0,0,0,0)");
+          ctx.fillStyle = grad;
+          ctx.fillRect(0, 0, 128, 128);
+        }
+        return new THREE.CanvasTexture(pCanvas);
+      }
+
+      const limePacketTex = createPacketTexture("#ccff00");
+      const cyanPacketTex = createPacketTexture("#06b6d4");
+      const emeraldPacketTex = createPacketTexture("#10b981");
+
+      const limeBeamTex = createBeamTexture("#ccff00");
+      const cyanBeamTex = createBeamTexture("#06b6d4");
+      const emeraldBeamTex = createBeamTexture("#10b981");
+
+      const limePulseTex = createPulseTexture("#ccff00");
+      const cyanPulseTex = createPulseTexture("#06b6d4");
+      const emeraldPulseTex = createPulseTexture("#10b981");
+
+      const limeFlareTex = createFlareTexture("#ccff00");
+      const cyanFlareTex = createFlareTexture("#06b6d4");
+      const emeraldFlareTex = createFlareTexture("#10b981");
+
+      // Floor Beacons: Ground footprint rings, vertical light plumb-beams & dynamic contact pings beneath hovering cards
+      const floorBeaconGroup = new THREE.Group();
+      scene.add(floorBeaconGroup);
+
+      interface FloorBeacon {
+        nodeId: string;
+        baseOuterRingMesh: THREE.Mesh;
+        baseInnerRingMesh: THREE.Mesh;
+        coreDiscMesh: THREE.Mesh;
+        pingRingMesh1: THREE.Mesh;
+        pingRingMesh2: THREE.Mesh;
+        beamMesh: THREE.Mesh;
+        lineMesh: THREE.Line;
+        portMesh: THREE.Mesh;
+        pulseMesh: THREE.Mesh;
+        cardBottomY: number;
+        floorY: number;
+        isHovered: boolean;
+        beamExtendProgress: number; // 0.0 to 1.0 (shooting down from card on hover)
+        pulseProgress: number; // 0.0 to 1.0 (traveling downwards from card to floor)
+        pingProgress1: number; // 0.0 to 1.0 (ground shockwave ripple)
+        pingProgress2: number; // 0.0 to 1.0 (staggered second ripple)
+        pingIntensity: number; // 1.0 down to 0.0 bloom intensity
+      }
+      const floorBeacons: FloorBeacon[] = [];
+
+      NODE_GRAPH.forEach((node) => {
+        if (node.id === "root") return;
+
+        // Exact physical bottom edge of each card
+        const cardHalfHeight =
+          node.id === "dossier" || node.id === "edge-gateway" ? 185 : 165;
+        const cardBottomY = node.y - cardHalfHeight;
+        const floorY = Y_FLOOR + 1;
+        const beaconColor =
+          node.badgeColor === "cyan"
+            ? 0x06b6d4
+            : node.badgeColor === "emerald"
+            ? 0x10b981
+            : 0xccff00;
+        const beamTex =
+          node.badgeColor === "cyan"
+            ? cyanBeamTex
+            : node.badgeColor === "emerald"
+            ? emeraldBeamTex
+            : limeBeamTex;
+        const pulseTex =
+          node.badgeColor === "cyan"
+            ? cyanPulseTex
+            : node.badgeColor === "emerald"
+            ? emeraldPulseTex
+            : limePulseTex;
+        const flareTex =
+          node.badgeColor === "cyan"
+            ? cyanFlareTex
+            : node.badgeColor === "emerald"
+            ? emeraldFlareTex
+            : limeFlareTex;
+
+        // Base static outer reticle ring on the floor at (node.x, floorY, node.z)
+        const baseOuterRingGeo = new THREE.RingGeometry(38, 48, 48);
+        const baseOuterRingMat = new THREE.MeshBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          opacity: 0.28,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const baseOuterRingMesh = new THREE.Mesh(baseOuterRingGeo, baseOuterRingMat);
+        baseOuterRingMesh.rotation.x = -Math.PI / 2;
+        baseOuterRingMesh.position.set(node.x, floorY + 0.1, node.z);
+        baseOuterRingMesh.renderOrder = 10;
+        floorBeaconGroup.add(baseOuterRingMesh);
+
+        // Base static inner reticle ring on the floor
+        const baseInnerRingGeo = new THREE.RingGeometry(16, 24, 32);
+        const baseInnerRingMat = new THREE.MeshBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          opacity: 0.32,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const baseInnerRingMesh = new THREE.Mesh(baseInnerRingGeo, baseInnerRingMat);
+        baseInnerRingMesh.rotation.x = -Math.PI / 2;
+        baseInnerRingMesh.position.set(node.x, floorY + 0.15, node.z);
+        baseInnerRingMesh.renderOrder = 10;
+        floorBeaconGroup.add(baseInnerRingMesh);
+
+        // Core contact flare disc (blooms when string strikes ground)
+        const coreDiscGeo = new THREE.CircleGeometry(22, 32);
+        const coreDiscMat = new THREE.MeshBasicMaterial({
+          map: flareTex,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          opacity: 0.22,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const coreDiscMesh = new THREE.Mesh(coreDiscGeo, coreDiscMat);
+        coreDiscMesh.rotation.x = -Math.PI / 2;
+        coreDiscMesh.position.set(node.x, floorY + 0.2, node.z);
+        coreDiscMesh.renderOrder = 11;
+        floorBeaconGroup.add(coreDiscMesh);
+
+        // Dynamic round contact ping ripple rings (shockwaves expanding on ground plane)
+        const pingRingGeo1 = new THREE.RingGeometry(22, 42, 48);
+        const pingRingMat1 = new THREE.MeshBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          opacity: 0.0,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const pingRingMesh1 = new THREE.Mesh(pingRingGeo1, pingRingMat1);
+        pingRingMesh1.rotation.x = -Math.PI / 2;
+        pingRingMesh1.position.set(node.x, floorY + 0.3, node.z);
+        pingRingMesh1.renderOrder = 12;
+        pingRingMesh1.visible = false;
+        floorBeaconGroup.add(pingRingMesh1);
+
+        const pingRingGeo2 = new THREE.RingGeometry(22, 42, 48);
+        const pingRingMat2 = new THREE.MeshBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          opacity: 0.0,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const pingRingMesh2 = new THREE.Mesh(pingRingGeo2, pingRingMat2);
+        pingRingMesh2.rotation.x = -Math.PI / 2;
+        pingRingMesh2.position.set(node.x, floorY + 0.35, node.z);
+        pingRingMesh2.renderOrder = 12;
+        pingRingMesh2.visible = false;
+        floorBeaconGroup.add(pingRingMesh2);
+
+        // Vertical luminous light conduit beam (anchored at card bottom and extending down to floor)
+        const beamHeight = Math.max(10, cardBottomY - floorY);
+        const beamGeo = new THREE.PlaneGeometry(28, beamHeight);
+        // Translate so geometry origin is at top (card emitter) for top-down extension
+        beamGeo.translate(0, -beamHeight / 2, 0);
+        const beamMat = new THREE.MeshBasicMaterial({
+          map: beamTex,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          opacity: 0.18,
+          side: THREE.DoubleSide,
+        });
+        const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+        beamMesh.position.set(node.x, cardBottomY, node.z);
+        beamMesh.renderOrder = 15;
+        floorBeaconGroup.add(beamMesh);
+
+        // Central core laser filament line
+        const linePoints = [
+          new THREE.Vector3(node.x, floorY, node.z),
+          new THREE.Vector3(node.x, cardBottomY, node.z),
+        ];
+        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          opacity: 0.15,
+          depthWrite: false,
+        });
+        const lineMesh = new THREE.Line(lineGeo, lineMat);
+        lineMesh.renderOrder = 14;
+        floorBeaconGroup.add(lineMesh);
+
+        // Card bottom emitter ingress port
+        const portGeo = new THREE.RingGeometry(3, 7, 24);
+        const portMat = new THREE.MeshBasicMaterial({
+          color: beaconColor,
+          transparent: true,
+          opacity: 0.45,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const portMesh = new THREE.Mesh(portGeo, portMat);
+        portMesh.position.set(node.x, cardBottomY, node.z + 1);
+        portMesh.renderOrder = 16;
+        floorBeaconGroup.add(portMesh);
+
+        // Descending energy pulse: travels down string from card to ground on hover
+        const pulseGeo = new THREE.PlaneGeometry(38, 76);
+        const pulseMat = new THREE.MeshBasicMaterial({
+          map: pulseTex,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          opacity: 0.0,
+        });
+        const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
+        pulseMesh.position.set(node.x, cardBottomY, node.z + 2);
+        pulseMesh.renderOrder = 20;
+        pulseMesh.visible = false;
+        floorBeaconGroup.add(pulseMesh);
+
+        floorBeacons.push({
+          nodeId: node.id,
+          baseOuterRingMesh,
+          baseInnerRingMesh,
+          coreDiscMesh,
+          pingRingMesh1,
+          pingRingMesh2,
+          beamMesh,
+          lineMesh,
+          portMesh,
+          pulseMesh,
+          cardBottomY,
+          floorY,
+          isHovered: false,
+          beamExtendProgress: 1.0,
+          pulseProgress: 0.0,
+          pingProgress1: 0.0,
+          pingProgress2: 0.45,
+          pingIntensity: 0.0,
+        });
+      });
 
       // Atmospheric starfield (1,800 points)
       const particleCount = 1800;
@@ -182,7 +594,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       for (let i = 0; i < particleCount; i++) {
         starPos[i * 3] = (Math.random() - 0.5) * 4500;
         starPos[i * 3 + 1] = (Math.random() - 0.5) * 3200;
-        starPos[i * 3 + 2] = (Math.random() - 0.5) * 2000;
+        starPos[i * 3 + 2] = -1200 + Math.random() * 2000;
 
         const r = Math.random();
         if (r > 0.82) {
@@ -320,7 +732,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       });
       let heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
       const heroAuraMesh = new THREE.Mesh(heroAuraGeo, heroAuraMat);
-      heroAuraMesh.position.set(0, HERO_Y, -25);
+      heroAuraMesh.position.set(0, HERO_Y, -80);
       scene.add(heroAuraMesh);
 
       // Volumetric cluster nebulas (ambient depth glow behind major node clusters)
@@ -328,10 +740,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       scene.add(clusterNebulaGroup);
 
       const clusterCenters = [
-        { x: -600, y: 180, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 700 }, // Ingress / Edge
-        { x: 620, y: 200, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Consensus / DB
-        { x: -540, y: -260, color: "rgba(6, 182, 212, 0.12)", halo: "rgba(6, 182, 212, 0.03)", size: 650 }, // Observability / Kernel
-        { x: 580, y: -240, color: "rgba(204, 255, 0, 0.13)", halo: "rgba(204, 255, 0, 0.04)", size: 660 }, // Compute / Dossier
+        { x: -800, y: 200, z: -160, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 700 }, // Ingress / Edge
+        { x: 800, y: 200, z: 80, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Dossier / Identity
+        { x: -1050, y: -200, z: -320, color: "rgba(6, 182, 212, 0.12)", halo: "rgba(6, 182, 212, 0.03)", size: 650 }, // Infrastructure / Compute
+        { x: 1050, y: -200, z: -320, color: "rgba(204, 255, 0, 0.13)", halo: "rgba(204, 255, 0, 0.04)", size: 660 }, // Projects / CRDT
       ];
 
       const clusterNebulaGeos: THREE.BufferGeometry[] = [];
@@ -347,31 +759,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const geo = new THREE.PlaneGeometry(c.size, c.size);
         const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(c.x, c.y, -60);
+        mesh.position.set(c.x, c.y, c.z);
         clusterNebulaGroup.add(mesh);
         clusterNebulaGeos.push(geo);
         clusterNebulaMats.push(mat);
       });
-
-      // Packet radial gradient texture helper
-      function createPacketTexture(colorHex: string) {
-        const pCanvas = document.createElement("canvas");
-        pCanvas.width = 64;
-        pCanvas.height = 64;
-        const ctx = pCanvas.getContext("2d");
-        if (ctx) {
-          const grad = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-          grad.addColorStop(0, colorHex);
-          grad.addColorStop(0.35, colorHex);
-          grad.addColorStop(1, "rgba(0,0,0,0)");
-          ctx.fillStyle = grad;
-          ctx.fillRect(0, 0, 64, 64);
-        }
-        return new THREE.CanvasTexture(pCanvas);
-      }
-
-      const limePacketTex = createPacketTexture("#ccff00");
-      const cyanPacketTex = createPacketTexture("#06b6d4");
 
       // Connection pipelines & packet meshes
       const connectionGroup = new THREE.Group();
@@ -394,23 +786,47 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         NODE_GRAPH.forEach((node) => {
           if (node.id === "root") return;
 
-          const startX = node.x > 0 ? cardWidth * 0.48 : -cardWidth * 0.48;
-          const startY = HERO_Y;
-          const startZ = 0;
-          const start = new THREE.Vector3(startX, startY, startZ);
-          const end = new THREE.Vector3(node.x, node.y, node.z);
+          // Vector from avatar head center (0, 30) towards node
+          const avatarCenterX = 0;
+          const avatarCenterY = 30;
+          const dirX = node.x - avatarCenterX;
+          const dirY = node.y - avatarCenterY;
+          const angle = Math.atan2(dirY, dirX);
 
-          const dx = end.x - start.x;
-          const dy = end.y - start.y;
+          // Visible avatar outer boundary in 3D world units (silhouette perimeter)
+          const avatarRadX = 185;
+          const avatarRadY = 220;
+          const startX = avatarCenterX + Math.cos(angle) * avatarRadX;
+          const startY = avatarCenterY + Math.sin(angle) * avatarRadY;
+          const startZ = -10;
+          const start = new THREE.Vector3(startX, startY, startZ);
+
+          // Card ingress port
+          let endX = node.x;
+          let endY = node.y;
+          let endZ = node.z;
+
+          if (node.x > 100) {
+            endX = node.x - 165; // left edge of right-hand cards
+          } else if (node.x < -100) {
+            endX = node.x + 165; // right edge of left-hand cards
+          } else if (node.y > avatarCenterY) {
+            endY = node.y - 110;
+          } else {
+            endY = node.y + 110;
+          }
+          const end = new THREE.Vector3(endX, endY, endZ);
+
+          // Smooth 3D cubic bezier control points
           const cp1 = new THREE.Vector3(
-            start.x + dx * 0.4,
-            start.y + dy * 0.2,
-            start.z + 100
+            start.x + Math.cos(angle) * 140,
+            start.y + Math.sin(angle) * 140,
+            start.z + 20
           );
           const cp2 = new THREE.Vector3(
-            start.x + dx * 0.65,
-            end.y,
-            end.z + 60
+            end.x - (node.x > 100 ? 100 : node.x < -100 ? -100 : 0),
+            end.y - (Math.abs(node.x) <= 100 ? (node.y > avatarCenterY ? 70 : -70) : 0),
+            end.z + 15
           );
 
           const curve = new THREE.CubicBezierCurve3(start, cp1, cp2, end);
@@ -424,6 +840,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           });
           const lineMesh = new THREE.Line(curveGeo, curveMat);
           connectionGroup.add(lineMesh);
+
+          // Subtle glowing ingress port on card edge
+          const portGeo = new THREE.RingGeometry(2.5, 4.5, 16);
+          const portMat = new THREE.MeshBasicMaterial({
+            color: node.badgeColor === "cyan" ? 0x06b6d4 : 0xccff00,
+            transparent: true,
+            opacity: 0.75,
+            side: THREE.DoubleSide,
+          });
+          const portMesh = new THREE.Mesh(portGeo, portMat);
+          portMesh.position.copy(end);
+          connectionGroup.add(portMesh);
 
           curvesList.push({
             curve,
@@ -444,7 +872,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             const pMesh = new THREE.Mesh(pGeo, pMat);
             connectionGroup.add(pMesh);
 
-            const baseSpeed = 0.0035 + Math.random() * 0.002;
+            const baseSpeed = 0.0032 + Math.random() * 0.0018;
             packetMeshes.push({
               mesh: pMesh,
               curve,
@@ -475,32 +903,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         heroAuraGeo.dispose();
         heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
         heroAuraMesh.geometry = heroAuraGeo;
-        heroAuraMesh.position.set(0, HERO_Y, -25);
+        heroAuraMesh.position.set(0, HERO_Y, -80);
 
         rebuildCurves();
       }
 
       video.addEventListener("loadedmetadata", calibrateVideoDimensions);
       calibrateVideoDimensions();
-
-      // Network surge trigger
-      const triggerNetworkSurge = () => {
-        playSurgePulse();
-        cameraShakeAmount = 3.8;
-
-        packetMeshes.forEach((p) => {
-          p.speed = p.baseSpeed * 3.4;
-          setTimeout(() => (p.speed = p.baseSpeed), 1100);
-        });
-
-        gridBaseMat.opacity = 0.95;
-        setTimeout(() => (gridBaseMat.opacity = 0.5), 400);
-
-        onShowTemporaryHint(
-          "⚡ NETWORK SURGE ACTIVE • 8 CLUSTERS SYNCHRONIZED"
-        );
-      };
-      networkSurgeRef.current = triggerNetworkSurge;
 
       // Highlight connection trigger
       const highlightConnection = (nodeId: string, isHovered: boolean) => {
@@ -512,6 +921,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             (c.lineMesh.material as THREE.LineBasicMaterial).opacity = isHovered
               ? 1.0
               : 0.55;
+          }
+        });
+        floorBeacons.forEach((b) => {
+          if (b.nodeId === nodeId) {
+            b.isHovered = isHovered;
+            if (isHovered) {
+              b.beamExtendProgress = 0.15; // Initiate string shoot-down from card to floor
+              b.pulseProgress = 0.0;
+              b.pingProgress1 = 0.0;
+              b.pingProgress2 = 0.45;
+              b.pingIntensity = 1.0;
+            }
           }
         });
       };
@@ -563,7 +984,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
 
         const dollySpeed =
-          (currentCamRef.current.z / DEFAULT_CAMERA_Z) * 105;
+          (currentCamRef.current.z / DEFAULT_CAMERA_Z) * 110;
+
+        const isNodeFocused = activeNodeIdRef.current !== "root";
+        const FLY_IN_MIN_Z = 620;
 
         // User scrolling DOWN (dollying back/out)
         if (e.deltaY > 0) {
@@ -589,22 +1013,33 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             }
           }
         } else if (e.deltaY < 0) {
-          // User scrolling UP (dollying in towards root)
-          if (targetCamRef.current.z > MIN_CAMERA_Z + 30) {
+          // User scrolling UP
+          if (isNodeFocused) {
+            // If zoomed into a card, scrolling up or back returns to overview
+            e.preventDefault();
+            focusNodeInternal("root");
+            overscrollUp = 0;
+          } else if (targetCamRef.current.z > FLY_IN_MIN_Z + 35) {
+            // Smoothly dolly in towards inner depth limit (natural 3D flight)
             e.preventDefault();
             targetCamRef.current.z = Math.max(
-              MIN_CAMERA_Z,
+              FLY_IN_MIN_Z,
               targetCamRef.current.z - dollySpeed
             );
             overscrollUp = 0;
           } else {
-            // Reached inner camera boundary -> continue scrolling back to Stage 02
+            // Reached inner camera boundary -> intentional stage transition back to Stage 01 via portal reverse
+            e.preventDefault();
             overscrollUp += Math.abs(e.deltaY);
-            if (overscrollUp > 75 && !isNavigatingStage) {
+            if (overscrollUp > 45 && !isNavigatingStage) {
               isNavigatingStage = true;
-              document
-                .getElementById("section-portal")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              if (onExitToPortal) {
+                onExitToPortal();
+              } else {
+                document
+                  .getElementById("section-hero")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
               setTimeout(() => {
                 isNavigatingStage = false;
                 overscrollUp = 0;
@@ -761,7 +1196,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         radarCtx.clearRect(0, 0, rw, rh);
 
-        radarCtx.strokeStyle = "rgba(255, 255, 255, 0.05)";
+        // Tactical radar background tint
+        radarCtx.fillStyle = "#07080e";
+        radarCtx.fillRect(0, 0, rw, rh);
+
+        // Tactical crosshair
+        radarCtx.strokeStyle = "rgba(204, 255, 0, 0.22)";
         radarCtx.lineWidth = 1;
         radarCtx.beginPath();
         radarCtx.moveTo(rw / 2, 0);
@@ -770,17 +1210,62 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         radarCtx.lineTo(rw, rh / 2);
         radarCtx.stroke();
 
+        // Concentric tactical range rings
+        radarCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+        radarCtx.beginPath();
+        radarCtx.arc(rw / 2, rh / 2, rh * 0.38, 0, Math.PI * 2);
+        radarCtx.stroke();
+
+        // Network connection lines between root and nodes
+        const rootRadar = worldToRadar(0, HERO_Y, rw, rh);
+        radarCtx.strokeStyle = "rgba(204, 255, 0, 0.25)";
+        radarCtx.lineWidth = 1;
         NODE_GRAPH.forEach((n) => {
+          if (n.id === "root") return;
           const { rx, ry } = worldToRadar(n.x, n.y, rw, rh);
-          radarCtx.fillStyle =
-            n.id === activeNodeIdRef.current
-              ? "#ccff00"
-              : "rgba(255, 255, 255, 0.4)";
           radarCtx.beginPath();
-          radarCtx.arc(rx, ry, n.id === "root" ? 3.5 : 2, 0, Math.PI * 2);
-          radarCtx.fill();
+          radarCtx.moveTo(rootRadar.rx, rootRadar.ry);
+          radarCtx.lineTo(rx, ry);
+          radarCtx.stroke();
         });
 
+        // Node blips
+        NODE_GRAPH.forEach((n) => {
+          const { rx, ry } = worldToRadar(n.x, n.y, rw, rh);
+          const isActive = n.id === activeNodeIdRef.current;
+          if (isActive) {
+            radarCtx.fillStyle = "rgba(204, 255, 0, 0.35)";
+            radarCtx.beginPath();
+            radarCtx.arc(rx, ry, 7, 0, Math.PI * 2);
+            radarCtx.fill();
+
+            radarCtx.fillStyle = "#ccff00";
+            radarCtx.shadowColor = "#ccff00";
+            radarCtx.shadowBlur = 8;
+            radarCtx.beginPath();
+            radarCtx.arc(rx, ry, 3.5, 0, Math.PI * 2);
+            radarCtx.fill();
+            radarCtx.shadowBlur = 0;
+          } else if (n.id === "root") {
+            radarCtx.fillStyle = "#ffffff";
+            radarCtx.shadowColor = "#ffffff";
+            radarCtx.shadowBlur = 6;
+            radarCtx.beginPath();
+            radarCtx.arc(rx, ry, 4, 0, Math.PI * 2);
+            radarCtx.fill();
+            radarCtx.shadowBlur = 0;
+          } else {
+            radarCtx.fillStyle = n.badgeColor === "cyan" ? "#38bdf8" : "#ccff00";
+            radarCtx.shadowColor = n.badgeColor === "cyan" ? "#38bdf8" : "#ccff00";
+            radarCtx.shadowBlur = 4;
+            radarCtx.beginPath();
+            radarCtx.arc(rx, ry, 2.5, 0, Math.PI * 2);
+            radarCtx.fill();
+            radarCtx.shadowBlur = 0;
+          }
+        });
+
+        // Frustum Viewport Rectangle
         const fovRad = (camera.fov * Math.PI) / 180;
         const frustumH =
           2 * Math.tan(fovRad / 2) * currentCamRef.current.z;
@@ -799,14 +1284,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           rh
         );
 
-        radarCtx.strokeStyle = "rgba(204, 255, 0, 0.75)";
-        radarCtx.lineWidth = 1.2;
-        radarCtx.strokeRect(
-          topLeft.rx,
-          topLeft.ry,
-          botRight.rx - topLeft.rx,
-          botRight.ry - topLeft.ry
-        );
+        const fw = botRight.rx - topLeft.rx;
+        const fh = botRight.ry - topLeft.ry;
+
+        radarCtx.fillStyle = "rgba(204, 255, 0, 0.1)";
+        radarCtx.fillRect(topLeft.rx, topLeft.ry, fw, fh);
+
+        radarCtx.strokeStyle = "#ccff00";
+        radarCtx.lineWidth = 1.6;
+        radarCtx.shadowColor = "#ccff00";
+        radarCtx.shadowBlur = 6;
+        radarCtx.strokeRect(topLeft.rx, topLeft.ry, fw, fh);
+        radarCtx.shadowBlur = 0;
       }
 
       // Resize listener
@@ -849,10 +1338,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           lastTime = now;
         }
 
-        // Critically damped camera lerp (framerate-independent)
-        const lerpFactor = 1.0 - Math.exp(-7.0 * delta);
+        // Snappy critically damped camera & lookAt lerp (framerate-independent)
+        const lerpFactor = 1.0 - Math.exp(-9.5 * delta);
 
-        // Critically damped camera lerp
         const dx = targetCamRef.current.x - currentCamRef.current.x;
         const dy = targetCamRef.current.y - currentCamRef.current.y;
         const dz = targetCamRef.current.z - currentCamRef.current.z;
@@ -861,30 +1349,29 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         currentCamRef.current.y += Math.abs(dy) < 0.04 ? dy : dy * lerpFactor;
         currentCamRef.current.z += Math.abs(dz) < 0.04 ? dz : dz * lerpFactor;
 
+        const lx = targetLookAtRef.current.x - currentLookAtRef.current.x;
+        const ly = targetLookAtRef.current.y - currentLookAtRef.current.y;
+        const lz = targetLookAtRef.current.z - currentLookAtRef.current.z;
+
+        currentLookAtRef.current.x += Math.abs(lx) < 0.04 ? lx : lx * lerpFactor;
+        currentLookAtRef.current.y += Math.abs(ly) < 0.04 ? ly : ly * lerpFactor;
+        currentLookAtRef.current.z += Math.abs(lz) < 0.04 ? lz : lz * lerpFactor;
+
         // Ambient mouse parallax interpolation (smooth 3D inertia)
-        const targetParallaxX = mouseNormX * 32;
-        const targetParallaxY = mouseNormY * 20;
+        const targetParallaxX = mouseNormX * 28;
+        const targetParallaxY = mouseNormY * 18;
         ambientParallaxX += (targetParallaxX - ambientParallaxX) * lerpFactor;
         ambientParallaxY += (targetParallaxY - ambientParallaxY) * lerpFactor;
 
-        // Camera shake decay (impulse on surge)
-        let shakeX = 0;
-        let shakeY = 0;
-        if (cameraShakeAmount > 0.02) {
-          shakeX = (Math.random() - 0.5) * cameraShakeAmount;
-          shakeY = (Math.random() - 0.5) * cameraShakeAmount;
-          cameraShakeAmount *= 0.91;
-        }
-
         camera.position.set(
-          currentCamRef.current.x + ambientParallaxX + shakeX,
-          currentCamRef.current.y + ambientParallaxY + shakeY,
+          currentCamRef.current.x + ambientParallaxX,
+          currentCamRef.current.y + ambientParallaxY,
           currentCamRef.current.z
         );
         camera.lookAt(
-          currentCamRef.current.x + ambientParallaxX * 0.35,
-          currentCamRef.current.y + ambientParallaxY * 0.35,
-          0
+          currentLookAtRef.current.x + ambientParallaxX * 0.35,
+          currentLookAtRef.current.y + ambientParallaxY * 0.35,
+          currentLookAtRef.current.z
         );
 
         // Drifting starfield through 3D space
@@ -892,8 +1379,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         const posArray = posAttr.array as Float32Array;
         for (let i = 0; i < particleCount; i++) {
           posArray[i * 3 + 2] += 0.45;
-          if (posArray[i * 3 + 2] > 1100) {
-            posArray[i * 3 + 2] = -1100;
+          if (posArray[i * 3 + 2] > 800) {
+            posArray[i * 3 + 2] = -1200;
           }
         }
         posAttr.needsUpdate = true;
@@ -901,6 +1388,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Update shader uniforms
         videoMaterial.uniforms.uDist.value = currentCamRef.current.z;
         videoMaterial.uniforms.uTime.value = elapsedTime;
+        floorMat.uniforms.uTime.value = elapsedTime;
 
         // Animate packets along 3D Bézier curves without allocations
         packetMeshes.forEach((p) => {
@@ -913,33 +1401,158 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           );
         });
 
-        // Perspective-project DOM statement: Anchored 55px above top of video
+        const isNodeFocused = activeNodeIdRef.current !== "root";
+        connectionGroup.visible = !isNodeFocused;
+        floorBeaconGroup.visible = !isNodeFocused;
+
+        // Animate dynamic floor beacons & descending contact pings on hover
+        floorBeacons.forEach((b) => {
+          if (b.isHovered) {
+            // 1. String shoot-down & extension animation (moves down from card)
+            b.beamExtendProgress = Math.min(1.0, b.beamExtendProgress + 0.08);
+            b.beamMesh.scale.y = b.beamExtendProgress;
+
+            // 2. Advance descending pulse along vertical string
+            b.pulseProgress += 0.038;
+            if (b.pulseProgress >= 1.0) {
+              b.pulseProgress = 0.0;
+              b.pingIntensity = 1.0; // Trigger impact flash bloom upon striking floor!
+            }
+
+            // Position pulse along vertical light conduit string
+            const py = b.cardBottomY + (b.floorY - b.cardBottomY) * b.pulseProgress;
+            b.pulseMesh.position.y = py;
+            b.pulseMesh.visible = true;
+            const pulseFade = Math.min(1.0, b.pulseProgress * 3.5);
+            (b.pulseMesh.material as THREE.MeshBasicMaterial).opacity = pulseFade * 0.96;
+            const pulseScale = 1.0 + Math.sin(b.pulseProgress * Math.PI) * 0.25;
+            b.pulseMesh.scale.set(pulseScale, pulseScale, 1);
+
+            // 3. Animate ground contact ping shockwave ripples
+            b.pingProgress1 = (b.pingProgress1 + 0.024) % 1.0;
+            b.pingProgress2 = (b.pingProgress2 + 0.024) % 1.0;
+
+            // Wave 1: expanding shockwave on ground plane
+            const s1 = 0.35 + b.pingProgress1 * 4.2;
+            b.pingRingMesh1.scale.set(s1, s1, 1);
+            (b.pingRingMesh1.material as THREE.MeshBasicMaterial).opacity =
+              Math.pow(1.0 - b.pingProgress1, 1.4) * 0.95;
+            b.pingRingMesh1.visible = true;
+
+            // Wave 2: staggered phase shockwave
+            const s2 = 0.35 + b.pingProgress2 * 4.2;
+            b.pingRingMesh2.scale.set(s2, s2, 1);
+            (b.pingRingMesh2.material as THREE.MeshBasicMaterial).opacity =
+              Math.pow(1.0 - b.pingProgress2, 1.4) * 0.95;
+            b.pingRingMesh2.visible = true;
+
+            // 4. Central contact flare bloom & decay
+            b.pingIntensity *= 0.92;
+            (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity =
+              0.4 + b.pingIntensity * 0.6;
+            const flareScale = 1.0 + b.pingIntensity * 1.8;
+            b.coreDiscMesh.scale.set(flareScale, flareScale, 1);
+
+            // 5. Ground reticles
+            b.baseOuterRingMesh.rotation.z += 0.012;
+            b.baseInnerRingMesh.rotation.z -= 0.018;
+            (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.92,
+              0.15
+            );
+            (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.88,
+              0.15
+            );
+
+            // 6. Vertical light conduit string
+            const beamBreath = 1.2 + Math.sin(elapsedTime * 9.0) * 0.25;
+            b.beamMesh.scale.x = THREE.MathUtils.lerp(b.beamMesh.scale.x, beamBreath, 0.15);
+            (b.beamMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.beamMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.95,
+              0.15
+            );
+            (b.lineMesh.material as THREE.LineBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.lineMesh.material as THREE.LineBasicMaterial).opacity,
+              1.0,
+              0.15
+            );
+            (b.portMesh.material as THREE.MeshBasicMaterial).opacity = 0.95;
+          } else {
+            // Idle state: subtle resting plumb line and ground marker
+            b.pulseMesh.visible = false;
+            b.pingRingMesh1.visible = false;
+            b.pingRingMesh2.visible = false;
+            b.beamMesh.scale.y = THREE.MathUtils.lerp(b.beamMesh.scale.y, 1.0, 0.1);
+            b.beamMesh.scale.x = THREE.MathUtils.lerp(b.beamMesh.scale.x, 0.75, 0.08);
+            (b.beamMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.beamMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.18,
+              0.08
+            );
+            (b.lineMesh.material as THREE.LineBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.lineMesh.material as THREE.LineBasicMaterial).opacity,
+              0.12,
+              0.08
+            );
+            (b.portMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.portMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.35,
+              0.08
+            );
+            (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.26,
+              0.08
+            );
+            (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.22,
+              0.08
+            );
+            (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
+              (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity,
+              0.15,
+              0.08
+            );
+            b.coreDiscMesh.scale.set(1, 1, 1);
+          }
+        });
+
+        // Perspective-project DOM statement: Anchored above top of video at Z = 75
         const stmtEl = statementRef.current;
         if (stmtEl) {
-          const statementWorldY = HERO_Y + cardHeight * 0.5 + 170;
-          const stmtProj = projectToScreen(0, statementWorldY, 40);
-          if (stmtProj.isVisible) {
+          const statementWorldY = HERO_Y + cardHeight * 0.5 + 130;
+          const stmtProj = projectToScreen(0, statementWorldY, 75);
+          if (stmtProj.isVisible && !isNodeFocused) {
             stmtEl.style.opacity = "1";
+            stmtEl.style.pointerEvents = "auto";
             stmtEl.style.transform = `translate3d(calc(${stmtProj.screenX.toFixed(1)}px - 50%), calc(${stmtProj.screenY.toFixed(1)}px - 50%), 0) scale3d(${stmtProj.scale.toFixed(3)}, ${stmtProj.scale.toFixed(3)}, 1)`;
           } else {
             stmtEl.style.opacity = "0";
+            stmtEl.style.pointerEvents = "none";
           }
         }
 
-        // Perspective-project Hero Status Badge: 24px below bottom of video
+        // Perspective-project Hero Status Badge: Anchored below bottom of video at Z = 45
         const badgeEl = heroBadgeRef.current;
         if (badgeEl) {
           const badgeWorldY = HERO_Y - cardHeight * 0.5 - 28;
-          const badgeProj = projectToScreen(0, badgeWorldY, 10);
-          if (badgeProj.isVisible) {
+          const badgeProj = projectToScreen(0, badgeWorldY, 45);
+          if (badgeProj.isVisible && !isNodeFocused) {
             badgeEl.style.opacity = "1";
+            badgeEl.style.pointerEvents = "auto";
             badgeEl.style.transform = `translate3d(calc(${badgeProj.screenX.toFixed(1)}px - 50%), calc(${badgeProj.screenY.toFixed(1)}px - 50%), 0) scale3d(${badgeProj.scale.toFixed(3)}, ${badgeProj.scale.toFixed(3)}, 1)`;
           } else {
             badgeEl.style.opacity = "0";
+            badgeEl.style.pointerEvents = "none";
           }
         }
 
-        // Perspective-project all spatial node cards
+        // Perspective-project all spatial node cards with Compositor-Only 120 FPS standard
         if (nodeRefs.current) {
           NODE_GRAPH.forEach((node) => {
             if (node.id === "root") return;
@@ -952,9 +1565,26 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             el._scale = proj.scale;
 
             if (proj.isVisible) {
-              el.style.opacity = "1";
-              el.style.pointerEvents = "auto";
-              el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${proj.scale.toFixed(3)}, ${proj.scale.toFixed(3)}, 1)`;
+              const isThisNodeActive = activeNodeIdRef.current === node.id;
+              el.style.opacity = isNodeFocused
+                ? isThisNodeActive
+                  ? "1"
+                  : "0"
+                : "1";
+              el.style.pointerEvents =
+                isNodeFocused && !isThisNodeActive ? "none" : "auto";
+              if (isThisNodeActive) {
+                // Ensure active card is positioned with exact integer pixels (avoiding calc(-50%) on odd heights which creates 0.5px subpixel font blur)
+                const halfW = Math.round(el.offsetWidth * 0.5);
+                const halfH = Math.round(el.offsetHeight * 0.5);
+                const posX = Math.round(proj.screenX) - halfW;
+                const posY = Math.round(proj.screenY) - halfH;
+                el.style.transform = `translate3d(${posX}px, ${posY}px, 0) scale3d(1, 1, 1)`;
+                el.style.zIndex = "50";
+              } else {
+                el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${proj.scale.toFixed(3)}, ${proj.scale.toFixed(3)}, 1)`;
+                el.style.zIndex = "20";
+              }
             } else {
               el.style.opacity = "0";
               el.style.pointerEvents = "none";
@@ -1028,10 +1658,40 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         videoTexture.dispose();
         starGeo.dispose();
         starMat.dispose();
-        gridDeep.geometry.dispose();
-        gridBase.geometry.dispose();
+        floorGeo.dispose();
+        floorMat.dispose();
+        floorBeacons.forEach((b) => {
+          b.baseOuterRingMesh.geometry.dispose();
+          (b.baseOuterRingMesh.material as THREE.Material).dispose();
+          b.baseInnerRingMesh.geometry.dispose();
+          (b.baseInnerRingMesh.material as THREE.Material).dispose();
+          b.coreDiscMesh.geometry.dispose();
+          (b.coreDiscMesh.material as THREE.Material).dispose();
+          b.pingRingMesh1.geometry.dispose();
+          (b.pingRingMesh1.material as THREE.Material).dispose();
+          b.pingRingMesh2.geometry.dispose();
+          (b.pingRingMesh2.material as THREE.Material).dispose();
+          b.beamMesh.geometry.dispose();
+          (b.beamMesh.material as THREE.Material).dispose();
+          b.lineMesh.geometry.dispose();
+          (b.lineMesh.material as THREE.Material).dispose();
+          b.portMesh.geometry.dispose();
+          (b.portMesh.material as THREE.Material).dispose();
+          b.pulseMesh.geometry.dispose();
+          (b.pulseMesh.material as THREE.Material).dispose();
+        });
         limePacketTex.dispose();
         cyanPacketTex.dispose();
+        emeraldPacketTex.dispose();
+        limeBeamTex.dispose();
+        cyanBeamTex.dispose();
+        emeraldBeamTex.dispose();
+        limePulseTex.dispose();
+        cyanPulseTex.dispose();
+        emeraldPulseTex.dispose();
+        limeFlareTex.dispose();
+        cyanFlareTex.dispose();
+        emeraldFlareTex.dispose();
         renderer.dispose();
       };
     }, [

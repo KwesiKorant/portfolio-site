@@ -1,6 +1,13 @@
-import React, { forwardRef, useCallback, useRef } from "react";
+"use client";
+
+import React, { forwardRef, useCallback, useRef, useState } from "react";
 import { NodeData, SubsystemType } from "@/types/graph";
-import { playCardHover, playKeyClick } from "@/lib/soundEngine";
+import {
+  playCardHover,
+  playGroundContactPing,
+  playKeyClick,
+  playCopySuccess,
+} from "@/lib/soundEngine";
 
 interface SpatialNodeCardProps {
   node: NodeData;
@@ -15,25 +22,139 @@ export interface SpatialNodeElement extends HTMLDivElement {
   _scale?: number;
 }
 
+function HighlightedCode({ code }: { code: string }) {
+  const lines = code.split("\n");
+  return (
+    <code>
+      {lines.map((line, idx) => {
+        const trimmed = line.trim();
+        const isComment = trimmed.startsWith("//") || trimmed.startsWith("#");
+        if (isComment) {
+          return (
+            <div key={idx} className="text-zinc-500 italic font-normal">
+              {line}
+            </div>
+          );
+        }
+
+        const parts = line.split(
+          /("(?:[^"\\]|\\.)*"|\b(?:pub|async|fn|let|await|match|const|export|function|return|struct|module|for|in|case|default|int|u32|f32|unsafe)\b)/g
+        );
+
+        return (
+          <div key={idx}>
+            {parts.map((p, pIdx) => {
+              if (p.startsWith('"') && p.endsWith('"')) {
+                return (
+                  <span key={pIdx} className="text-emerald-300 font-semibold">
+                    {p}
+                  </span>
+                );
+              }
+              if (
+                /^(pub|async|fn|let|await|match|const|export|function|return|struct|module|for|in|case|default|int|u32|f32|unsafe)$/.test(
+                  p
+                )
+              ) {
+                return (
+                  <span key={pIdx} className="text-accent-lime font-bold">
+                    {p}
+                  </span>
+                );
+              }
+              return <span key={pIdx}>{p}</span>;
+            })}
+          </div>
+        );
+      })}
+    </code>
+  );
+}
+
+function PipelineDiagram({ type }: { type?: SubsystemType }) {
+  const stepsMap: Record<string, string[]> = {
+    router: ["Client IP", "Edge Worker", "Token Bucket", "Upstream Peer"],
+    stream: ["Producer", "Kafka Partition", "Ring Buffer", "48k WS Sockets"],
+    vectordb: ["Raw Vector", "HNSW Index", "AVX-512 SIMD", "Top-K Matrix"],
+    crdt: ["Local Write", "Automerge LWW", "WebRTC Mesh", "State Converged"],
+    ebpf: ["Userspace Call", "kprobe/tcp", "eBPF Verifier", "Ring Buffer"],
+    cluster: [
+      "Ingress Controller",
+      "Envoy Sidecar",
+      "Pod Replica",
+      "Postgres Primary",
+    ],
+    identity: [
+      "Client Request",
+      "GPG Verification",
+      "Dossier Registry",
+      "SLA 99.99%",
+    ],
+  };
+
+  const steps = (type && stepsMap[type]) || [
+    "Ingress",
+    "Processor",
+    "Buffer",
+    "Destination",
+  ];
+
+  return (
+    <div className="mb-3.5 p-3 bg-[#0d101a] border border-white/20 rounded-xl">
+      <div className="flex items-center justify-between text-[10.5px] font-mono text-zinc-300 mb-2">
+        <span className="text-accent-lime font-bold flex items-center gap-1.5 tracking-wider">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+          SYSTEM PIPELINE FLOW
+        </span>
+        <span className="text-zinc-400 font-mono text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10">
+          ZERO-COPY DIRECT
+        </span>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5 font-mono text-[9.5px]">
+        {steps.map((step, idx) => (
+          <div
+            key={idx}
+            className="flex flex-col items-center justify-center p-2 rounded-lg bg-[#141724] border border-white/18 text-center relative shadow-sm"
+          >
+            <span className="text-[8.5px] text-accent-lime font-bold mb-0.5">0{idx + 1}</span>
+            <span className="text-zinc-100 font-semibold leading-tight">
+              {step}
+            </span>
+            {idx < 3 && (
+              <span className="absolute -right-2 top-1/2 -translate-y-1/2 text-xs text-accent-lime font-bold z-10 hidden sm:block">
+                &rarr;
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SubsystemWidget({ type }: { type?: SubsystemType }) {
   if (!type) return null;
 
   switch (type) {
     case "router":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               ANYCAST INGRESS
             </span>
-            <span className="text-zinc-300">p99: 1.18ms</span>
+            <span className="text-zinc-200 font-semibold">p99: 1.18ms</span>
           </div>
           <div className="h-6 w-full relative overflow-hidden">
-            <svg className="w-full h-full" viewBox="0 0 280 24" preserveAspectRatio="none">
+            <svg
+              className="w-full h-full"
+              viewBox="0 0 280 24"
+              preserveAspectRatio="none"
+            >
               <defs>
                 <linearGradient id="router-grad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ccff00" stopOpacity="0.25" />
+                  <stop offset="0%" stopColor="#ccff00" stopOpacity="0.3" />
                   <stop offset="100%" stopColor="#ccff00" stopOpacity="0" />
                 </linearGradient>
               </defs>
@@ -45,42 +166,44 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
                 d="M 0 16 Q 35 4, 70 14 T 140 8 T 210 16 T 276 6"
                 fill="none"
                 stroke="#ccff00"
-                strokeWidth="1.5"
+                strokeWidth="1.8"
               />
               <circle cx="276" cy="6" r="2.5" fill="#ccff00" />
             </svg>
           </div>
-          <div className="flex justify-between text-zinc-500 text-[8.5px] mt-1">
+          <div className="flex justify-between text-zinc-400 text-[9px] mt-1.5 font-medium">
             <span>EDGE: 120k req/s</span>
-            <span className="text-accent-lime font-semibold">DROP RATE: 0.00%</span>
+            <span className="text-accent-lime font-bold">
+              DROP RATE: 0.00%
+            </span>
           </div>
         </div>
       );
 
     case "stream":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-cyan font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-cyan font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_8px_#06b6d4] animate-pulse" />
               KAFKA FANOUT
             </span>
-            <span className="text-zinc-300">48.2k frames/s</span>
+            <span className="text-zinc-200 font-semibold">48.2k frames/s</span>
           </div>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <span className="text-zinc-500 w-12 text-[8px]">SOCKETS</span>
-              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-accent-cyan w-[78%] rounded-full animate-pulse" />
+              <span className="text-zinc-400 w-14 text-[8.5px] font-semibold">SOCKETS</span>
+              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-accent-cyan w-[78%] rounded-full shadow-[0_0_8px_#06b6d4]" />
               </div>
-              <span className="text-zinc-400 text-[8.5px]">24k/s</span>
+              <span className="text-zinc-200 text-[9px] font-bold">24k/s</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-zinc-500 w-12 text-[8px]">PIPELINES</span>
-              <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-accent-lime w-[64%] rounded-full animate-pulse" />
+              <span className="text-zinc-400 w-14 text-[8.5px] font-semibold">PIPELINES</span>
+              <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-full bg-accent-lime w-[64%] rounded-full shadow-[0_0_8px_#ccff00]" />
               </div>
-              <span className="text-zinc-400 text-[8.5px]">24k/s</span>
+              <span className="text-zinc-200 text-[9px] font-bold">24k/s</span>
             </div>
           </div>
         </div>
@@ -88,27 +211,36 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
 
     case "vectordb":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               HNSW GRAPH
             </span>
-            <span className="text-zinc-300">cos_sim: 0.984</span>
+            <span className="text-zinc-200 font-semibold">cos_sim: 0.984</span>
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <polygon points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2" strokeOpacity="0.4" />
-                <line x1="12" y1="2" x2="12" y2="22" strokeOpacity="0.3" />
-                <line x1="2" y1="8.5" x2="22" y2="8.5" strokeOpacity="0.3" />
+              <svg
+                className="w-5 h-5 text-accent-lime"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <polygon
+                  points="12 2 2 8.5 2 15.5 12 22 22 15.5 22 8.5 12 2"
+                  strokeOpacity="0.6"
+                />
+                <line x1="12" y1="2" x2="12" y2="22" strokeOpacity="0.4" />
+                <line x1="2" y1="8.5" x2="22" y2="8.5" strokeOpacity="0.4" />
                 <circle cx="12" cy="12" r="2.5" fill="#ccff00" />
                 <circle cx="2" cy="8.5" r="1.5" fill="#06b6d4" />
                 <circle cx="22" cy="15.5" r="1.5" fill="#06b6d4" />
               </svg>
-              <span className="text-zinc-300 text-[8.5px]">1536-DIM SIMD</span>
+              <span className="text-zinc-200 text-[9px] font-bold">1536-DIM SIMD</span>
             </div>
-            <span className="px-2 py-0.5 rounded bg-accent-lime/10 text-accent-lime border border-accent-lime/30 text-[8px] font-semibold">
+            <span className="px-2 py-0.5 rounded bg-accent-lime/15 text-accent-lime border border-accent-lime/40 text-[8.5px] font-bold">
               AVX-512 FMA
             </span>
           </div>
@@ -117,22 +249,28 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
 
     case "crdt":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-emerald font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-emerald animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-emerald font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-emerald shadow-[0_0_8px_#10b981] animate-pulse" />
               PEER MESH
             </span>
-            <span className="text-emerald-400 font-semibold">CONVERGED</span>
+            <span className="text-emerald-400 font-bold">CONVERGED</span>
           </div>
-          <div className="flex items-center justify-between text-[8.5px] px-1 text-zinc-300">
-            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER A</span>
-            <span className="text-accent-emerald">&harr;</span>
-            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER B</span>
-            <span className="text-accent-emerald">&harr;</span>
-            <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10">PEER C</span>
+          <div className="flex items-center justify-between text-[9px] px-1 text-zinc-200">
+            <span className="px-2 py-0.5 rounded bg-white/10 border border-white/18 font-bold">
+              PEER A
+            </span>
+            <span className="text-accent-emerald font-bold">&harr;</span>
+            <span className="px-2 py-0.5 rounded bg-white/10 border border-white/18 font-bold">
+              PEER B
+            </span>
+            <span className="text-accent-emerald font-bold">&harr;</span>
+            <span className="px-2 py-0.5 rounded bg-white/10 border border-white/18 font-bold">
+              PEER C
+            </span>
           </div>
-          <div className="text-[8px] text-zinc-500 mt-1.5 text-center">
+          <div className="text-[8.5px] text-zinc-400 mt-1.5 text-center font-medium">
             VECTOR CLOCK: [P1:42, P2:89, P3:15] &bull; 0 SPLIT-BRAIN
           </div>
         </div>
@@ -140,56 +278,72 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
 
     case "ebpf":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[8.5px] leading-tight">
-          <div className="flex justify-between items-center text-zinc-400 mb-1">
-            <span className="flex items-center gap-1.5 text-accent-cyan font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9px] leading-tight shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-cyan font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-cyan shadow-[0_0_8px_#06b6d4] animate-pulse" />
               KERNEL PROBES
             </span>
-            <span className="text-zinc-500">&lt; 0.8% CPU</span>
+            <span className="text-zinc-300 font-bold">&lt; 0.8% CPU</span>
           </div>
-          <div className="bg-[#050608] rounded p-1.5 border border-white/5 text-zinc-400 space-y-0.5">
-            <div className="text-accent-cyan truncate">&gt; sys_enter_connect: pid 3841 (0.12ms)</div>
-            <div className="text-zinc-500 truncate">&gt; ringbuf_submit: 64B [VERIFIED]</div>
+          <div className="bg-[#05060a] rounded-lg p-2 border border-white/12 text-zinc-300 space-y-1 font-mono text-[9px]">
+            <div className="text-accent-cyan font-semibold truncate">
+              &gt; sys_enter_connect: pid 3841 (0.12ms)
+            </div>
+            <div className="text-zinc-400 truncate">
+              &gt; ringbuf_submit: 64B [VERIFIED]
+            </div>
           </div>
         </div>
       );
 
     case "cluster":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               POD REPLICAS
             </span>
-            <span className="text-emerald-400 font-semibold">128/128 HEALTHY</span>
+            <span className="text-emerald-400 font-bold">
+              128/128 HEALTHY
+            </span>
           </div>
-          <div className="grid grid-cols-4 gap-1 text-[8px] text-center font-bold">
-            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">US-E</div>
-            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">US-W</div>
-            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">EU-C</div>
-            <div className="py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">AP-S</div>
+          <div className="grid grid-cols-4 gap-1 text-[8.5px] text-center font-bold">
+            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
+              US-E
+            </div>
+            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
+              US-W
+            </div>
+            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
+              EU-C
+            </div>
+            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
+              AP-S
+            </div>
           </div>
         </div>
       );
 
     case "identity":
       return (
-        <div className="mb-3.5 p-2.5 rounded-lg bg-black/40 border border-white/10 font-mono text-[9px]">
-          <div className="flex justify-between items-center text-zinc-400 mb-1">
-            <span className="flex items-center gap-1.5 text-accent-lime font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
+            <span className="flex items-center gap-1.5 text-accent-lime font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               VERIFIED KEY
             </span>
-            <span className="text-zinc-300 font-semibold">ED25519</span>
+            <span className="text-zinc-100 font-bold">ED25519</span>
           </div>
-          <div className="text-[8.5px] text-zinc-400 tracking-wider truncate">
+          <div className="text-[9px] text-zinc-300 tracking-wider truncate font-semibold">
             FINGERPRINT: 4A7F 90B2 C811 09E4
           </div>
-          <div className="flex justify-between text-[8px] text-zinc-500 mt-1">
+          <div className="flex justify-between text-[8.5px] text-zinc-400 mt-1.5 font-medium">
             <span>UPTIME: 99.99%</span>
-            <span className="text-accent-lime font-semibold">SYSTEM ARCHITECT</span>
+            <span className="text-accent-lime font-bold">
+              SYSTEM ARCHITECT
+            </span>
           </div>
         </div>
       );
@@ -199,145 +353,312 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
   }
 }
 
-export const SpatialNodeCard = forwardRef<SpatialNodeElement, SpatialNodeCardProps>(
-  ({ node, isActive, onFocusNode, onHoverConnection }, ref) => {
-    const innerCardRef = useRef<HTMLDivElement | null>(null);
+export const SpatialNodeCard = forwardRef<
+  SpatialNodeElement,
+  SpatialNodeCardProps
+>(({ node, isActive, onFocusNode, onHoverConnection }, ref) => {
+  const innerCardRef = useRef<HTMLDivElement | null>(null);
+  const [copied, setCopied] = useState(false);
 
-    const handleMouseEnter = useCallback(
-      () => {
-        playCardHover();
-        const inner = innerCardRef.current;
-        if (inner) {
-          inner.style.transition = "border-color 200ms ease, box-shadow 200ms ease";
-        }
-        onHoverConnection(node.id, true);
-      },
-      [node.id, onHoverConnection]
-    );
+  const handleMouseEnter = useCallback(() => {
+    if (isActive) return;
+    playCardHover();
+    setTimeout(() => {
+      playGroundContactPing(node.badgeColor as "lime" | "cyan" | "emerald");
+    }, 180);
+    onHoverConnection(node.id, true);
+  }, [isActive, node.id, node.badgeColor, onHoverConnection]);
 
-    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  // Enhanced 3D Tilt with dynamic holographic light sheen
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      if (isActive) return; // Keep level when zoomed into content
       const inner = innerCardRef.current;
       if (!inner) return;
 
-      const cardEl = e.currentTarget.parentElement as SpatialNodeElement | null;
-      let normX = 0;
-      let normY = 0;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const normX = (e.clientX - rect.left) / rect.width - 0.5;
+      const normY = (e.clientY - rect.top) / rect.height - 0.5;
 
-      if (cardEl && cardEl._screenX !== undefined && cardEl._screenY !== undefined) {
-        const scale = cardEl._scale || 1;
-        const halfW = (340 * scale) / 2;
-        const halfH = (220 * scale) / 2;
-        normX = Math.max(-0.5, Math.min(0.5, (e.clientX - cardEl._screenX) / Math.max(halfW, 80)));
-        normY = Math.max(-0.5, Math.min(0.5, (e.clientY - cardEl._screenY) / Math.max(halfH, 80)));
-      } else {
-        const rect = e.currentTarget.getBoundingClientRect();
-        normX = (e.clientX - rect.left) / rect.width - 0.5;
-        normY = (e.clientY - rect.top) / rect.height - 0.5;
-      }
+      inner.style.setProperty("--mouse-x", `${(normX * 100).toFixed(1)}%`);
+      inner.style.setProperty("--mouse-y", `${(normY * 100).toFixed(1)}%`);
 
-      inner.style.transform = `rotateX(${-normY * 14}deg) rotateY(${normX * 14}deg) translateZ(8px) scale3d(1.02, 1.02, 1)`;
-    }, []);
+      // Tuned dynamic tilt: ±26° X/Y, 18px Z-lift, 1.04 scale
+      inner.style.transform = `rotateX(${-normY * 26}deg) rotateY(${normX * 26}deg) translateZ(18px) scale3d(1.04, 1.04, 1)`;
+    },
+    [isActive]
+  );
 
-    const handleMouseLeave = useCallback(() => {
-      const inner = innerCardRef.current;
-      if (inner) {
-        inner.style.transition = "transform 280ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 200ms ease";
-        inner.style.transform = `rotateX(0deg) rotateY(0deg) translateZ(0px) scale3d(1, 1, 1)`;
-      }
-      onHoverConnection(node.id, false);
-    }, [node.id, onHoverConnection]);
+  const handleMouseLeave = useCallback(() => {
+    const inner = innerCardRef.current;
+    if (inner && !isActive) {
+      inner.style.transition =
+        "transform 360ms cubic-bezier(0.16, 1, 0.3, 1), border-color 200ms ease, box-shadow 200ms ease";
+      inner.style.transform =
+        "rotateX(0deg) rotateY(0deg) translateZ(0px) scale3d(1, 1, 1)";
+    }
+    onHoverConnection(node.id, false);
+  }, [isActive, node.id, onHoverConnection]);
 
-    const handleClick = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        playKeyClick();
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      playKeyClick();
+      if (!isActive) {
         onFocusNode(node.id);
-      },
-      [node.id, onFocusNode]
-    );
+      }
+    },
+    [isActive, node.id, onFocusNode]
+  );
 
-    const badgeColorClass =
-      node.badgeColor === "cyan"
-        ? "text-accent-cyan border-accent-cyan/35 bg-accent-cyan/10"
-        : node.badgeColor === "emerald"
-        ? "text-accent-emerald border-accent-emerald/35 bg-accent-emerald/10"
-        : "text-accent-lime border-accent-lime/35 bg-accent-lime/10";
+  const handleCloseZoom = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      playKeyClick();
+      onFocusNode("root");
+    },
+    [onFocusNode]
+  );
 
-    return (
+  const handleCopyCode = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!node.code) return;
+      navigator.clipboard.writeText(node.code).then(() => {
+        playCopySuccess();
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2200);
+      });
+    },
+    [node.code]
+  );
+
+  const badgeColorClass =
+    node.badgeColor === "cyan"
+      ? "text-accent-cyan border-accent-cyan/35 bg-accent-cyan/10"
+      : node.badgeColor === "emerald"
+      ? "text-accent-emerald border-accent-emerald/35 bg-accent-emerald/10"
+      : "text-accent-lime border-accent-lime/35 bg-accent-lime/10";
+
+  return (
+    <div
+      ref={ref}
+      id={`node-${node.id}`}
+      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
+        isActive
+          ? "w-[1040px] max-w-[94vw] z-50 cursor-default"
+          : "w-[330px] max-w-[90vw] z-20 cursor-pointer"
+      }`}
+      style={{ opacity: 0, pointerEvents: "none" }}
+      onClick={handleClick}
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Inner Card: 3D tilt when idle, crisp 2D flat rendering when active */}
       <div
-        ref={ref}
-        id={`node-${node.id}`}
-        className="spatial-node absolute top-0 left-0 w-[340px] max-w-[90vw] pointer-events-auto cursor-pointer [contain:layout_style_paint] will-change-transform origin-center select-none"
-        style={{ opacity: 0, pointerEvents: "none" }}
-        onClick={handleClick}
-        onMouseDown={(e) => e.stopPropagation()}
+        ref={innerCardRef}
+        className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out overflow-hidden antialiased ${
+          isActive
+            ? "p-6 bg-[#0a0c16] border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 overflow-hidden [transform-style:flat]"
+            : "p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d]"
+        }`}
+        onMouseEnter={handleMouseEnter}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={isActive ? { transform: "none" } : undefined}
       >
-        {/* Inner Card handles 3D tilt without touching outer camera projection */}
-        <div
-          ref={innerCardRef}
-          className={`relative rounded-2xl p-6 bg-[#0c0d14]/95 border text-zinc-100 group [transform-style:preserve-3d] transition-[border-color,box-shadow] duration-200 ease-out ${
-            isActive
-              ? "border-accent-lime ring-1 ring-accent-lime/50 shadow-[0_0_35px_rgba(204,255,0,0.3),0_12px_40px_rgba(0,0,0,0.85)]"
-              : "border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)]"
-          }`}
-          onMouseEnter={handleMouseEnter}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Pre-rendered glow overlay */}
+        {/* Holographic dynamic glare tracking pointer */}
+        {!isActive && (
           <div
-            className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent-lime/25 via-transparent to-accent-cyan/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 ${
-              isActive ? "opacity-100" : ""
-            }`}
+            className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"
+            style={{
+              background: `radial-gradient(circle at calc(50% + var(--mouse-x, 0%)) calc(50% + var(--mouse-y, 0%)), rgba(255,255,255,0.08) 0%, rgba(204,255,0,0.04) 40%, transparent 70%)`,
+            }}
           />
+        )}
 
-          <div className="flex items-center justify-between gap-3 mb-2.5 font-mono text-[10px] tracking-wider uppercase text-zinc-400">
-            <span className="font-semibold">{node.category}</span>
+        {/* Ambient edge aura */}
+        <div
+          className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent-lime/25 via-transparent to-accent-cyan/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 ${
+            isActive ? "opacity-100" : ""
+          }`}
+        />
+
+        {/* Header Bar */}
+        <div className="flex items-center justify-between gap-3 mb-2.5 font-mono text-[10px] tracking-wider uppercase text-zinc-400">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-zinc-300">{node.category}</span>
+            {isActive && (
+              <span className="text-zinc-600 font-mono text-[9px] hidden sm:inline">
+                // SYSTEM DEEP DIVE
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
             <span
               className={`inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-md font-mono font-medium text-[10px] shadow-sm ${badgeColorClass}`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
               {node.badge}
             </span>
-          </div>
-
-          <div className="font-display text-[18px] font-bold text-white mb-2 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
-            {node.title}
-          </div>
-
-          {node.desc && (
-            <div className="font-sans text-[13px] leading-relaxed text-zinc-300 mb-3.5 line-clamp-3">
-              {node.desc}
-            </div>
-          )}
-
-          {/* Differentiated live subsystem telemetry widget */}
-          <SubsystemWidget type={node.subsystemType} />
-
-          {node.tags && node.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3.5">
-              {node.tags.map((t) => (
-                <span
-                  key={t}
-                  className="font-mono text-[10px] px-2.5 py-0.5 rounded-md bg-white/[0.05] border border-white/12 text-zinc-300 shadow-sm"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-between pt-3.5 border-t border-white/10 font-mono text-[10px] text-zinc-400">
-            <span>STATUS: ONLINE</span>
-            <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150">
-              Dolly In &rarr;
-            </span>
+            {isActive && (
+              <button
+                onClick={handleCloseZoom}
+                className="px-2 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-300 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors"
+                title="Zoom Out / Overview (ESC)"
+                aria-label="Zoom Out"
+              >
+                <span>&times; ESC</span>
+              </button>
+            )}
           </div>
         </div>
+
+        {/* Widescreen Landscape Layout when Active */}
+        {isActive ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              {/* Left Column: Specs, Metrics, Description */}
+              <div className="lg:col-span-5 flex flex-col justify-between space-y-3.5">
+                <div>
+                  <div className="font-display text-[22px] font-bold text-white mb-2 tracking-tight">
+                    {node.title}
+                  </div>
+                  {node.desc && (
+                    <div className="font-sans text-[13px] leading-relaxed text-zinc-200 mb-3 font-normal">
+                      {node.desc}
+                    </div>
+                  )}
+                  {/* Differentiated live subsystem telemetry widget */}
+                  <SubsystemWidget type={node.subsystemType} />
+                </div>
+
+                {/* Architecture Metrics Grid */}
+                {node.metrics && node.metrics.length > 0 && (
+                  <div>
+                    <div className="text-[10.5px] font-mono text-zinc-300 mb-1.5 uppercase tracking-wider font-bold">
+                      LIVE TELEMETRY METRICS
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {node.metrics.map((m, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-[#131624] border border-white/18 rounded-lg p-2 text-center shadow-sm"
+                        >
+                          <div className="font-mono text-[9px] text-zinc-400 mb-0.5 uppercase tracking-wider font-semibold">
+                            {m.label}
+                          </div>
+                          <div className="font-mono text-[13px] text-white font-bold tracking-tight">
+                            {m.val}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Tags */}
+                {node.tags && node.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {node.tags.map((t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-[10px] px-2.5 py-0.5 rounded-md bg-white/[0.08] border border-white/20 text-zinc-100 font-medium"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Pipeline Diagram & Code Blueprint */}
+              <div className="lg:col-span-7 flex flex-col space-y-3.5">
+                {/* System Pipeline Flow */}
+                <PipelineDiagram type={node.subsystemType} />
+
+                {/* Code / Configuration Blueprint */}
+                {node.code && (
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
+                      <span className="text-zinc-300 uppercase tracking-wider font-bold">
+                        ARCHITECTURE BLUEPRINT
+                      </span>
+                      <button
+                        onClick={handleCopyCode}
+                        className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
+                      >
+                        <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
+                      </button>
+                    </div>
+                    <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-52 flex-1 font-medium shadow-inner">
+                      <HighlightedCode code={node.code} />
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Bottom Bar for Landscape Console */}
+            <div className="flex items-center justify-between pt-3 border-t border-white/15 font-mono text-[10.5px] text-zinc-300">
+              <span className="flex items-center gap-2 text-accent-lime text-[10px] font-semibold">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+                ACTIVE NODE TELEMETRY // ZERO-COPY RUNTIME
+              </span>
+              <button
+                onClick={handleCloseZoom}
+                className="text-accent-lime font-bold hover:underline cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-md bg-accent-lime/10 border border-accent-lime/30 hover:bg-accent-lime/20 transition-all text-[10.5px]"
+              >
+                <span>&larr; ZOOM OUT [ESC]</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          /* Compact Overview Layout when Idle */
+          <div>
+            <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
+              {node.title}
+            </div>
+
+            {node.desc && (
+              <div className="font-sans text-[12.5px] leading-relaxed text-zinc-300 mb-3 line-clamp-2">
+                {node.desc}
+              </div>
+            )}
+
+            <SubsystemWidget type={node.subsystemType} />
+
+            {node.tags && node.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2.5 mb-3">
+                {node.tags.slice(0, 3).map((t) => (
+                  <span
+                    key={t}
+                    className="font-mono text-[9px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/12 text-zinc-400"
+                  >
+                    {t}
+                  </span>
+                ))}
+                {node.tags.length > 3 && (
+                  <span className="font-mono text-[9px] px-1.5 py-0.5 text-zinc-500">
+                    +{node.tags.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9.5px] text-zinc-400">
+              <span>ONLINE</span>
+              <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150">
+                Inspect Node &rarr;
+              </span>
+            </div>
+          </div>
+        )}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 SpatialNodeCard.displayName = "SpatialNodeCard";
-

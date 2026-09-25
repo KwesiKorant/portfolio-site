@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { NODE_GRAPH } from "@/data/nodeGraph";
-import { ClusterType, NodeData } from "@/types/graph";
+import { ClusterType } from "@/types/graph";
 import { HeroStatement } from "@/components/ui/HeroStatement";
 import { HeroMetaBadge } from "@/components/ui/HeroMetaBadge";
 import {
@@ -11,39 +11,63 @@ import {
 } from "@/components/nodes/SpatialNodeCard";
 import { HUD } from "@/components/ui/HUD";
 import { ProHintsBanner } from "@/components/ui/ProHintsBanner";
-import { ProjectDrawer } from "@/components/ui/ProjectDrawer";
 import { ShortcutsModal } from "@/components/ui/ShortcutsModal";
 import {
   SpatialCanvas,
   type SpatialCanvasHandle,
 } from "@/components/canvas/SpatialCanvas";
 import { ImageRevealHero } from "@/components/sections/ImageRevealHero";
-import { ScrollVideoGate } from "@/components/sections/ScrollVideoGate";
+import {
+  PortalGateway,
+  type PortalGatewayHandle,
+} from "@/components/sections/PortalGateway";
 import { MouseScrubSection } from "@/components/sections/MouseScrubSection";
 import { FinaleSection } from "@/components/sections/FinaleSection";
 
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
-  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [temporaryHint, setTemporaryHint] = useState<string | null>(null);
+  const [isWarping, setIsWarping] = useState(false);
 
   // Refs for zero-reflow 120 FPS updates
   const canvasHandleRef = useRef<SpatialCanvasHandle | null>(null);
+  const portalGatewayRef = useRef<PortalGatewayHandle | null>(null);
   const statementRef = useRef<HTMLDivElement | null>(null);
   const heroBadgeRef = useRef<HTMLDivElement | null>(null);
   const telemetryRef = useRef<HTMLDivElement | null>(null);
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const nodeRefs = useRef<Map<string, SpatialNodeElement>>(new Map());
 
+  // Portal Gateway Forward & Reverse Transitions
+  const handleEnterPortal = useCallback(() => {
+    setIsWarping(true);
+    portalGatewayRef.current?.triggerForward();
+  }, []);
+
+  const handleBreachStage3 = useCallback(() => {
+    canvasHandleRef.current?.triggerDimensionalBreach("enter");
+    setActiveNodeId("root");
+    setTimeout(() => {
+      setIsWarping(false);
+    }, 380);
+  }, []);
+
+  const handleExitToPortal = useCallback(() => {
+    setIsWarping(true);
+    canvasHandleRef.current?.triggerDimensionalBreach("exit");
+    portalGatewayRef.current?.triggerReverse();
+  }, []);
+
+  const handleArriveStage1 = useCallback(() => {
+    setActiveNodeId("root");
+    setTimeout(() => {
+      setIsWarping(false);
+    }, 200);
+  }, []);
+
   const activeCluster: ClusterType =
     NODE_GRAPH.find((n) => n.id === activeNodeId)?.cluster || "root";
-
-  // Trigger network surge
-  const handleNetworkSurge = useCallback(() => {
-    canvasHandleRef.current?.triggerNetworkSurge();
-  }, []);
 
   // Display temporary hint with auto-reset
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -55,20 +79,10 @@ export default function SpatialPortfolioPage() {
     }, 4000);
   }, []);
 
-  // Focus node handler
+  // Focus node handler: dollies directly into the card in 3D (no sidebar)
   const handleFocusNode = useCallback((nodeId: string) => {
-    const node = NODE_GRAPH.find((n) => n.id === nodeId);
-    if (!node) return;
-
     setActiveNodeId(nodeId);
     canvasHandleRef.current?.focusNode(nodeId);
-
-    if (node.id !== "root") {
-      setSelectedNode(node);
-      setIsDrawerOpen(true);
-    } else {
-      setIsDrawerOpen(false);
-    }
   }, []);
 
   // Cluster selector
@@ -114,11 +128,13 @@ export default function SpatialPortfolioPage() {
       }
 
       if (e.key === "Escape") {
-        setIsDrawerOpen(false);
-        setIsGuideOpen(false);
-      } else if (e.key === " ") {
-        e.preventDefault();
-        handleNetworkSurge();
+        if (isGuideOpen) {
+          setIsGuideOpen(false);
+        } else if (activeNodeId !== "root") {
+          handleFocusNode("root");
+        }
+      } else if (e.key === "0") {
+        handleExitToPortal();
       } else if (e.key === "1") {
         handleFocusNode("root");
       } else if (e.key === "2") {
@@ -136,15 +152,19 @@ export default function SpatialPortfolioPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleFocusNode, handleNetworkSurge]);
+  }, [handleFocusNode, handleExitToPortal, isGuideOpen, activeNodeId]);
 
   return (
     <main className="w-full min-h-screen bg-[#050508] relative">
       {/* STAGE 01: Image Reveal Hero (Cursor Spotlight Mask) */}
-      <ImageRevealHero />
+      <ImageRevealHero onEnterPortal={handleEnterPortal} />
 
-      {/* STAGE 02: Scroll-Triggered Video Portal Gate */}
-      <ScrollVideoGate onComplete={() => handleFocusNode("root")} />
+      {/* STAGE 02: Portal Gateway (Fullscreen Fixed Cinematic Conduit Bridge) */}
+      <PortalGateway
+        ref={portalGatewayRef}
+        onBreachStage3={handleBreachStage3}
+        onArriveStage1={handleArriveStage1}
+      />
 
       {/* STAGE 03: 3D Spatial Canvas Dimension (Viewport Culled) */}
       <section
@@ -165,17 +185,32 @@ export default function SpatialPortfolioPage() {
           telemetryRef={telemetryRef}
           radarCanvasRef={radarCanvasRef}
           nodeRefs={nodeRefs}
+          onExitToPortal={handleExitToPortal}
         />
 
-        {/* Spatial World: 3D perspective projected DOM elements */}
-        <div id="spatial-world">
+        {/* Fullscreen Backdrop: Clicking outside the active card sends it back to overview */}
+        {activeNodeId !== "root" && (
+          <div
+            id="card-zoom-backdrop"
+            className="absolute inset-0 z-30 cursor-pointer bg-black/80 transition-opacity duration-200"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFocusNode("root");
+            }}
+            title="Click outside to zoom out (ESC)"
+            aria-label="Click outside to zoom out"
+          />
+        )}
+
+        {/* Spatial World: 3D perspective projected DOM elements (Elevated to z-40 so active card sits above backdrop) */}
+        <div id="spatial-world" className="relative z-40 pointer-events-none">
           <HeroStatement ref={statementRef} />
           <HeroMetaBadge
             ref={heroBadgeRef}
-            onNetworkSurge={handleNetworkSurge}
+            onResetView={() => handleFocusNode("root")}
           />
 
-          {/* Multi-depth child node cards */}
+          {/* Multi-depth child node cards: smoothly zoom in-place on selection */}
           {NODE_GRAPH.filter((n) => n.id !== "root").map((node) => (
             <SpatialNodeCard
               key={node.id}
@@ -202,12 +237,13 @@ export default function SpatialPortfolioPage() {
           onOpenGuide={() => setIsGuideOpen(true)}
           onZoomIn={() => canvasHandleRef.current?.dollyBy(-220)}
           onZoomOut={() => canvasHandleRef.current?.dollyBy(220)}
-          onNetworkSurge={handleNetworkSurge}
           onResetCamera={() => handleFocusNode("root")}
           onWarpToCoords={(wx, wy) =>
             canvasHandleRef.current?.warpToCoords(wx, wy)
           }
           radarCanvasRef={radarCanvasRef}
+          onReturnToHero={handleExitToPortal}
+          isWarping={isWarping}
         />
 
         {/* Pro Hint Cycling Ticker Banner */}
@@ -222,14 +258,6 @@ export default function SpatialPortfolioPage() {
 
       {/* STAGE 05: Finale / Direct Uplink & Dossier */}
       <FinaleSection />
-
-      {/* Slideover Project Deep-Dive Inspector (Global Fixed Drawer) */}
-      <ProjectDrawer
-        node={selectedNode}
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        onNetworkSurge={handleNetworkSurge}
-      />
 
       {/* Spatial Controls Cheatsheet Modal */}
       <ShortcutsModal

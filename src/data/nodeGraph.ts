@@ -1,24 +1,24 @@
 import { NodeData } from "@/types/graph";
 
 export const HERO_Y = -60;
-export const DEFAULT_CAMERA_Z = 1100;
-export const MIN_CAMERA_Z = 360;
-export const MAX_CAMERA_Z = 2050;
+export const DEFAULT_CAMERA_Z = 1880;
+export const MIN_CAMERA_Z = 200;
+export const MAX_CAMERA_Z = 2800;
 
 export const WORLD_BOUNDS = {
-  minX: -1300,
-  maxX: 1300,
+  minX: -1850,
+  maxX: 1850,
   minY: -950,
   maxY: 1100,
 };
 
 export const PRO_HINTS: string[] = [
-  "Press SPACE to pulse network surge • Scroll to 3D fly-through",
-  "Press 1 - 5 on your keyboard to warp instantly between clusters",
-  "Click any node card to dolly right into its architecture deep-dive",
-  "Click any point on the bottom-right RADAR MAP to jump anywhere",
-  "Hover over any project node to inspect holographic 3D tilt & live telemetry",
-  "Press ESC to dismiss the deep-dive drawer • Press ? for guide",
+  "Click any node card to smoothly zoom into the widescreen landscape architecture console",
+  "Press 1 - 5 to jump between spatial clusters • Press 0 for Portal to Hero",
+  "Hover cards for dynamic 3D tilt & holographic light reflection",
+  "Scroll mouse wheel to fly-through depth • Drag to orbit & pan",
+  "Click any coordinate on the RADAR MAP to warp camera position",
+  "Press ESC or click outside card to return to high-angle system overview • Press ? for guide",
 ];
 
 export const NODE_GRAPH: NodeData[] = [
@@ -31,10 +31,10 @@ export const NODE_GRAPH: NodeData[] = [
     x: 0,
     y: HERO_Y,
     z: 0,
-    camTarget: { x: 0, y: 40, z: DEFAULT_CAMERA_Z },
+    camTarget: { x: 0, y: 80, z: DEFAULT_CAMERA_Z },
     cluster: "root",
   },
-  // Cluster A: Systems Architecture (Recessed in 3D space)
+  // Cluster A: Systems Architecture (Left Flank - 3 Distinct Non-Overlapping Columns)
   {
     id: "edge-gateway",
     title: "Edge Gateway & Anycast Proxy",
@@ -43,10 +43,10 @@ export const NODE_GRAPH: NodeData[] = [
     badgeColor: "lime",
     subsystemType: "router",
     desc: "Sub-millisecond global ingress router built with Rust & Cloudflare Workers. Features custom JWT zero-trust auth and token-bucket rate limiting.",
-    x: -940,
-    y: 220,
-    z: -90,
-    camTarget: { x: -940, y: 220, z: 480 },
+    x: -800,
+    y: 230,
+    z: 20,
+    camTarget: { x: -800, y: 230, z: 520 },
     cluster: "arch",
     tags: ["Rust", "Workers", "QUIC", "eBPF"],
     metrics: [
@@ -71,10 +71,10 @@ pub async fn route_request(req: Request) -> Result<Response> {
     badgeColor: "cyan",
     subsystemType: "stream",
     desc: "Distributed event stream broker managing multi-tenant bidirectional WebSocket pipelines with high-throughput Kafka topic fanout.",
-    x: -980,
-    y: -260,
-    z: -140,
-    camTarget: { x: -980, y: -260, z: 460 },
+    x: -1300,
+    y: 220,
+    z: 20,
+    camTarget: { x: -1300, y: 220, z: 520 },
     cluster: "arch",
     tags: ["Go", "Kafka", "WebSockets", "Redis Cluster"],
     metrics: [
@@ -95,7 +95,7 @@ func (b *Broker) Broadcast(topic string, payload []byte) {
     }
 }`,
   },
-  // Cluster B: Featured Case Studies (Staggered forward into perspective)
+  // Cluster B: Featured Case Studies & Production Systems (Right Flank - 4 Distinct Non-Overlapping Columns)
   {
     id: "hyperscale",
     title: "HyperScale: Vector DB Engine",
@@ -104,10 +104,10 @@ func (b *Broker) Broadcast(topic string, payload []byte) {
     badgeColor: "lime",
     subsystemType: "vectordb",
     desc: "High-dimensional similarity search engine in Rust & WebAssembly. HNSW indexing with AVX-512 SIMD vector quantization and sub-5ms search latency.",
-    x: 940,
-    y: 220,
-    z: 60,
-    camTarget: { x: 940, y: 220, z: 540 },
+    x: 1300,
+    y: 230,
+    z: 20,
+    camTarget: { x: 1300, y: 230, z: 520 },
     cluster: "projects",
     tags: ["Rust", "SIMD", "Wasm", "gRPC", "HNSW"],
     metrics: [
@@ -136,10 +136,10 @@ unsafe fn sim_dot_product(a: &[f32], b: &[f32]) -> f32 {
     badgeColor: "emerald",
     subsystemType: "crdt",
     desc: "Peer-to-peer state synchronization kernel using Conflict-free Replicated Data Types (Automerge/Yjs) over WebRTC mesh with encrypted cloud fallback.",
-    x: 980,
-    y: -200,
-    z: -30,
-    camTarget: { x: 980, y: -200, z: 490 },
+    x: 1050,
+    y: -160,
+    z: -20,
+    camTarget: { x: 1050, y: -160, z: 500 },
     cluster: "projects",
     tags: ["TypeScript", "CRDTs", "WebRTC", "IndexedDB"],
     metrics: [
@@ -164,10 +164,10 @@ export function applyRemoteUpdate(doc: AutomergeDoc, update: Uint8Array): SyncRe
     badgeColor: "cyan",
     subsystemType: "ebpf",
     desc: "Non-intrusive Linux kernel observability daemon tracing TCP socket lifecycle, block I/O bottlenecks, and container memory pressure via eBPF bytecode.",
-    x: 960,
-    y: -620,
-    z: -160,
-    camTarget: { x: 960, y: -620, z: 480 },
+    x: 1540,
+    y: -160,
+    z: -20,
+    camTarget: { x: 1540, y: -160, z: 500 },
     cluster: "projects",
     tags: ["C", "Go", "Linux eBPF", "Prometheus"],
     metrics: [
@@ -184,7 +184,7 @@ int BPF_KPROBE(trace_tcp_v4_connect, struct sock *sk) {
     return 0;
 }`,
   },
-  // Cluster C: Infrastructure Stack (Deep in the foundation)
+  // Cluster C: Infrastructure Stack (Deep in the foundation, hovering above floor)
   {
     id: "infra-compute",
     title: "Core Compute & Storage Layer",
@@ -193,10 +193,10 @@ int BPF_KPROBE(trace_tcp_v4_connect, struct sock *sk) {
     badgeColor: "lime",
     subsystemType: "cluster",
     desc: "Stateless container topology orchestrating microservices across AWS & Bare Metal Kubernetes with automated zero-downtime canary rollouts.",
-    x: -860,
-    y: -640,
-    z: -200,
-    camTarget: { x: -860, y: -640, z: 500 },
+    x: -1050,
+    y: -160,
+    z: -20,
+    camTarget: { x: -1050, y: -160, z: 500 },
     cluster: "stack",
     tags: ["Kubernetes", "PostgreSQL", "Redis", "Terraform", "Envoy"],
     metrics: [
@@ -214,7 +214,7 @@ module "edge_k8s_mesh" {
   vpc_cni_addon      = "true"
 }`,
   },
-  // Cluster D: Dossier & Terminal Uplink (Elevated in light)
+  // Cluster D: Dossier & Terminal Uplink (Crown Flank, Clear of Center Hero Statement)
   {
     id: "dossier",
     title: "Engineer Dossier & Identity",
@@ -223,10 +223,10 @@ module "edge_k8s_mesh" {
     badgeColor: "lime",
     subsystemType: "identity",
     desc: "Full-Stack & Systems Engineer specializing in distributed infrastructure, high-throughput pipelines, and hardware-accelerated interfaces.",
-    x: 0,
-    y: 800,
-    z: 80,
-    camTarget: { x: 0, y: 800, z: 580 },
+    x: 800,
+    y: 230,
+    z: 20,
+    camTarget: { x: 800, y: 230, z: 520 },
     cluster: "dossier",
     tags: ["Distributed Systems", "WebGL", "Rust", "TypeScript", "Performance"],
     metrics: [

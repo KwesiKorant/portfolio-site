@@ -216,6 +216,40 @@ export function playCardHover(): void {
 }
 
 /**
+ * Resonant acoustic/holographic sonar contact ping when a card beam strikes the ground plane
+ */
+export function playGroundContactPing(color?: "lime" | "cyan" | "emerald"): void {
+  if (isMuted) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  const freq = color === "cyan" ? 1174.66 : color === "emerald" ? 987.77 : 1318.51;
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(freq, now);
+  osc.frequency.exponentialRampToValueAtTime(freq * 0.55, now + 0.12);
+
+  filter.type = "bandpass";
+  filter.frequency.setValueAtTime(freq, now);
+  filter.Q.setValueAtTime(3.5, now);
+
+  gain.gain.setValueAtTime(0.001, now);
+  gain.gain.linearRampToValueAtTime(0.032, now + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.13);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(now);
+  osc.stop(now + 0.14);
+}
+
+/**
  * Futuristic ascending double-chime on copy snippet or action success
  */
 export function playCopySuccess(): void {
@@ -244,3 +278,62 @@ export function playCopySuccess(): void {
     osc.stop(t + 0.15);
   });
 }
+
+/**
+ * Deep sub-bass dimensional breach boom when emerging from or entering the portal warp
+ */
+export function playDimensionalBoom(direction: "enter" | "exit" = "enter"): void {
+  if (isMuted) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+
+  const now = ctx.currentTime;
+
+  // Sub-bass heavy seismic pulse
+  const subOsc = ctx.createOscillator();
+  const subGain = ctx.createGain();
+  const subFilter = ctx.createBiquadFilter();
+
+  subOsc.type = "sine";
+  if (direction === "enter") {
+    subOsc.frequency.setValueAtTime(38, now);
+    subOsc.frequency.exponentialRampToValueAtTime(110, now + 0.18);
+    subOsc.frequency.exponentialRampToValueAtTime(28, now + 1.1);
+  } else {
+    subOsc.frequency.setValueAtTime(110, now);
+    subOsc.frequency.exponentialRampToValueAtTime(45, now + 0.4);
+    subOsc.frequency.exponentialRampToValueAtTime(25, now + 1.0);
+  }
+
+  subFilter.type = "lowpass";
+  subFilter.frequency.setValueAtTime(280, now);
+  subFilter.frequency.exponentialRampToValueAtTime(180, now + 0.8);
+
+  subGain.gain.setValueAtTime(0.001, now);
+  subGain.gain.linearRampToValueAtTime(0.24, now + 0.08);
+  subGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+  subOsc.connect(subFilter);
+  subFilter.connect(subGain);
+  subGain.connect(ctx.destination);
+
+  // Harmonic spatial breach shimmer
+  const shimmerOsc = ctx.createOscillator();
+  const shimmerGain = ctx.createGain();
+  shimmerOsc.type = "triangle";
+  shimmerOsc.frequency.setValueAtTime(direction === "enter" ? 340 : 680, now);
+  shimmerOsc.frequency.exponentialRampToValueAtTime(direction === "enter" ? 880 : 220, now + 0.35);
+
+  shimmerGain.gain.setValueAtTime(0.001, now);
+  shimmerGain.gain.linearRampToValueAtTime(0.08, now + 0.06);
+  shimmerGain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+
+  shimmerOsc.connect(shimmerGain);
+  shimmerGain.connect(ctx.destination);
+
+  subOsc.start(now);
+  shimmerOsc.start(now);
+  subOsc.stop(now + 1.25);
+  shimmerOsc.stop(now + 0.52);
+}
+

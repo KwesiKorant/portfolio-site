@@ -1,10 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 export const FinaleSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
+  const containerRef = useRef<HTMLElement | null>(null);
+  const [isInView, setIsInView] = useState(false);
   const email = "kwesi@engineer.design";
+
+  // Viewport Culling: Pause continuous CSS animations when off-screen
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleCopyEmail = () => {
     navigator.clipboard.writeText(email).then(() => {
@@ -24,77 +42,244 @@ export const FinaleSection: React.FC = () => {
 
   return (
     <footer
+      ref={containerRef}
       id="section-finale"
       className="relative w-full min-h-[100dvh] flex flex-col justify-between py-12 md:py-16 px-6 sm:px-10 md:px-16 lg:px-24 bg-[#050508] select-none [contain:layout_style_paint] overflow-hidden"
-      aria-label="Engineer Dossier & Finale"
+      aria-label="Engineer Dossier & Terminal Finale"
     >
-      {/* Compact Wavy Mesh Grid Background (Curvy wave lines repeating densely edge-to-edge) */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <svg
-          className="w-full h-full opacity-65"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern
-              id="wavy-cyber-grid"
-              width="28"
-              height="28"
-              patternUnits="userSpaceOnUse"
-            >
-              {/* Horizontal sinusoidal wave line (Curvy like waves/ripples) */}
-              <path
-                d="M 0 14 Q 7 7 14 14 T 28 14"
-                fill="none"
-                stroke="rgba(204, 255, 0, 0.40)"
-                strokeWidth="0.85"
-              />
-              {/* Vertical sinusoidal wave line */}
-              <path
-                d="M 14 0 Q 7 7 14 14 T 14 28"
-                fill="none"
-                stroke="rgba(140, 200, 255, 0.28)"
-                strokeWidth="0.75"
-              />
-            </pattern>
-            {/* Smooth radial vignette */}
-            <radialGradient id="wavy-fade" cx="50%" cy="40%" r="75%">
-              <stop offset="0%" stopColor="#fff" stopOpacity="1" />
-              <stop offset="65%" stopColor="#fff" stopOpacity="0.85" />
-              <stop offset="100%" stopColor="#fff" stopOpacity="0.25" />
-            </radialGradient>
-            <mask id="wavy-grid-mask">
-              <rect width="100%" height="100%" fill="url(#wavy-fade)" />
-            </mask>
-          </defs>
-          <rect
-            width="100%"
-            height="100%"
-            fill="url(#wavy-cyber-grid)"
-            mask="url(#wavy-grid-mask)"
-          />
-        </svg>
+      {/* Dynamic Multi-Directional Wavy Keyframes (Zero-Reflow Compositor Only) */}
+      <style>{`
+        @keyframes waveFlowSE {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(64px, 64px, 0); }
+        }
+        @keyframes waveFlowSW {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-64px, 64px, 0); }
+        }
+        @keyframes waveFlowNW {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-64px, -64px, 0); }
+        }
+        @keyframes waveFlowNE {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(64px, -64px, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .anim-wave-se, .anim-wave-sw, .anim-wave-nw, .anim-wave-ne {
+            animation: none !important;
+          }
+        }
+      `}</style>
 
-        {/* Ambient bottom depth fade */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#050508]/90 pointer-events-none" />
+      {/* Multi-Directional Wavy Cyber Mesh Background with Seamless Alpha Blend from Stage 04 */}
+      <div
+        className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+        style={{
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.35) 90px, black 220px, black 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.35) 90px, black 220px, black 100%)",
+        }}
+      >
+        {/* Layer 1: South-East Drifting Waves (Electric Lime Flow) */}
+        <div
+          className="absolute -inset-16 anim-wave-se opacity-40"
+          style={{
+            animation: "waveFlowSE 18s linear infinite",
+            animationPlayState: isInView ? "running" : "paused",
+            willChange: "transform",
+          }}
+        >
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="wavy-layer-se"
+                width="32"
+                height="32"
+                patternUnits="userSpaceOnUse"
+              >
+                {/* Horizontal wave line */}
+                <path
+                  d="M 0 16 Q 8 8 16 16 T 32 16"
+                  fill="none"
+                  stroke="rgba(204, 255, 0, 0.40)"
+                  strokeWidth="0.85"
+                />
+                {/* Vertical wave line */}
+                <path
+                  d="M 16 0 Q 8 8 16 16 T 16 32"
+                  fill="none"
+                  stroke="rgba(204, 255, 0, 0.22)"
+                  strokeWidth="0.75"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#wavy-layer-se)" />
+          </svg>
+        </div>
+
+        {/* Layer 2: South-West Drifting Counter-Waves (Cyan / Ice Cross-Current) */}
+        <div
+          className="absolute -inset-16 anim-wave-sw opacity-35"
+          style={{
+            animation: "waveFlowSW 24s linear infinite",
+            animationPlayState: isInView ? "running" : "paused",
+            willChange: "transform",
+          }}
+        >
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="wavy-layer-sw"
+                width="32"
+                height="32"
+                patternUnits="userSpaceOnUse"
+              >
+                {/* Inverse phase horizontal wave */}
+                <path
+                  d="M 0 16 Q 8 24 16 16 T 32 16"
+                  fill="none"
+                  stroke="rgba(140, 210, 255, 0.30)"
+                  strokeWidth="0.75"
+                />
+                {/* Inverse phase vertical wave */}
+                <path
+                  d="M 16 0 Q 24 8 16 16 T 16 32"
+                  fill="none"
+                  stroke="rgba(140, 210, 255, 0.20)"
+                  strokeWidth="0.7"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#wavy-layer-sw)" />
+          </svg>
+        </div>
+
+        {/* Layer 3: North-West Drifting Wave (Subtle Emerald Under-current) */}
+        <div
+          className="absolute -inset-16 anim-wave-nw opacity-25"
+          style={{
+            animation: "waveFlowNW 28s linear infinite",
+            animationPlayState: isInView ? "running" : "paused",
+            willChange: "transform",
+          }}
+        >
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="wavy-layer-nw"
+                width="32"
+                height="32"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M 0 16 Q 8 10 16 16 T 32 16"
+                  fill="none"
+                  stroke="rgba(52, 211, 153, 0.28)"
+                  strokeWidth="0.7"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#wavy-layer-nw)" />
+          </svg>
+        </div>
+
+        {/* Layer 4: North-East Drifting Swell (Translucent Ambient Highlight) */}
+        <div
+          className="absolute -inset-16 anim-wave-ne opacity-20"
+          style={{
+            animation: "waveFlowNE 34s linear infinite",
+            animationPlayState: isInView ? "running" : "paused",
+            willChange: "transform",
+          }}
+        >
+          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern
+                id="wavy-layer-ne"
+                width="32"
+                height="32"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M 0 16 Q 16 6 32 16"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.22)"
+                  strokeWidth="0.65"
+                />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#wavy-layer-ne)" />
+          </svg>
+        </div>
+
+        {/* Deep bottom grounding fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050508]/40 to-[#030305]/95 pointer-events-none" />
       </div>
 
-      {/* Broad Blending Light Glow: Seeping from the top into the stage, extending deep onto the page */}
-      <div className="absolute -top-36 left-1/2 -translate-x-1/2 w-[1900px] max-w-[98vw] h-[800px] bg-[radial-gradient(ellipse_at_top,rgba(204,255,0,0.22)_0%,rgba(204,255,0,0.08)_38%,rgba(140,200,255,0.035)_60%,transparent_82%)] pointer-events-none z-0" />
+      {/* Vertical Tunnel Light Shaft (Volumetric downlight from overhead tunnel, scaled +15% wider and +25% longer) */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[994px] max-w-[96vw] h-[990px] pointer-events-none z-0 overflow-visible">
+        {/* Overhead tunnel mouth / aperture rim */}
+        <div className="absolute -top-[55px] left-1/2 -translate-x-1/2 w-[414px] sm:w-[524px] h-[50px] rounded-[100%] bg-black/85 border border-accent-lime/20 shadow-[0_4px_28px_rgba(204,255,0,0.18)]" />
+        <div className="absolute -top-[45px] left-1/2 -translate-x-1/2 w-[332px] sm:w-[414px] h-[25px] rounded-[100%] bg-accent-lime/20 blur-md" />
+        <div className="absolute -top-[39px] left-1/2 -translate-x-1/2 w-[180px] sm:w-[235px] h-[14px] rounded-[100%] bg-white/40 blur-sm" />
 
-      {/* Extended vertical ambient light wash extending ~550px down from the top edge */}
-      <div className="absolute top-0 inset-x-0 h-[560px] bg-gradient-to-b from-accent-lime/[0.10] via-accent-lime/[0.03] to-transparent pointer-events-none z-0" />
+        {/* Volumetric Vertical Light Column (Organic Gaussian falloff, zero hard cutoffs) */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[718px] sm:w-[856px] h-[935px]"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 85% at 50% 0%, rgba(204,255,0,0.13) 0%, rgba(204,255,0,0.05) 45%, rgba(204,255,0,0.01) 72%, transparent 90%)",
+            maskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.5) 75%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.5) 75%, transparent 100%)",
+          }}
+        />
 
-      {/* Top Border Blending Hairline */}
-      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-accent-lime/65 to-transparent pointer-events-none z-[1]" />
+        {/* Inner focused vertical light column */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[360px] sm:w-[442px] h-[770px]"
+          style={{
+            background:
+              "radial-gradient(ellipse 45% 90% at 50% 0%, rgba(220,255,100,0.16) 0%, rgba(204,255,0,0.06) 45%, transparent 80%)",
+            filter: "blur(24px)",
+          }}
+        />
 
-      {/* Secondary ambient depth aura in center */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[600px] bg-[radial-gradient(ellipse_at_center,rgba(204,255,0,0.05)_0%,transparent_70%)] pointer-events-none z-0" />
+        {/* Core tunnel downlight ray */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[152px] sm:w-[207px] h-[578px]"
+          style={{
+            background:
+              "radial-gradient(ellipse 50% 90% at 50% 0%, rgba(255,255,255,0.20) 0%, rgba(204,255,0,0.08) 50%, transparent 85%)",
+            filter: "blur(16px)",
+          }}
+        />
 
-      {/* Top Header Strip: Directly on the page */}
+        {/* Subtle vertical atmospheric streaks */}
+        <div
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[470px] sm:w-[580px] h-[688px] opacity-35 mix-blend-screen"
+          style={{
+            background:
+              "repeating-linear-gradient(90deg, transparent 0px, transparent 18px, rgba(204,255,0,0.04) 18px, rgba(204,255,0,0.04) 22px, transparent 22px, transparent 40px)",
+            maskImage:
+              "radial-gradient(ellipse 50% 80% at 50% 0%, black 15%, transparent 80%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 50% 80% at 50% 0%, black 15%, transparent 80%)",
+          }}
+        />
+      </div>
+
+      {/* Tiny top blend: eliminates the hard line page cut at the top middle where the Vertical Tunnel Light Shaft appears */}
+      <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#050508] via-[#050508]/80 to-transparent pointer-events-none z-[1]" />
+
+      {/* Top Header Bar: Cleanly anchored directly on the page */}
       <div className="relative z-10 flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-white/10 w-full">
         <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00]" />
-          <span>STAGE 05 // SYSTEM TRANSMISSION &amp; DOSSIER</span>
+          <span>STAGE 05 // TERMINAL DOSSIER &amp; TRANSMISSION</span>
         </div>
         <div className="flex gap-2 font-mono text-[10px]">
           <button
@@ -112,7 +297,7 @@ export const FinaleSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Content Body: Fully structured page layout */}
+      {/* Main Content Body */}
       <div className="relative z-10 w-full max-w-5xl my-auto py-8 md:py-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-6 backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
@@ -178,15 +363,33 @@ export const FinaleSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Footer Bottom Strip: Directly on the page */}
-      <div className="relative z-10 flex flex-col sm:flex-row justify-between items-center gap-3 pt-6 border-t border-white/10 w-full font-mono text-[10px] text-zinc-500">
-        <div>&copy; 2026 KWESI &bull; ALL RIGHTS RESERVED</div>
-        <div className="flex items-center gap-3">
-          <span>THREE.JS ENGINE</span>
-          <span>&bull;</span>
-          <span>NEXT.JS APP ROUTER</span>
-          <span>&bull;</span>
-          <span>ALL-INTRA KINEMATICS</span>
+      {/* Grounded Terminal Footer Strip (Definitive End of Site) */}
+      <div className="relative z-10 w-full pt-8 border-t border-white/10 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 font-mono text-[10px]">
+          <div className="flex items-center gap-2 text-zinc-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-ping" />
+            <span className="text-zinc-300">STATUS: ALL CHANNELS NOMINAL // END OF TRANSMISSION</span>
+          </div>
+          <button
+            onClick={handleBackToTop}
+            className="cursor-pointer group flex items-center gap-2 text-zinc-400 hover:text-accent-lime transition-colors"
+          >
+            <span>RETURN TO TOP</span>
+            <span className="text-xs group-hover:-translate-y-0.5 transition-transform">&uarr;</span>
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 font-mono text-[10px] text-zinc-500">
+          <div>&copy; 2026 KWESI &bull; ALL RIGHTS RESERVED</div>
+          <div className="flex items-center flex-wrap gap-3">
+            <span>THREE.JS WEBGL</span>
+            <span>&bull;</span>
+            <span>NEXT.JS 15</span>
+            <span>&bull;</span>
+            <span>120 FPS ZERO REFLOW</span>
+            <span>&bull;</span>
+            <span>ALL-INTRA KINEMATICS</span>
+          </div>
         </div>
       </div>
     </footer>

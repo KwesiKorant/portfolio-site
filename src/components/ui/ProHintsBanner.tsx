@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { PRO_HINTS } from "@/data/nodeGraph";
 
@@ -30,16 +32,18 @@ export const ProHintsBanner: React.FC<ProHintsBannerProps> = ({
       role="button"
       tabIndex={0}
     >
-      <span className="text-accent-lime text-[14px]">&#9889;</span>
+      <span className="text-accent-lime text-[13px]">&#10022;</span>
       <span className="text-zinc-300" id="hint-text">
         {temporaryHint ? (
-          <strong className="text-white font-bold tracking-wide">{temporaryHint}</strong>
+          <strong className="text-white font-bold tracking-wide">
+            {temporaryHint}
+          </strong>
         ) : (
           <>
             <strong className="text-white font-semibold">PRO HINT:</strong>{" "}
             {currentHint.split(" ").map((word, idx) => {
               if (
-                word === "SPACE" ||
+                word === "0" ||
                 word === "1" ||
                 word === "5" ||
                 word === "RADAR" ||
