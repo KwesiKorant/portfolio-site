@@ -220,11 +220,11 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
                   <span>INTERACTIVE X-RAY LENS &bull; MOVE CURSOR TO REVEAL</span>
                 </div>
-                <h1 className="font-display text-4xl md:text-7xl font-bold tracking-tighter text-white mb-4">
-                  KWESI
+                <h1 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-4">
+                  KWESI ANKOMAH-KORANTENG
                 </h1>
                 <p className="font-sans text-base md:text-xl text-zinc-300 max-w-xl mx-auto leading-relaxed">
-                  Design Engineer &amp; Creative Technologist crafting tactile web experiences and hardware-accelerated interfaces.
+                  Design Engineer &amp; Creative Technologist crafting tactile, hardware-accelerated web experiences and resilient product systems.
                 </p>
               </div>
             </div>
@@ -237,7 +237,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
         <div className="flex items-center gap-3">
           <span className="w-2 h-2 rounded-full bg-accent-lime shadow-[0_0_10px_#ccff00]" />
           <span className="font-mono text-xs tracking-widest uppercase font-semibold text-zinc-200">
-            KWESI // PORTFOLIO 2026
+            KWESI ANKOMAH-KORANTENG // DESIGN ENGINEER
           </span>
         </div>
         <div className="font-mono text-[11px] text-zinc-400 border border-white/12 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-md">

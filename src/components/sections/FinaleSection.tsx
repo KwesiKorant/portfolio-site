@@ -6,7 +6,7 @@ export const FinaleSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const containerRef = useRef<HTMLElement | null>(null);
   const [isInView, setIsInView] = useState(false);
-  const email = "kwesi@engineer.design";
+  const email = "junykorant@gmail.com";
 
   // Viewport Culling: Pause continuous CSS animations when off-screen
   useEffect(() => {
@@ -301,15 +301,15 @@ export const FinaleSection: React.FC = () => {
       <div className="relative z-10 w-full max-w-5xl my-auto py-8 md:py-14">
         <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-6 backdrop-blur-sm">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
-          <span>DIRECT CONTACT // AVAILABILITY: IMMEDIATE</span>
+          <span>DIRECT CONTACT // OPEN FOR DESIGN ENGINEERING ROLES</span>
         </div>
 
         <h2 className="font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.12]">
-          Bridging creative engineering &amp; high-performance systems.
+          Bridging tactile design engineering &amp; scalable software.
         </h2>
 
         <p className="font-sans text-sm sm:text-base md:text-lg text-zinc-300 leading-relaxed max-w-3xl mb-10">
-          Specializing in hardware-accelerated web experiences, 120 FPS compositor architecture, and spatial interface engineering. Available for design engineering roles, technical advisory, and high-impact creative builds.
+          Kwesi Ankomah-Koranteng &mdash; Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems, and university technologist. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
         </p>
 
         {/* Tactile Action Hub */}
@@ -328,29 +328,47 @@ export const FinaleSection: React.FC = () => {
           </button>
 
           <a
-            href="https://github.com"
+            href="https://wa.me/233204563873"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-5 py-3 rounded-xl font-mono text-xs text-zinc-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/12 hover:border-white/25 transition-all cursor-pointer backdrop-blur-sm"
+            className="px-5 py-3 rounded-xl font-mono text-xs text-zinc-300 hover:text-white bg-white/[0.03] hover:bg-emerald-500/10 border border-white/12 hover:border-emerald-400/50 transition-all cursor-pointer backdrop-blur-sm flex items-center gap-2"
           >
-            GITHUB ↗
+            <span className="text-emerald-400">💬</span>
+            <span>WHATSAPP ↗</span>
           </a>
 
           <a
-            href="https://linkedin.com"
+            href="https://www.linkedin.com/in/kaykorant"
             target="_blank"
             rel="noopener noreferrer"
             className="px-5 py-3 rounded-xl font-mono text-xs text-zinc-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/12 hover:border-white/25 transition-all cursor-pointer backdrop-blur-sm"
           >
             LINKEDIN ↗
           </a>
+
+          <a
+            href="https://github.com/KwesiKorant"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-5 py-3 rounded-xl font-mono text-xs text-zinc-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.08] border border-white/12 hover:border-white/25 transition-all cursor-pointer backdrop-blur-sm"
+          >
+            GITHUB ↗
+          </a>
         </div>
 
         {/* Technical System Footprint Grid */}
         <div className="p-4 sm:p-5 rounded-2xl bg-black/60 border border-white/10 font-mono text-[10px] text-zinc-400 space-y-2.5 backdrop-blur-md max-w-2xl">
           <div className="flex justify-between flex-wrap gap-2">
-            <span className="text-zinc-500">SECURITY // PGP:</span>
-            <span className="text-zinc-300 font-mono">4A7F 90B2 C811 09E4 22D1</span>
+            <span className="text-zinc-500">ENGINEER:</span>
+            <span className="text-zinc-200 font-mono">KWESI ANKOMAH-KORANTENG</span>
+          </div>
+          <div className="flex justify-between flex-wrap gap-2">
+            <span className="text-zinc-500">TARGET ROLE:</span>
+            <span className="text-accent-lime font-mono">DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
+          </div>
+          <div className="flex justify-between flex-wrap gap-2">
+            <span className="text-zinc-500">STARTUP // ROLE:</span>
+            <span className="text-zinc-300 font-mono">ARCFIELD SYSTEMS // CO-FOUNDER &amp; CTO</span>
           </div>
           <div className="flex justify-between flex-wrap gap-2">
             <span className="text-zinc-500">COMPOSITOR STANDARD:</span>
@@ -358,7 +376,7 @@ export const FinaleSection: React.FC = () => {
           </div>
           <div className="flex justify-between flex-wrap gap-2">
             <span className="text-zinc-500">LOCATION:</span>
-            <span className="text-zinc-300">REMOTE // WORLDWIDE INGRESS</span>
+            <span className="text-zinc-300">GHANA // WORLDWIDE REMOTE</span>
           </div>
         </div>
       </div>
@@ -380,7 +398,7 @@ export const FinaleSection: React.FC = () => {
         </div>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 font-mono text-[10px] text-zinc-500">
-          <div>&copy; 2026 KWESI &bull; ALL RIGHTS RESERVED</div>
+          <div>&copy; 2026 KWESI ANKOMAH-KORANTENG &bull; ALL RIGHTS RESERVED</div>
           <div className="flex items-center flex-wrap gap-3">
             <span>THREE.JS WEBGL</span>
             <span>&bull;</span>

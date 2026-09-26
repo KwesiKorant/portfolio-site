@@ -11,13 +11,13 @@ interface ProjectDrawerProps {
 
 function PipelineDiagram({ type }: { type?: SubsystemType }) {
   const stepsMap: Record<string, string[]> = {
-    router: ["Client IP", "Edge Worker", "Token Bucket", "Upstream Peer"],
-    stream: ["Producer", "Kafka Partition", "Ring Buffer", "48k WS Sockets"],
-    vectordb: ["Raw Vector", "HNSW Index", "AVX-512 SIMD", "Top-K Matrix"],
-    crdt: ["Local Write", "Automerge LWW", "WebRTC Mesh", "State Converged"],
-    ebpf: ["Userspace Call", "kprobe/tcp", "eBPF Verifier", "Ring Buffer"],
-    cluster: ["Ingress Controller", "Envoy Sidecar", "Pod Replica", "Postgres Primary"],
-    identity: ["Client Request", "GPG Verification", "Dossier Registry", "SLA 99.99%"],
+    router: ["Inventory Ingress", "Material Costing", "P&L Engine", "Audit Report"],
+    stream: ["3D Camera", "Perspective Math", "Zero-Reflow DOM", "Spatial Audio"],
+    vectordb: ["Merchant Store", "Catalog Index", "Geo Ingress", "Consumer Discovery"],
+    crdt: ["Pet Profile", "Vaccine Scheduler", "Clinical History", "Care Commerce"],
+    ebpf: ["Order Ingress", "Real-Time Bus", "Kitchen Display", "Pickup Alert"],
+    cluster: ["Type Contract", "Component Tree", "API Route", "Relational DB"],
+    identity: ["Design Engineer", "Co-Founder & CTO", "120 FPS Standard", "Ghana / Remote"],
   };
 
   const steps = (type && stepsMap[type]) || ["Ingress", "Processor", "Buffer", "Destination"];
@@ -109,15 +109,55 @@ export const ProjectDrawer: React.FC<ProjectDrawerProps> = ({
         <h2 className="font-display text-2xl font-bold text-white mb-3 tracking-tight">
           {node.title}
         </h2>
-        <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-lime/10 border border-accent-lime/40 rounded-md text-accent-lime font-mono text-[11px] mb-6 self-start shadow-sm">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-lime/10 border border-accent-lime/40 rounded-md text-accent-lime font-mono text-[11px] mb-3 self-start shadow-sm">
           <span className="status-pulse" />
           <span className="font-medium">{node.badge || "ONLINE"}</span>
         </div>
+
+        {node.role && (
+          <div className="flex items-center gap-2 mb-4 font-mono text-[11px] text-zinc-300 bg-white/[0.04] border border-white/10 px-3 py-1.5 rounded-lg">
+            <span className="text-zinc-500 font-semibold">ROLE //</span>
+            <span className="text-accent-lime font-medium">{node.role}</span>
+          </div>
+        )}
 
         {node.desc && (
           <p className="font-sans text-[13px] leading-relaxed text-zinc-300 mb-6">
             {node.desc}
           </p>
+        )}
+
+        {/* Structured Case Study Sections */}
+        {(node.problem || node.solution || node.impact) && (
+          <div className="space-y-3 mb-6">
+            {node.problem && (
+              <div className="p-3.5 rounded-xl bg-red-950/20 border border-red-500/20 text-[12px] leading-relaxed">
+                <div className="font-mono text-[9px] uppercase tracking-wider text-red-400 font-semibold mb-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                  THE PROBLEM &amp; CHALLENGE
+                </div>
+                <p className="text-zinc-300 font-sans leading-relaxed">{node.problem}</p>
+              </div>
+            )}
+            {node.solution && (
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 text-[12px] leading-relaxed">
+                <div className="font-mono text-[9px] uppercase tracking-wider text-emerald-400 font-semibold mb-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  ENGINEERING &amp; ARCHITECTURAL SOLUTION
+                </div>
+                <p className="text-zinc-300 font-sans leading-relaxed">{node.solution}</p>
+              </div>
+            )}
+            {node.impact && (
+              <div className="p-3.5 rounded-xl bg-accent-lime/10 border border-accent-lime/25 text-[12px] leading-relaxed">
+                <div className="font-mono text-[9px] uppercase tracking-wider text-accent-lime font-semibold mb-1 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-lime" />
+                  MEASURABLE OUTCOME &amp; IMPACT
+                </div>
+                <p className="text-zinc-200 font-sans leading-relaxed">{node.impact}</p>
+              </div>
+            )}
+          </div>
         )}
 
         {/* Dynamic Architectural Pipeline Diagram */}
@@ -187,19 +227,41 @@ export const ProjectDrawer: React.FC<ProjectDrawerProps> = ({
         )}
       </div>
 
-      <div className="flex gap-3 mt-auto pt-5 border-t border-white/10">
-        <button
-          className="flex-1 py-3 px-4 rounded-lg font-mono text-[11px] tracking-wider text-center cursor-pointer bg-accent-lime hover:bg-[#b5e600] text-black font-bold border border-accent-lime shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
-          onClick={handleSurge}
-        >
-          PULSE NETWORK
-        </button>
-        <button
-          className="flex-1 py-3 px-4 rounded-lg font-mono text-[11px] tracking-wider text-center cursor-pointer bg-white/[0.05] hover:bg-white/[0.1] hover:border-accent-lime/40 text-zinc-200 border border-white/15 transition-all shadow-sm"
-          onClick={handleClose}
-        >
-          BACK TO SPACE
-        </button>
+      <div className="flex flex-col gap-2 mt-auto pt-5 border-t border-white/10">
+        <div className="flex gap-2 font-mono text-[10px]">
+          <a
+            href="https://wa.me/233204563873"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-2 px-3 rounded-lg text-center cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/12 transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>WHATSAPP</span>
+            <span className="text-accent-lime">&rarr;</span>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/kaykorant"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-2 px-3 rounded-lg text-center cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/12 transition-all flex items-center justify-center gap-1.5"
+          >
+            <span>LINKEDIN</span>
+            <span className="text-accent-lime">&rarr;</span>
+          </a>
+        </div>
+        <div className="flex gap-2">
+          <button
+            className="flex-1 py-2.5 px-4 rounded-lg font-mono text-[11px] tracking-wider text-center cursor-pointer bg-accent-lime hover:bg-[#b5e600] text-black font-bold border border-accent-lime shadow-[0_0_20px_rgba(204,255,0,0.2)] transition-all"
+            onClick={handleSurge}
+          >
+            PULSE NETWORK
+          </button>
+          <button
+            className="flex-1 py-2.5 px-4 rounded-lg font-mono text-[11px] tracking-wider text-center cursor-pointer bg-white/[0.05] hover:bg-white/[0.1] hover:border-accent-lime/40 text-zinc-200 border border-white/15 transition-all shadow-sm"
+            onClick={handleClose}
+          >
+            BACK TO SPACE
+          </button>
+        </div>
       </div>
     </aside>
   );

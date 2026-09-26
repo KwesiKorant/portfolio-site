@@ -73,22 +73,22 @@ function HighlightedCode({ code }: { code: string }) {
 
 function PipelineDiagram({ type }: { type?: SubsystemType }) {
   const stepsMap: Record<string, string[]> = {
-    router: ["Client IP", "Edge Worker", "Token Bucket", "Upstream Peer"],
-    stream: ["Producer", "Kafka Partition", "Ring Buffer", "48k WS Sockets"],
-    vectordb: ["Raw Vector", "HNSW Index", "AVX-512 SIMD", "Top-K Matrix"],
-    crdt: ["Local Write", "Automerge LWW", "WebRTC Mesh", "State Converged"],
-    ebpf: ["Userspace Call", "kprobe/tcp", "eBPF Verifier", "Ring Buffer"],
+    router: ["Inventory Ingress", "Material Costing", "P&L Engine", "Audit Report"],
+    stream: ["3D Camera", "Perspective Math", "Zero-Reflow DOM", "Spatial Audio"],
+    vectordb: ["Merchant Store", "Catalog Index", "Geo Ingress", "Consumer Discovery"],
+    crdt: ["Pet Profile", "Vaccine Scheduler", "Clinical History", "Care Commerce"],
+    ebpf: ["Order Ingress", "Real-Time Bus", "Kitchen Display", "Pickup Alert"],
     cluster: [
-      "Ingress Controller",
-      "Envoy Sidecar",
-      "Pod Replica",
-      "Postgres Primary",
+      "Type Contract",
+      "Component Tree",
+      "API Route",
+      "Relational DB",
     ],
     identity: [
-      "Client Request",
-      "GPG Verification",
-      "Dossier Registry",
-      "SLA 99.99%",
+      "Design Engineer",
+      "Co-Founder & CTO",
+      "120 FPS Standard",
+      "Ghana / Remote",
     ],
   };
 

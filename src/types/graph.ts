@@ -33,10 +33,16 @@ export interface NodeData {
     z: number;
   };
   cluster: ClusterType;
+  role?: string;
+  problem?: string;
+  solution?: string;
+  impact?: string;
   tags?: string[];
   metrics?: MetricItem[];
   code?: string;
   externalLink?: string;
+  liveUrl?: string;
+  githubUrl?: string;
 }
 
 export interface ProjectedPosition {
