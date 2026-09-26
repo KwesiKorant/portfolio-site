@@ -34,7 +34,7 @@ export const NODE_GRAPH: NodeData[] = [
     camTarget: { x: 0, y: 80, z: DEFAULT_CAMERA_Z },
     cluster: "root",
     role: "Design Engineer & Creative Technologist",
-    desc: "Ghanaian software engineer, startup co-founder (Arcfield Systems), and university technologist crafting tactile, hardware-accelerated web experiences and scalable product architectures.",
+    desc: "Ghanaian software engineer and startup co-founder (Arcfield Systems) crafting tactile, hardware-accelerated web experiences and scalable product architectures.",
   },
   // Cluster A: Systems & Client Work (Left Flank - 3 Distinct Non-Overlapping Columns)
   {
@@ -77,6 +77,26 @@ export function calculateFurnitureMargin(item: FurnitureProduct): MarginAudit {
     isHighVelocity: item.monthlyUnitsSold > 20
   };
 }`,
+    screenshots: [
+      {
+        url: "/projects/nayak/nayak-dashboard-light.webp",
+        title: "Active Production Builds & Catalog Window",
+        caption: "Custom furniture production dashboard allowing staff to initiate builds, catalog product specs, and manage active workshop pipelines.",
+        badge: "LIGHT UI",
+      },
+      {
+        url: "/projects/nayak/nayak-dashboard-dark.webp",
+        title: "Completed Builds & Archive Ledger",
+        caption: "Historical build timeline organized by year and month, tracking completed furniture batches with folderized inventory status.",
+        badge: "DARK UI",
+      },
+      {
+        url: "/projects/nayak/nayak-reports-analytics.webp",
+        title: "Financial Analytics & P&L Trends (GH₵)",
+        caption: "Automated financial breakdown reporting total expected revenue, net profit, average margin, and monthly profit curve in Ghanaian Cedis (GH₵).",
+        badge: "ANALYTICS ENGINE",
+      },
+    ],
   },
   {
     id: "event-stream",
@@ -267,7 +287,7 @@ export interface ProductionSystem<TConfig> {
     badgeColor: "lime",
     subsystemType: "identity",
     role: "Design Engineer & Co-Founder",
-    desc: "Ghanaian software engineer, startup co-founder (Arcfield Systems), and university technologist. Crafts tactile, hardware-accelerated digital interfaces, 3D web experiences, and resilient business software.",
+    desc: "Ghanaian software engineer and startup co-founder (Arcfield Systems). Crafts tactile, hardware-accelerated digital interfaces, 3D web experiences, and resilient business software.",
     problem: "Modern digital products often lack either visual craftsmanship or architectural resilience. Finding engineers who operate across both spatial design engineering and production backend systems is rare.",
     solution: "Pursuing deep mechanical sympathy: combining Three.js WebGL creative frontends, strict zero-reflow CSS physics, and robust full-stack systems that solve concrete problems for real businesses.",
     impact: "Co-founded Arcfield Systems (CTO), built production ERP for Nayak Furniture, contributed to digital healthcare and food ordering platforms, and built high-performance spatial web architectures.",

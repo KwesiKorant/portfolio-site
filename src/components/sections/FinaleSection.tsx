@@ -303,7 +303,7 @@ export const FinaleSection: React.FC = () => {
         </h2>
 
         <p className="font-sans text-sm sm:text-base md:text-lg text-zinc-300 leading-relaxed max-w-3xl mb-10">
-          Kwesi Ankomah-Koranteng &mdash; Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems, and university technologist. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
+          Kwesi Ankomah-Koranteng &mdash; Ghanaian software engineer and Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
         </p>
 
         {/* Tactile Action Hub */}
@@ -377,11 +377,7 @@ export const FinaleSection: React.FC = () => {
 
       {/* Grounded Terminal Footer Strip (Definitive End of Site) */}
       <div className="relative z-10 w-full pt-8 border-t border-white/10 space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 font-mono text-[10px]">
-          <div className="flex items-center gap-2 text-zinc-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-ping" />
-            <span className="text-zinc-300">STATUS: ALL CHANNELS NOMINAL // END OF TRANSMISSION</span>
-          </div>
+        <div className="flex justify-end items-center gap-4 font-mono text-[10px]">
           <button
             onClick={handleBackToTop}
             className="cursor-pointer group flex items-center gap-2 text-zinc-400 hover:text-accent-lime transition-colors"

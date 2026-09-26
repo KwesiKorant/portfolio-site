@@ -154,10 +154,24 @@ export default function SpatialPortfolioPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFocusNode, handleExitToPortal, isGuideOpen, activeNodeId]);
 
+  const handleSelectProjectFromHero = useCallback(
+    (projectId: string) => {
+      const el = document.getElementById("section-spatial");
+      el?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        handleFocusNode(projectId);
+      }, 400);
+    },
+    [handleFocusNode]
+  );
+
   return (
     <main className="w-full min-h-screen bg-[#050508] relative">
       {/* STAGE 01: Image Reveal Hero (Cursor Spotlight Mask) */}
-      <ImageRevealHero onEnterPortal={handleEnterPortal} />
+      <ImageRevealHero
+        onEnterPortal={handleEnterPortal}
+        onSelectProject={handleSelectProjectFromHero}
+      />
 
       {/* STAGE 02: Portal Gateway (Fullscreen Fixed Cinematic Conduit Bridge) */}
       <PortalGateway

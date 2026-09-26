@@ -183,14 +183,8 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
         </header>
 
         <footer className="flex justify-between items-end gap-5">
-          <div className="font-mono text-[11px] text-zinc-400 flex flex-col gap-1.5 bg-[#0c0d14]/90 border border-white/15 px-4 py-2.5 rounded-xl backdrop-blur-md shadow-md">
-            <div>
-              <strong className="text-zinc-200 font-medium">CAMERA:</strong> 3D PERSPECTIVE WARP-DOLLY
-            </div>
-            <div>
-              <strong className="text-zinc-200 font-medium">GRAPH:</strong> 8 MULTI-DEPTH NODES &bull; ELECTRIC LIME TRACES
-            </div>
-          </div>
+          {/* Left spacer: clean view without bottom-left stage descriptions */}
+          <div className="flex-1 pointer-events-none" />
 
           {/* Center spacer: leaves bottom-center completely clear for ProHintsBanner */}
           <div className="flex-1 pointer-events-none" />

@@ -5,9 +5,14 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 interface ImageRevealHeroProps {
   onScrollNext?: () => void;
   onEnterPortal?: () => void;
+  onSelectProject?: (projectId: string) => void;
 }
 
-export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, onEnterPortal }) => {
+export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
+  onScrollNext,
+  onEnterPortal,
+  onSelectProject,
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const frontImageRef = useRef<HTMLDivElement | null>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -252,12 +257,20 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
 
         {/* Engaging Contextual Narrative */}
         <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-5">
-          Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems, and university technologist. Designing software with deep mechanical sympathy &mdash; from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
+          Ghanaian software engineer and Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy &mdash; from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
         {/* Venture & Capabilities Highlight Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-xl mb-5">
-          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+          <div
+            onClick={() => onSelectProject && onSelectProject("hyperscale")}
+            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+              onSelectProject
+                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
+                : ""
+            }`}
+            title="Inspect Arcfield Discover in 3D Dimension"
+          >
             <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               STARTUP // CTO
             </div>
@@ -269,7 +282,15 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
             </div>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+          <div
+            onClick={() => onSelectProject && onSelectProject("edge-gateway")}
+            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+              onSelectProject
+                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
+                : ""
+            }`}
+            title="Inspect Nayak Furniture ERP Screenshots & Specs"
+          >
             <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               ENTERPRISE POS
             </div>
@@ -281,7 +302,15 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
             </div>
           </div>
 
-          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+          <div
+            onClick={() => onSelectProject && onSelectProject("event-stream")}
+            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+              onSelectProject
+                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
+                : ""
+            }`}
+            title="Inspect 120 FPS Compositor Architecture"
+          >
             <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               CORE SPECIALTY
             </div>
@@ -309,16 +338,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
       </div>
 
       {/* Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6 w-full pt-12">
-        <div className="max-w-md">
-          <div className="font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-1 font-semibold">
-            01 &bull; CURSOR SPOTLIGHT
-          </div>
-          <p className="font-sans text-xs text-zinc-400 leading-relaxed">
-            Move your cursor across the portrait to peer into the digital twin schematic. Scroll down to trigger the portal transition into the 3D spatial dimension.
-          </p>
-        </div>
-
+      <div className="relative z-10 flex justify-end items-center w-full pt-8">
         <button
           onClick={() => {
             if (onEnterPortal) {
@@ -330,7 +350,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
               el?.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group cursor-pointer flex items-center gap-3 px-5 py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg"
+          className="group cursor-pointer flex items-center gap-3 px-5 py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm"
           aria-label="Scroll to Portal Section"
         >
           <span className="font-mono text-xs tracking-wider font-semibold">

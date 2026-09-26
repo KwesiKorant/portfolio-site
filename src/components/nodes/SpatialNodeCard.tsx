@@ -359,6 +359,10 @@ export const SpatialNodeCard = forwardRef<
 >(({ node, isActive, onFocusNode, onHoverConnection }, ref) => {
   const innerCardRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
+  const [activeRightTab, setActiveRightTab] = useState<"screenshots" | "code">(
+    node.screenshots && node.screenshots.length > 0 ? "screenshots" : "code"
+  );
+  const [selectedScreenshotIdx, setSelectedScreenshotIdx] = useState(0);
 
   const handleMouseEnter = useCallback(() => {
     if (isActive) return;
@@ -611,29 +615,117 @@ export const SpatialNodeCard = forwardRef<
                 )}
               </div>
 
-              {/* Right Column: Pipeline Diagram & Code Blueprint */}
-              <div className="lg:col-span-7 flex flex-col space-y-3.5">
+              {/* Right Column: Pipeline Diagram, Screenshots & Code Blueprint */}
+              <div className="lg:col-span-7 flex flex-col space-y-3">
                 {/* System Pipeline Flow */}
                 <PipelineDiagram type={node.subsystemType} />
 
-                {/* Code / Configuration Blueprint */}
-                {node.code && (
-                  <div className="flex-1 flex flex-col">
-                    <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
-                      <span className="text-zinc-300 uppercase tracking-wider font-bold">
-                        ARCHITECTURE BLUEPRINT
-                      </span>
-                      <button
-                        onClick={handleCopyCode}
-                        className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
-                      >
-                        <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
-                      </button>
-                    </div>
-                    <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-52 flex-1 font-medium shadow-inner">
-                      <HighlightedCode code={node.code} />
-                    </pre>
+                {/* Tab Switcher if Screenshots are available */}
+                {node.screenshots && node.screenshots.length > 0 && node.code && (
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                    <button
+                      onClick={() => setActiveRightTab("screenshots")}
+                      className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                        activeRightTab === "screenshots"
+                          ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                          : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
+                      }`}
+                    >
+                      <span>📸 PRODUCTION SCREENS ({node.screenshots.length})</span>
+                    </button>
+                    <button
+                      onClick={() => setActiveRightTab("code")}
+                      className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                        activeRightTab === "code"
+                          ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                          : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
+                      }`}
+                    >
+                      <span>⚡ CODE BLUEPRINT</span>
+                    </button>
                   </div>
+                )}
+
+                {/* Screenshots View */}
+                {activeRightTab === "screenshots" && node.screenshots && node.screenshots.length > 0 ? (
+                  <div className="flex-1 flex flex-col space-y-2.5">
+                    {/* Thumbnail Switcher Pills */}
+                    <div className="flex flex-wrap gap-2">
+                      {node.screenshots.map((s, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedScreenshotIdx(idx)}
+                          className={`font-mono text-[10px] px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                            selectedScreenshotIdx === idx
+                              ? "bg-accent-lime/15 border-accent-lime text-white font-semibold shadow-sm"
+                              : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-zinc-200"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              selectedScreenshotIdx === idx
+                                ? "bg-accent-lime shadow-[0_0_6px_#ccff00]"
+                                : "bg-zinc-600"
+                            }`}
+                          />
+                          <span>{s.badge || `VIEW 0${idx + 1}`}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Screenshot Display Card */}
+                    {(() => {
+                      const currentShot =
+                        node.screenshots[selectedScreenshotIdx] || node.screenshots[0];
+                      return (
+                        <div className="relative rounded-xl overflow-hidden border border-white/20 bg-black/60 shadow-lg">
+                          <picture className="w-full block aspect-[16/9] overflow-hidden bg-black/80">
+                            <img
+                              src={currentShot.url}
+                              alt={currentShot.title}
+                              className="w-full h-full object-contain object-center"
+                              loading="eager"
+                            />
+                          </picture>
+                          <div className="p-3 bg-[#0a0d17]/95 border-t border-white/10">
+                            <div className="flex items-center justify-between gap-2 mb-1">
+                              <span className="font-display text-xs font-bold text-white">
+                                {currentShot.title}
+                              </span>
+                              {currentShot.badge && (
+                                <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
+                                  {currentShot.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="font-sans text-[11px] text-zinc-300 leading-relaxed">
+                              {currentShot.caption}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                ) : (
+                  /* Code / Configuration Blueprint */
+                  node.code && (
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
+                        <span className="text-zinc-300 uppercase tracking-wider font-bold">
+                          ARCHITECTURE BLUEPRINT
+                        </span>
+                        <button
+                          onClick={handleCopyCode}
+                          className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
+                        >
+                          <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
+                        </button>
+                      </div>
+                      <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-52 flex-1 font-medium shadow-inner">
+                        <HighlightedCode code={node.code} />
+                      </pre>
+                    </div>
+                  )
                 )}
               </div>
             </div>

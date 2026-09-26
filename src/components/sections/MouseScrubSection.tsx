@@ -8,17 +8,18 @@ export const MouseScrubSection: React.FC = () => {
   const progressBarRef = useRef<HTMLDivElement | null>(null);
   const progressTextRef = useRef<HTMLSpanElement | null>(null);
   const durationTextRef = useRef<HTMLSpanElement | null>(null);
-  const stateLabelRef = useRef<HTMLDivElement | null>(null);
 
   const [duration, setDuration] = useState<number>(0);
+  const [isAutoOrbit, setIsAutoOrbit] = useState<boolean>(false);
   const cachedBounds = useRef<{ left: number; width: number } | null>(null);
-  const lastClientX = useRef<number>(-999);
+  const isInViewRef = useRef<boolean>(true);
 
   // Easing values for zero-reflow rAF loop
   const targetTimeRef = useRef<number>(0);
   const displayedTimeRef = useRef<number>(0);
   const rafId = useRef<number | null>(null);
   const isSettled = useRef<boolean>(true);
+  const autoOrbitRafId = useRef<number | null>(null);
 
   // Cache container bounds on mount and window resize
   const updateCachedBounds = useCallback(() => {
@@ -33,6 +34,27 @@ export const MouseScrubSection: React.FC = () => {
     window.addEventListener("resize", updateCachedBounds, { passive: true });
     return () => window.removeEventListener("resize", updateCachedBounds);
   }, [updateCachedBounds]);
+
+  // Viewport culling discipline: pause render loop when offscreen
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isInViewRef.current = entry.isIntersecting;
+        if (!entry.isIntersecting) {
+          if (rafId.current) cancelAnimationFrame(rafId.current);
+          if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Wait for loadedmetadata before calculating targetTime
   useEffect(() => {
@@ -52,19 +74,18 @@ export const MouseScrubSection: React.FC = () => {
       handleLoadedMetadata();
     } else {
       video.addEventListener("loadedmetadata", handleLoadedMetadata);
-      return () => video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      return () =>
+        video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     }
-  }, []);
-
-  // Cancel rAF loop on unmount
-  useEffect(() => {
-    return () => {
-      if (rafId.current) cancelAnimationFrame(rafId.current);
-    };
   }, []);
 
   // Single rAF easing loop (Direct DOM mutations, zero React state re-renders)
   const easeScrub = useCallback(() => {
+    if (!isInViewRef.current) {
+      isSettled.current = true;
+      return;
+    }
+
     const video = videoRef.current;
     if (!video || !video.duration) {
       isSettled.current = true;
@@ -93,7 +114,10 @@ export const MouseScrubSection: React.FC = () => {
     }
 
     // Update progress bar via compositor-only transform scaleX
-    const progressRatio = Math.max(0, Math.min(1, displayedTimeRef.current / video.duration));
+    const progressRatio = Math.max(
+      0,
+      Math.min(1, displayedTimeRef.current / video.duration)
+    );
     if (progressBarRef.current) {
       progressBarRef.current.style.transform = `scaleX(${progressRatio.toFixed(4)})`;
     }
@@ -102,8 +126,51 @@ export const MouseScrubSection: React.FC = () => {
     }
   }, []);
 
-  // Mousemove updates targetTime continuously with zero deadband drops (fluid at all angles and speeds)
+  // Auto-Orbit Continuous Loop
+  useEffect(() => {
+    if (!isAutoOrbit) {
+      if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+      return;
+    }
+
+    let lastTimestamp = performance.now();
+
+    const loop = (timestamp: number) => {
+      const dt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+
+      const video = videoRef.current;
+      if (video && video.duration && isInViewRef.current) {
+        // Orbit speed: full rotation every 6 seconds
+        const delta = (dt / 6) * video.duration;
+        targetTimeRef.current = (targetTimeRef.current + delta) % video.duration;
+        if (isSettled.current) {
+          isSettled.current = false;
+          rafId.current = requestAnimationFrame(easeScrub);
+        }
+      }
+
+      autoOrbitRafId.current = requestAnimationFrame(loop);
+    };
+
+    autoOrbitRafId.current = requestAnimationFrame(loop);
+    return () => {
+      if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+    };
+  }, [isAutoOrbit, easeScrub]);
+
+  // Cancel rAF loop on unmount
+  useEffect(() => {
+    return () => {
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+    };
+  }, []);
+
+  // Mousemove updates targetTime continuously with zero deadband drops
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isAutoOrbit) return; // User can click Orbit off to resume scrub
+
     const video = videoRef.current;
     if (!video || !video.duration) return;
 
@@ -117,7 +184,6 @@ export const MouseScrubSection: React.FC = () => {
     const ratio = Math.max(0, Math.min(1, mouseX / bounds.width));
     const newTarget = ratio * video.duration;
 
-    // Only skip if mouse X has not moved at all
     if (Math.abs(newTarget - targetTimeRef.current) < 0.0001) return;
 
     targetTimeRef.current = newTarget;
@@ -128,31 +194,42 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
-    updateCachedBounds();
-    lastClientX.current = e.clientX;
-    if (stateLabelRef.current) {
-      stateLabelRef.current.textContent = "STATE: ACTIVE // SCRUBBING";
+  const handleStep = (stepRatio: number) => {
+    setIsAutoOrbit(false);
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+
+    const delta = stepRatio * video.duration;
+    targetTimeRef.current = Math.max(
+      0,
+      Math.min(video.duration, targetTimeRef.current + delta)
+    );
+
+    if (isSettled.current) {
+      isSettled.current = false;
+      rafId.current = requestAnimationFrame(easeScrub);
     }
   };
 
-  const handleMouseLeave = () => {
-    if (stateLabelRef.current) {
-      stateLabelRef.current.textContent = "STATE: IDLE // MOVE MOUSE";
-    }
+  const handleToSpatialNayak = () => {
+    const el = document.getElementById("section-spatial");
+    el?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleToFinale = () => {
+    const el = document.getElementById("section-finale");
+    el?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <section
       ref={containerRef}
       id="section-scrub"
-      className="relative w-full h-[100dvh] flex flex-col justify-between p-6 md:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
+      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-6 md:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
       onMouseMove={handleMouseMove}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      aria-label="Mouse-Controlled Video Scrub"
+      aria-label="Kinetic Frame Interaction Section"
     >
-      {/* Video Element: Always Paused, Seek Only */}
+      {/* Video Element: Always Paused, Hardware Seek Only */}
       <video
         ref={videoRef}
         muted
@@ -163,23 +240,69 @@ export const MouseScrubSection: React.FC = () => {
         <source src="/turntable_scrub.mp4" type="video/mp4" />
       </video>
 
-      {/* Atmospheric Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/70 pointer-events-none z-[1]" />
+      {/* Atmospheric Vignette & Gradients */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/90 via-transparent to-transparent pointer-events-none z-[1]" />
 
-      {/* HUD Telemetry Overlay (pointer-events-none so cursor moves across it without hit-test churn) */}
-      <div className="relative z-10 max-w-md p-6 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-md shadow-2xl pointer-events-none mt-auto mb-auto">
-        <div className="font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-1 font-semibold">
-          KINETIC FRAME INTERACTION // 120 FPS
+      {/* Top Spacer */}
+      <div className="relative z-10 w-full" />
+
+      {/* Comprehensive Professional Engineering Console */}
+      <div className="relative z-10 max-w-xl p-6 md:p-8 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-xl shadow-2xl pointer-events-auto my-auto">
+        {/* Pill Tag */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+          <span>KINETIC INTERACTION ARCHITECTURE // 120 FPS</span>
         </div>
-        <h3 className="font-display text-xl font-bold text-white mb-2">
+
+        {/* Title */}
+        <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2">
           Hardware-Accelerated Frame Interpolation
-        </h3>
-        <p className="font-sans text-xs text-zinc-300 leading-relaxed mb-4">
-          Move your cursor horizontally across the screen to scrub the encoded artifact. Updates are smoothed with critically damped spring interpolation inside a single requestAnimationFrame loop.
+        </h2>
+
+        {/* Subtitle & Problem / Solution context */}
+        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
+          Engineered for tactile 360&deg; product inspection and mechanical CAD visualization without the multi-megabyte bundle overhead or GPU thermal throttling of heavy 3D WebGL meshes.
         </p>
 
+        {/* Technical Architecture Specs Grid */}
+        <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
+          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
+            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
+              COMPOSITOR TARGET
+            </span>
+            <span className="text-accent-lime font-semibold">
+              120 FPS Zero-Reflow
+            </span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
+            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
+              INPUT LATENCY
+            </span>
+            <span className="text-white font-semibold">
+              &lt; 8ms Normalized Ticker
+            </span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
+            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
+              SPRING DYNAMICS
+            </span>
+            <span className="text-white font-semibold">
+              Critically Damped (&zeta; = 1.0)
+            </span>
+          </div>
+          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
+            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
+              SEEK PIPELINE
+            </span>
+            <span className="text-accent-lime font-semibold">
+              Hardware Video Decoder
+            </span>
+          </div>
+        </div>
+
         {/* Real-time scrub gauge */}
-        <div className="space-y-1.5 font-mono text-[10px]">
+        <div className="space-y-1.5 font-mono text-[10px] mb-5">
           <div className="flex justify-between text-zinc-400">
             <span>SEEK PROGRESS:</span>
             <span ref={progressTextRef} className="text-accent-lime font-bold">
@@ -193,21 +316,68 @@ export const MouseScrubSection: React.FC = () => {
               style={{ transform: "scaleX(0)" }}
             />
           </div>
-          <div className="flex justify-between text-[9px] text-zinc-500 pt-1">
+          <div className="flex justify-between text-[9px] text-zinc-500 pt-0.5">
             <span>0.00s</span>
-            <span ref={durationTextRef}>{duration ? `${duration.toFixed(2)}s` : "4.00s"}</span>
+            <span ref={durationTextRef}>
+              {duration ? `${duration.toFixed(2)}s` : "4.00s"}
+            </span>
           </div>
+        </div>
+
+        {/* Interactive Control Deck */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+          <button
+            onClick={() => setIsAutoOrbit((prev) => !prev)}
+            className={`font-mono text-[10.5px] px-3.5 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+              isAutoOrbit
+                ? "bg-accent-lime/20 border-accent-lime text-accent-lime font-bold shadow-[0_0_12px_rgba(204,255,0,0.25)]"
+                : "bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-zinc-300 hover:text-white"
+            }`}
+          >
+            <span>{isAutoOrbit ? "■ STOP ORBIT" : "▶ AUTO-ORBIT 360°"}</span>
+          </button>
+
+          <button
+            onClick={() => handleStep(-0.05)}
+            className="font-mono text-[10.5px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-zinc-300 hover:text-white transition-all cursor-pointer"
+            title="Step back 5%"
+          >
+            &larr; STEP
+          </button>
+
+          <button
+            onClick={() => handleStep(0.05)}
+            className="font-mono text-[10.5px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-zinc-300 hover:text-white transition-all cursor-pointer"
+            title="Step forward 5%"
+          >
+            STEP &rarr;
+          </button>
+
+          <button
+            onClick={handleToSpatialNayak}
+            className="font-mono text-[10.5px] px-3 py-1.5 rounded-lg bg-accent-lime/10 hover:bg-accent-lime/20 border border-accent-lime/30 text-accent-lime transition-all cursor-pointer ml-auto flex items-center gap-1"
+          >
+            <span>NAYAK ERP SCREENS</span>
+            <span>&uarr;</span>
+          </button>
         </div>
       </div>
 
-      {/* Footer Info */}
-      <div className="relative z-20 flex justify-between items-end w-full font-mono text-[10px] text-zinc-400 pointer-events-none">
-        <div ref={stateLabelRef}>STATE: IDLE // MOVE MOUSE</div>
-        <div className="text-accent-lime font-semibold">SCROLL DOWN FOR FINALE &darr;</div>
+      {/* Footer Navigation Bar: Clean right-aligned scroll cue without bottom-left descriptions */}
+      <div className="relative z-20 flex justify-end items-center w-full font-mono text-[10px] text-zinc-400 pt-6">
+        <button
+          onClick={handleToFinale}
+          className="group cursor-pointer flex items-center gap-2 text-accent-lime/90 hover:text-accent-lime px-3.5 py-1.5 rounded-lg border border-accent-lime/20 hover:border-accent-lime/40 bg-accent-lime/[0.04] transition-all"
+        >
+          <span>SCROLL DOWN FOR FINALE</span>
+          <span className="text-xs group-hover:translate-y-0.5 transition-transform">
+            &darr;
+          </span>
+        </button>
       </div>
 
       {/* Seamless bottom fade handoff into Stage 05 */}
-      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#050508] via-[#050508]/85 to-transparent pointer-events-none z-10" />
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#050508] via-[#050508]/85 to-transparent pointer-events-none z-10" />
     </section>
   );
 };

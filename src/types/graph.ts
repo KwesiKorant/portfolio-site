@@ -40,6 +40,12 @@ export interface NodeData {
   tags?: string[];
   metrics?: MetricItem[];
   code?: string;
+  screenshots?: {
+    url: string;
+    title: string;
+    caption: string;
+    badge?: string;
+  }[];
   externalLink?: string;
   liveUrl?: string;
   githubUrl?: string;
