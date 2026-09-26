@@ -523,14 +523,51 @@ export const SpatialNodeCard = forwardRef<
               {/* Left Column: Specs, Metrics, Description */}
               <div className="lg:col-span-5 flex flex-col justify-between space-y-3.5">
                 <div>
-                  <div className="font-display text-[22px] font-bold text-white mb-2 tracking-tight">
+                  <div className="font-display text-[22px] font-bold text-white mb-1.5 tracking-tight">
                     {node.title}
                   </div>
+                  {node.role && (
+                    <div className="inline-flex items-center gap-1.5 mb-2 font-mono text-[10px] text-zinc-300 bg-white/[0.04] border border-white/10 px-2.5 py-1 rounded-md">
+                      <span className="text-zinc-500 font-semibold">ROLE //</span>
+                      <span className="text-accent-lime font-medium">{node.role}</span>
+                    </div>
+                  )}
                   {node.desc && (
                     <div className="font-sans text-[13px] leading-relaxed text-zinc-200 mb-3 font-normal">
                       {node.desc}
                     </div>
                   )}
+
+                  {/* Structured Case Study Highlights */}
+                  {(node.problem || node.solution || node.impact) && (
+                    <div className="space-y-2 mb-3 font-sans text-[11px] leading-relaxed">
+                      {node.problem && (
+                        <div className="p-2.5 rounded-lg bg-red-950/25 border border-red-500/20 text-zinc-300">
+                          <span className="font-mono text-[9px] text-red-400 font-semibold uppercase tracking-wider block mb-0.5">
+                            PROBLEM &bull;
+                          </span>
+                          {node.problem}
+                        </div>
+                      )}
+                      {node.solution && (
+                        <div className="p-2.5 rounded-lg bg-emerald-950/25 border border-emerald-500/20 text-zinc-300">
+                          <span className="font-mono text-[9px] text-emerald-400 font-semibold uppercase tracking-wider block mb-0.5">
+                            SOLUTION &bull;
+                          </span>
+                          {node.solution}
+                        </div>
+                      )}
+                      {node.impact && (
+                        <div className="p-2.5 rounded-lg bg-accent-lime/10 border border-accent-lime/20 text-zinc-200">
+                          <span className="font-mono text-[9px] text-accent-lime font-semibold uppercase tracking-wider block mb-0.5">
+                            IMPACT &bull;
+                          </span>
+                          {node.impact}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Differentiated live subsystem telemetry widget */}
                   <SubsystemWidget type={node.subsystemType} />
                 </div>
@@ -621,6 +658,13 @@ export const SpatialNodeCard = forwardRef<
             <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
               {node.title}
             </div>
+
+            {node.role && (
+              <div className="font-mono text-[9.5px] text-accent-lime font-medium mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-accent-lime" />
+                <span>{node.role}</span>
+              </div>
+            )}
 
             {node.desc && (
               <div className="font-sans text-[12.5px] leading-relaxed text-zinc-300 mb-3 line-clamp-2">
