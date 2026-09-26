@@ -14,6 +14,11 @@ export const MouseScrubSection: React.FC = () => {
   const cachedBounds = useRef<{ left: number; width: number } | null>(null);
   const isInViewRef = useRef<boolean>(true);
 
+  // Precision tracking refs to eliminate vertical movement jitter
+  const lastClientX = useRef<number>(-1);
+  const lastClientY = useRef<number>(-1);
+  const lastCommittedTimeRef = useRef<number>(-1);
+
   // Easing values for zero-reflow rAF loop
   const targetTimeRef = useRef<number>(0);
   const displayedTimeRef = useRef<number>(0);
@@ -96,24 +101,31 @@ export const MouseScrubSection: React.FC = () => {
     const absDiff = Math.abs(diff);
 
     // If difference is sub-millisecond, snap to exact target and settle
-    if (absDiff < 0.0005) {
+    if (absDiff < 0.002) {
       displayedTimeRef.current = targetTimeRef.current;
       isSettled.current = true;
     } else {
       // Responsive, critically damped easing:
-      // 0.38 provides immediate, tactile tracking while smoothing pointer jitter
-      displayedTimeRef.current += diff * 0.38;
+      // 0.36 provides immediate, tactile tracking while smoothing pointer jitter
+      displayedTimeRef.current += diff * 0.36;
       rafId.current = requestAnimationFrame(easeScrub);
     }
 
-    // Direct hardware seek to currentTime
-    try {
-      video.currentTime = displayedTimeRef.current;
-    } catch {
-      // Ignore rapid seek aborts
+    // Hardware Seek Throttling:
+    // With 24 FPS All-Intra video (each frame ~0.0416s), committing currentTime
+    // when diff < 0.02s causes the browser to abort and restart in-flight seeks.
+    // Commit only if target has shifted by at least 0.025s (over half a frame) OR when settled.
+    const timeDelta = Math.abs(displayedTimeRef.current - lastCommittedTimeRef.current);
+    if (timeDelta >= 0.025 || isSettled.current) {
+      lastCommittedTimeRef.current = displayedTimeRef.current;
+      try {
+        video.currentTime = displayedTimeRef.current;
+      } catch {
+        // Safe seek catch
+      }
     }
 
-    // Update progress bar via compositor-only transform scaleX
+    // Update progress bar via compositor-only transform scaleX (runs at full 120 FPS!)
     const progressRatio = Math.max(
       0,
       Math.min(1, displayedTimeRef.current / video.duration)
@@ -167,9 +179,9 @@ export const MouseScrubSection: React.FC = () => {
     };
   }, []);
 
-  // Mousemove updates targetTime continuously with zero deadband drops
+  // Directional mouse tracking with vertical-jitter suppression
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isAutoOrbit) return; // User can click Orbit off to resume scrub
+    if (isAutoOrbit) return;
 
     const video = videoRef.current;
     if (!video || !video.duration) return;
@@ -180,11 +192,33 @@ export const MouseScrubSection: React.FC = () => {
     const bounds = cachedBounds.current;
     if (!bounds || bounds.width <= 0) return;
 
+    // First coordinate sample
+    if (lastClientX.current === -1) {
+      lastClientX.current = e.clientX;
+      lastClientY.current = e.clientY;
+      return;
+    }
+
+    const dx = Math.abs(e.clientX - lastClientX.current);
+    const dy = Math.abs(e.clientY - lastClientY.current);
+
+    // Directional Intent Guard:
+    // If movement is predominantly vertical (dy significantly greater than dx) AND horizontal movement is tiny (< 3.5px),
+    // ignore it as natural hand tremor during vertical motion to prevent video decoder thrashing.
+    if (dy > dx * 1.5 && dx < 3.5) {
+      lastClientY.current = e.clientY;
+      return;
+    }
+
+    lastClientX.current = e.clientX;
+    lastClientY.current = e.clientY;
+
     const mouseX = e.clientX - bounds.left;
     const ratio = Math.max(0, Math.min(1, mouseX / bounds.width));
     const newTarget = ratio * video.duration;
 
-    if (Math.abs(newTarget - targetTimeRef.current) < 0.0001) return;
+    // Minimum target threshold: ignore sub-pixel noise
+    if (Math.abs(newTarget - targetTimeRef.current) < 0.005) return;
 
     targetTimeRef.current = newTarget;
 
@@ -251,58 +285,58 @@ export const MouseScrubSection: React.FC = () => {
       {/* Top Spacer */}
       <div className="relative z-10 w-full" />
 
-      {/* Main Dual-Console View: Left Console + Center Model Space + Right Possibilities Card */}
+      {/* Main Dual-Console View: Left Constructor Console + Center Active Model + Right Concept Panel */}
       <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto">
-        {/* Left: Professional Kinetic Console (Slightly transparent glassmorphic aesthetic) */}
+        {/* Left: Autonomous Constructor Console (Translucent glassmorphism with crisp legibility) */}
         <div className="w-full max-w-lg lg:max-w-xl p-6 md:p-8 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-            <span>KINETIC INTERACTION ARCHITECTURE // 120 FPS</span>
+            <span>AUTONOMOUS CONSTRUCTOR // STAGE 04</span>
           </div>
 
           {/* Title */}
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            Hardware-Accelerated Frame Interpolation
+            Synthesizing Kwesi&apos;s Digital Presence
           </h2>
 
-          {/* Subtitle & Problem / Solution context */}
+          {/* Narrative context */}
           <p className="font-sans text-xs sm:text-sm text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-            Tactile 360&deg; product inspection and mechanical CAD visualization without the multi-megabyte bundle overhead or GPU thermal throttling of heavy 3D WebGL meshes.
+            Behind the interface is an automated robotic constructor actively compiling my website, assembling code pipelines, and projecting holographic assets of my work in real-time.
           </p>
 
-          {/* Technical Architecture Specs Grid */}
+          {/* Technical Specs Grid */}
           <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                COMPOSITOR TARGET
+                CONSTRUCTOR ACTION
               </span>
               <span className="text-accent-lime font-semibold">
-                120 FPS Zero-Reflow
+                Autonomous Site Build
               </span>
             </div>
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                INPUT LATENCY
+                TIMELINE ENGINE
               </span>
               <span className="text-white font-semibold">
-                &lt; 8ms Normalized Ticker
+                120 FPS All-Intra Seek
               </span>
             </div>
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                SPRING DYNAMICS
+                INPUT FILTER
               </span>
               <span className="text-white font-semibold">
-                Critically Damped (&zeta; = 1.0)
+                Vertical-Isolated Dampening
               </span>
             </div>
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                SEEK PIPELINE
+                PROJECTION
               </span>
               <span className="text-accent-lime font-semibold">
-                Hardware Video Decoder
+                Holographic Workstation
               </span>
             </div>
           </div>
@@ -310,7 +344,7 @@ export const MouseScrubSection: React.FC = () => {
           {/* Real-time scrub gauge */}
           <div className="space-y-1.5 font-mono text-[10px] mb-5">
             <div className="flex justify-between text-zinc-300">
-              <span className="font-medium">SEEK PROGRESS:</span>
+              <span className="font-medium">ASSEMBLY PROGRESS:</span>
               <span ref={progressTextRef} className="text-accent-lime font-bold">
                 0.0%
               </span>
@@ -369,46 +403,46 @@ export const MouseScrubSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Insightful Production Possibilities Card (Slightly transparent glassmorphic panel) */}
+        {/* Right: The Creative Concept Panel */}
         <div className="w-full max-w-lg lg:max-w-sm p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-            <span>PRODUCTION POSSIBILITIES</span>
+            <span>THE CREATIVE CONCEPT</span>
           </div>
 
           <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-            Tactile Fidelity Without 3D Overhead
+            Building the Builder
           </h3>
 
           <p className="font-sans text-xs text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-            Hardware-decoded timeline interpolation solves critical bottlenecks that cause traditional 3D web experiences to struggle on mobile:
+            Modern web design shouldn&apos;t feel like a static template. Stage 04 reveals the digital workshop where my portfolio itself is engineered and constructed:
           </p>
 
           <div className="space-y-2.5 font-sans text-xs">
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                01 &bull; SPATIAL E-COMMERCE SHOWROOMS
+                01 &bull; THE AUTONOMOUS ARCHITECT
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Smooth 360&deg; furniture &amp; product inspection with 95% lower asset payload than 50MB GLTF meshes &mdash; zero client thermal throttling.
+                The constructor actively projects my photos, UI components, and system telemetry across background holographic screens in real time.
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                02 &bull; CAD &amp; HARDWARE TEARDOWNS
+                02 &bull; ZERO-REFLOW ALL-INTRA
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Sub-millisecond scrubbing through complex mechanical assemblies, exploded views, and architectural cross-sections with touch/mouse haptics.
+                All 96 frames of the workstation are encoded as hardware-accelerated All-Intra keyframes, enabling fluid horizontal scrubbing without DOM reflow.
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                03 &bull; PRE-RENDERED PHOTOREALISM
+                03 &bull; DIRECTIONAL FILTERING
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Delivers cinematic studio lighting and ray-traced reflections baked into video frames with 0ms shader compile overhead on mobile GPUs.
+                Vertical cursor gestures are isolated from timeline scrub targets, preventing hardware decoder thrashing and guaranteeing stutter-free playback.
               </p>
             </div>
           </div>
