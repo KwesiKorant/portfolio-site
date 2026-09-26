@@ -275,26 +275,20 @@ export const FinaleSection: React.FC = () => {
       {/* Tiny top blend: eliminates the hard line page cut at the top middle where the Vertical Tunnel Light Shaft appears */}
       <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#050508] via-[#050508]/80 to-transparent pointer-events-none z-[1]" />
 
-      {/* Top Header Bar: Cleanly anchored directly on the page */}
-      <div className="relative z-10 flex flex-wrap justify-between items-center gap-4 pb-6 border-b border-white/10 w-full">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00]" />
-          <span>STAGE 05 // TERMINAL DOSSIER &amp; TRANSMISSION</span>
-        </div>
-        <div className="flex gap-2 font-mono text-[10px]">
-          <button
-            onClick={handleToSpatial}
-            className="text-zinc-400 hover:text-white px-3.5 py-1.5 rounded-lg border border-white/12 hover:border-accent-lime/40 bg-white/[0.03] hover:bg-white/[0.08] transition-all cursor-pointer backdrop-blur-sm"
-          >
-            &uarr; SPATIAL DECK
-          </button>
-          <button
-            onClick={handleBackToTop}
-            className="text-accent-lime/90 hover:text-accent-lime px-3.5 py-1.5 rounded-lg border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.05] hover:bg-accent-lime/[0.1] transition-all cursor-pointer backdrop-blur-sm"
-          >
-            &uarr; TOP HERO
-          </button>
-        </div>
+      {/* Top Navigation Actions: Cleanly anchored without stage header bar */}
+      <div className="relative z-10 flex justify-end items-center gap-2 font-mono text-[10px] pb-4 w-full">
+        <button
+          onClick={handleToSpatial}
+          className="text-zinc-400 hover:text-white px-3.5 py-1.5 rounded-lg border border-white/12 hover:border-accent-lime/40 bg-white/[0.03] hover:bg-white/[0.08] transition-all cursor-pointer backdrop-blur-sm"
+        >
+          &uarr; SPATIAL DECK
+        </button>
+        <button
+          onClick={handleBackToTop}
+          className="text-accent-lime/90 hover:text-accent-lime px-3.5 py-1.5 rounded-lg border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.05] hover:bg-accent-lime/[0.1] transition-all cursor-pointer backdrop-blur-sm"
+        >
+          &uarr; TOP HERO
+        </button>
       </div>
 
       {/* Main Content Body */}

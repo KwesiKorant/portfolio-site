@@ -232,16 +232,79 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({ onScrollNext, 
         </div>
       </div>
 
-      {/* Hero Foreground Header */}
-      <div className="relative z-10 flex justify-between items-center w-full">
-        <div className="flex items-center gap-3">
-          <span className="w-2 h-2 rounded-full bg-accent-lime shadow-[0_0_10px_#ccff00]" />
-          <span className="font-mono text-xs tracking-widest uppercase font-semibold text-zinc-200">
-            KWESI ANKOMAH-KORANTENG // DESIGN ENGINEER
-          </span>
+      {/* Captivating Editorial Hero Content */}
+      <div className="relative z-10 my-auto py-8 sm:py-12 max-w-2xl lg:max-w-3xl pointer-events-none">
+        {/* Role tag pill */}
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+          <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
         </div>
-        <div className="font-mono text-[11px] text-zinc-400 border border-white/12 px-3 py-1 rounded-lg bg-black/40 backdrop-blur-md">
-          STAGE 01 // IMAGE REVEAL
+
+        {/* Captivating Bold Header */}
+        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-4">
+          KWESI ANKOMAH-KORANTENG
+        </h1>
+
+        {/* Punchy Subtitle */}
+        <p className="font-sans text-base sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-4">
+          Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
+        </p>
+
+        {/* Engaging Contextual Narrative */}
+        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-5">
+          Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems, and university technologist. Designing software with deep mechanical sympathy &mdash; from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
+        </p>
+
+        {/* Venture & Capabilities Highlight Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-xl mb-5">
+          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+              STARTUP // CTO
+            </div>
+            <div className="font-sans text-xs font-semibold text-white">
+              Arcfield Discover
+            </div>
+            <div className="font-sans text-[10.5px] text-zinc-400">
+              Social Discovery MVP
+            </div>
+          </div>
+
+          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+              ENTERPRISE POS
+            </div>
+            <div className="font-sans text-xs font-semibold text-white">
+              Nayak Furniture ERP
+            </div>
+            <div className="font-sans text-[10.5px] text-zinc-400">
+              Inventory &amp; P&amp;L Engine
+            </div>
+          </div>
+
+          <div className="px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md">
+            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+              CORE SPECIALTY
+            </div>
+            <div className="font-sans text-xs font-semibold text-white">
+              120 FPS Compositor
+            </div>
+            <div className="font-sans text-[10.5px] text-zinc-400">
+              Zero-Reflow Spatial UI
+            </div>
+          </div>
+        </div>
+
+        {/* Focus Badges */}
+        <div className="flex flex-wrap gap-2 font-mono text-[10px]">
+          <span className="px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+            120 FPS COMPOSITOR MANDATE
+          </span>
+          <span className="px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+            THREE.JS // WEBGL SPATIAL
+          </span>
+          <span className="px-3 py-1 rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
+            ACCRA, GHANA // REMOTE
+          </span>
         </div>
       </div>
 

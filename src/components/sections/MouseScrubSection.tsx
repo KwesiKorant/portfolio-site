@@ -166,21 +166,10 @@ export const MouseScrubSection: React.FC = () => {
       {/* Atmospheric Vignette */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/70 pointer-events-none z-[1]" />
 
-      {/* Header Info */}
-      <div className="relative z-10 flex justify-between items-center w-full pointer-events-none">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime" />
-          <span>STAGE 04 // INTERACTION TURNTABLE</span>
-        </div>
-        <div className="font-mono text-[10px] text-zinc-400 px-3 py-1 rounded bg-black/60 border border-white/10">
-          MOUSE X &rarr; CONTINUOUS VIDEO SEEK
-        </div>
-      </div>
-
       {/* HUD Telemetry Overlay (pointer-events-none so cursor moves across it without hit-test churn) */}
-      <div className="relative z-10 max-w-md p-6 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-md shadow-2xl pointer-events-none">
+      <div className="relative z-10 max-w-md p-6 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-md shadow-2xl pointer-events-none mt-auto mb-auto">
         <div className="font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-1 font-semibold">
-          04 &bull; KINETIC FRAME SCRUB
+          KINETIC FRAME INTERACTION // 120 FPS
         </div>
         <h3 className="font-display text-xl font-bold text-white mb-2">
           Hardware-Accelerated Frame Interpolation

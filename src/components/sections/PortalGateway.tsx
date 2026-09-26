@@ -160,16 +160,6 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
 
         {/* Subtle Edge Vignettes */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/40 via-transparent to-[#050508]/60 pointer-events-none" />
-
-        {/* Cinematic Telemetry Overlay */}
-        <div className="absolute top-6 left-6 flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300 pointer-events-none">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-ping" />
-          <span>PORTAL GATEWAY // HYPERSPACE CONDUIT ENGAGED</span>
-        </div>
-
-        <div className="absolute bottom-6 right-6 font-mono text-[10px] tracking-widest text-zinc-400 pointer-events-none">
-          STAGE 02 &bull; DIMENSIONAL TRANSIT &bull; 48 FPS
-        </div>
       </div>
     );
   }

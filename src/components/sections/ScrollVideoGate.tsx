@@ -175,22 +175,6 @@ export const ScrollVideoGate: React.FC<ScrollVideoGateProps> = ({ onComplete }) 
       {/* Seamless Edge Blends: Top and bottom gradients dissolve into obsidian void */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#050508] via-transparent to-[#050508] pointer-events-none z-[1]" />
 
-      {/* Header Info: High-tech telemetry dock in top corners */}
-      <div className="relative z-10 flex justify-between items-center w-full pointer-events-none">
-        <div className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest text-zinc-300">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00]" />
-          <span>STAGE 02 // PORTAL GATEWAY</span>
-        </div>
-        <div className="font-mono text-[10px] text-zinc-300 px-3 py-1.5 rounded-full bg-black/60 border border-white/15 backdrop-blur-md">
-          {warpStatus === "forward"
-            ? "WARP DRIVE: ENGAGED [ACCELERATING TO STAGE 03]"
-            : warpStatus === "reverse"
-            ? "WARP DRIVE: REVERSING [STAGE 01 RETURN]"
-            : warpStatus === "complete"
-            ? "WARP COMPLETE [LANDED IN 3D REALM]"
-            : "WARP READY // AUTOMATIC TRANSIT"}
-        </div>
-      </div>
 
       {/* Subtle Bottom Controls & Status Dock: Leaves center 100% open for cinematic warp immersion */}
       <div
