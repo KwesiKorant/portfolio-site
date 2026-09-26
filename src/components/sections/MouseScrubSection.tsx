@@ -101,8 +101,8 @@ export const MouseScrubSection: React.FC = () => {
       isSettled.current = true;
     } else {
       // Responsive, critically damped easing:
-      // 0.32 provides immediate, tactile tracking while smoothing pointer jitter
-      displayedTimeRef.current += diff * 0.32;
+      // 0.38 provides immediate, tactile tracking while smoothing pointer jitter
+      displayedTimeRef.current += diff * 0.38;
       rafId.current = requestAnimationFrame(easeScrub);
     }
 
@@ -126,7 +126,7 @@ export const MouseScrubSection: React.FC = () => {
     }
   }, []);
 
-  // Auto-Orbit Continuous Loop
+  // Auto-Orbit Continuous Loop: fast & fluid rotation (~2.2s for complete 360° turn)
   useEffect(() => {
     if (!isAutoOrbit) {
       if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
@@ -141,8 +141,8 @@ export const MouseScrubSection: React.FC = () => {
 
       const video = videoRef.current;
       if (video && video.duration && isInViewRef.current) {
-        // Orbit speed: full rotation every 6 seconds
-        const delta = (dt / 6) * video.duration;
+        // Snappy, energetic orbit: 2.2s per 360° rotation
+        const delta = (dt / 2.2) * video.duration;
         targetTimeRef.current = (targetTimeRef.current + delta) % video.duration;
         if (isSettled.current) {
           isSettled.current = false;
@@ -211,9 +211,13 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
-  const handleToSpatialNayak = () => {
-    const el = document.getElementById("section-spatial");
-    el?.scrollIntoView({ behavior: "smooth" });
+  const handleReset = () => {
+    setIsAutoOrbit(false);
+    targetTimeRef.current = 0;
+    if (isSettled.current) {
+      isSettled.current = false;
+      rafId.current = requestAnimationFrame(easeScrub);
+    }
   };
 
   const handleToFinale = () => {
@@ -240,126 +244,174 @@ export const MouseScrubSection: React.FC = () => {
         <source src="/turntable_scrub.mp4" type="video/mp4" />
       </video>
 
-      {/* Atmospheric Vignette & Gradients */}
+      {/* Atmospheric Vignette & Subtle Center Spotlight */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
-      <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/90 via-transparent to-transparent pointer-events-none z-[1]" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/80 via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
 
       {/* Top Spacer */}
       <div className="relative z-10 w-full" />
 
-      {/* Comprehensive Professional Engineering Console */}
-      <div className="relative z-10 max-w-xl p-6 md:p-8 rounded-2xl bg-[#0c0d14]/90 border border-white/15 backdrop-blur-xl shadow-2xl pointer-events-auto my-auto">
-        {/* Pill Tag */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-          <span>KINETIC INTERACTION ARCHITECTURE // 120 FPS</span>
+      {/* Main Dual-Console View: Left Console + Center Model Space + Right Possibilities Card */}
+      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto">
+        {/* Left: Professional Kinetic Console (Slightly transparent glassmorphic aesthetic) */}
+        <div className="w-full max-w-lg lg:max-w-xl p-6 md:p-8 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+          {/* Pill Tag */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+            <span>KINETIC INTERACTION ARCHITECTURE // 120 FPS</span>
+          </div>
+
+          {/* Title */}
+          <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+            Hardware-Accelerated Frame Interpolation
+          </h2>
+
+          {/* Subtitle & Problem / Solution context */}
+          <p className="font-sans text-xs sm:text-sm text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+            Tactile 360&deg; product inspection and mechanical CAD visualization without the multi-megabyte bundle overhead or GPU thermal throttling of heavy 3D WebGL meshes.
+          </p>
+
+          {/* Technical Architecture Specs Grid */}
+          <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
+            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
+                COMPOSITOR TARGET
+              </span>
+              <span className="text-accent-lime font-semibold">
+                120 FPS Zero-Reflow
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
+                INPUT LATENCY
+              </span>
+              <span className="text-white font-semibold">
+                &lt; 8ms Normalized Ticker
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
+                SPRING DYNAMICS
+              </span>
+              <span className="text-white font-semibold">
+                Critically Damped (&zeta; = 1.0)
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
+                SEEK PIPELINE
+              </span>
+              <span className="text-accent-lime font-semibold">
+                Hardware Video Decoder
+              </span>
+            </div>
+          </div>
+
+          {/* Real-time scrub gauge */}
+          <div className="space-y-1.5 font-mono text-[10px] mb-5">
+            <div className="flex justify-between text-zinc-300">
+              <span className="font-medium">SEEK PROGRESS:</span>
+              <span ref={progressTextRef} className="text-accent-lime font-bold">
+                0.0%
+              </span>
+            </div>
+            <div className="w-full h-1.5 bg-white/15 rounded-full overflow-hidden">
+              <div
+                ref={progressBarRef}
+                className="h-full w-full bg-accent-lime rounded-full origin-left will-change-transform"
+                style={{ transform: "scaleX(0)" }}
+              />
+            </div>
+            <div className="flex justify-between text-[9px] text-zinc-400 pt-0.5 font-medium">
+              <span>0.00s</span>
+              <span ref={durationTextRef}>
+                {duration ? `${duration.toFixed(2)}s` : "4.00s"}
+              </span>
+            </div>
+          </div>
+
+          {/* Interactive Control Deck */}
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+            <button
+              onClick={() => setIsAutoOrbit((prev) => !prev)}
+              className={`font-mono text-[10.5px] px-4 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+                isAutoOrbit
+                  ? "bg-accent-lime/25 border-accent-lime text-accent-lime font-bold shadow-[0_0_15px_rgba(204,255,0,0.3)]"
+                  : "bg-white/[0.06] hover:bg-white/[0.12] border-white/20 text-white font-medium"
+              }`}
+            >
+              <span>{isAutoOrbit ? "■ STOP ORBIT" : "▶ AUTO-ORBIT 360°"}</span>
+            </button>
+
+            <button
+              onClick={() => handleStep(-0.05)}
+              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer"
+              title="Step back 5%"
+            >
+              &larr; STEP
+            </button>
+
+            <button
+              onClick={() => handleStep(0.05)}
+              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer"
+              title="Step forward 5%"
+            >
+              STEP &rarr;
+            </button>
+
+            <button
+              onClick={handleReset}
+              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ml-auto"
+              title="Reset rotation to 0°"
+            >
+              RESET 0&deg;
+            </button>
+          </div>
         </div>
 
-        {/* Title */}
-        <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2">
-          Hardware-Accelerated Frame Interpolation
-        </h2>
-
-        {/* Subtitle & Problem / Solution context */}
-        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed mb-4">
-          Engineered for tactile 360&deg; product inspection and mechanical CAD visualization without the multi-megabyte bundle overhead or GPU thermal throttling of heavy 3D WebGL meshes.
-        </p>
-
-        {/* Technical Architecture Specs Grid */}
-        <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
-          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
-            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
-              COMPOSITOR TARGET
-            </span>
-            <span className="text-accent-lime font-semibold">
-              120 FPS Zero-Reflow
-            </span>
+        {/* Right: Insightful Production Possibilities Card (Slightly transparent glassmorphic panel) */}
+        <div className="w-full max-w-lg lg:max-w-sm p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+            <span>PRODUCTION POSSIBILITIES</span>
           </div>
-          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
-            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
-              INPUT LATENCY
-            </span>
-            <span className="text-white font-semibold">
-              &lt; 8ms Normalized Ticker
-            </span>
-          </div>
-          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
-            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
-              SPRING DYNAMICS
-            </span>
-            <span className="text-white font-semibold">
-              Critically Damped (&zeta; = 1.0)
-            </span>
-          </div>
-          <div className="p-2.5 rounded-lg bg-white/[0.03] border border-white/10">
-            <span className="text-zinc-500 uppercase block text-[9px] mb-0.5">
-              SEEK PIPELINE
-            </span>
-            <span className="text-accent-lime font-semibold">
-              Hardware Video Decoder
-            </span>
-          </div>
-        </div>
 
-        {/* Real-time scrub gauge */}
-        <div className="space-y-1.5 font-mono text-[10px] mb-5">
-          <div className="flex justify-between text-zinc-400">
-            <span>SEEK PROGRESS:</span>
-            <span ref={progressTextRef} className="text-accent-lime font-bold">
-              0.0%
-            </span>
+          <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+            Tactile Fidelity Without 3D Overhead
+          </h3>
+
+          <p className="font-sans text-xs text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+            Hardware-decoded timeline interpolation solves critical bottlenecks that cause traditional 3D web experiences to struggle on mobile:
+          </p>
+
+          <div className="space-y-2.5 font-sans text-xs">
+            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+                01 &bull; SPATIAL E-COMMERCE SHOWROOMS
+              </div>
+              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+                Smooth 360&deg; furniture &amp; product inspection with 95% lower asset payload than 50MB GLTF meshes &mdash; zero client thermal throttling.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+                02 &bull; CAD &amp; HARDWARE TEARDOWNS
+              </div>
+              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+                Sub-millisecond scrubbing through complex mechanical assemblies, exploded views, and architectural cross-sections with touch/mouse haptics.
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+                03 &bull; PRE-RENDERED PHOTOREALISM
+              </div>
+              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+                Delivers cinematic studio lighting and ray-traced reflections baked into video frames with 0ms shader compile overhead on mobile GPUs.
+              </p>
+            </div>
           </div>
-          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div
-              ref={progressBarRef}
-              className="h-full w-full bg-accent-lime rounded-full origin-left will-change-transform"
-              style={{ transform: "scaleX(0)" }}
-            />
-          </div>
-          <div className="flex justify-between text-[9px] text-zinc-500 pt-0.5">
-            <span>0.00s</span>
-            <span ref={durationTextRef}>
-              {duration ? `${duration.toFixed(2)}s` : "4.00s"}
-            </span>
-          </div>
-        </div>
-
-        {/* Interactive Control Deck */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
-          <button
-            onClick={() => setIsAutoOrbit((prev) => !prev)}
-            className={`font-mono text-[10.5px] px-3.5 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
-              isAutoOrbit
-                ? "bg-accent-lime/20 border-accent-lime text-accent-lime font-bold shadow-[0_0_12px_rgba(204,255,0,0.25)]"
-                : "bg-white/[0.04] hover:bg-white/[0.08] border-white/15 text-zinc-300 hover:text-white"
-            }`}
-          >
-            <span>{isAutoOrbit ? "■ STOP ORBIT" : "▶ AUTO-ORBIT 360°"}</span>
-          </button>
-
-          <button
-            onClick={() => handleStep(-0.05)}
-            className="font-mono text-[10.5px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-zinc-300 hover:text-white transition-all cursor-pointer"
-            title="Step back 5%"
-          >
-            &larr; STEP
-          </button>
-
-          <button
-            onClick={() => handleStep(0.05)}
-            className="font-mono text-[10.5px] px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/15 text-zinc-300 hover:text-white transition-all cursor-pointer"
-            title="Step forward 5%"
-          >
-            STEP &rarr;
-          </button>
-
-          <button
-            onClick={handleToSpatialNayak}
-            className="font-mono text-[10.5px] px-3 py-1.5 rounded-lg bg-accent-lime/10 hover:bg-accent-lime/20 border border-accent-lime/30 text-accent-lime transition-all cursor-pointer ml-auto flex items-center gap-1"
-          >
-            <span>NAYAK ERP SCREENS</span>
-            <span>&uarr;</span>
-          </button>
         </div>
       </div>
 
@@ -367,7 +419,7 @@ export const MouseScrubSection: React.FC = () => {
       <div className="relative z-20 flex justify-end items-center w-full font-mono text-[10px] text-zinc-400 pt-6">
         <button
           onClick={handleToFinale}
-          className="group cursor-pointer flex items-center gap-2 text-accent-lime/90 hover:text-accent-lime px-3.5 py-1.5 rounded-lg border border-accent-lime/20 hover:border-accent-lime/40 bg-accent-lime/[0.04] transition-all"
+          className="group cursor-pointer flex items-center gap-2 text-accent-lime/90 hover:text-accent-lime px-4 py-2 rounded-xl border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.06] hover:bg-accent-lime/[0.12] transition-all backdrop-blur-sm shadow-md"
         >
           <span>SCROLL DOWN FOR FINALE</span>
           <span className="text-xs group-hover:translate-y-0.5 transition-transform">
