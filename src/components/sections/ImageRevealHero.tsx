@@ -278,7 +278,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               Arcfield Discover
             </div>
             <div className="font-sans text-[10.5px] text-zinc-400">
-              Social Discovery MVP
+              Business &amp; Service Discovery MVP
             </div>
           </div>
 

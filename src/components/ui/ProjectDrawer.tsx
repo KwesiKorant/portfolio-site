@@ -13,7 +13,7 @@ function PipelineDiagram({ type }: { type?: SubsystemType }) {
   const stepsMap: Record<string, string[]> = {
     router: ["Inventory Ingress", "Material Costing", "P&L Engine", "Audit Report"],
     stream: ["3D Camera", "Perspective Math", "Zero-Reflow DOM", "Spatial Audio"],
-    vectordb: ["Merchant Store", "Catalog Index", "Geo Ingress", "Consumer Discovery"],
+    vectordb: ["Business Profile", "Service Catalog", "Geo Ingress", "User Discovery"],
     crdt: ["Pet Profile", "Vaccine Scheduler", "Clinical History", "Care Commerce"],
     ebpf: ["Order Ingress", "Real-Time Bus", "Kitchen Display", "Pickup Alert"],
     cluster: ["Type Contract", "Component Tree", "API Route", "Relational DB"],

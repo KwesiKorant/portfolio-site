@@ -141,10 +141,10 @@ function projectWorldToScreen(worldPos: Vector3, cam: PerspectiveCamera): Screen
     badgeColor: "lime",
     subsystemType: "vectordb",
     role: "Co-Founder & CTO @ Arcfield Systems",
-    desc: "Hyperlocal business and service discovery platform connecting neighborhood enterprises with consumers. Features business profile creation, dynamic service catalogs, interactive discovery feeds, and merchant verification.",
-    problem: "Small local businesses and service providers in emerging markets are often excluded from high-cost digital platforms, missing out on local customer discovery, neighborhood footfall, and streamlined direct customer inquiries.",
-    solution: "Architecting a mobile-first discovery progressive web app allowing local businesses to list their services, showcase their work, and engage consumers through lightweight, responsive feeds.",
-    impact: "Successfully co-founded Arcfield Systems, designed the end-to-end product architecture, and currently piloting the live MVP with local merchants and service businesses.",
+    desc: "Hyperlocal business and service discovery platform connecting neighborhood enterprises with consumers. Enables local businesses to list their business profiles and service offerings, while allowing users to discover and inspect local businesses.",
+    problem: "Small local businesses and service providers in emerging markets often lack an accessible digital presence, missing out on neighborhood discovery, customer footfall, and direct service inquiries.",
+    solution: "Architecting a mobile-first discovery PWA allowing local businesses to list their services and contact details, and empowering consumers to explore neighborhood services through an interactive, low-latency feed.",
+    impact: "Co-founded Arcfield Systems as CTO, engineered the end-to-end platform architecture, and currently piloting the live MVP with local businesses and service providers.",
     x: 1300,
     y: 230,
     z: 20,
@@ -155,18 +155,18 @@ function projectWorldToScreen(worldPos: Vector3, cam: PerspectiveCamera): Screen
       { label: "Discovery Latency", val: "< 60ms" },
       { label: "Stage", val: "Active MVP" },
       { label: "Role", val: "Co-Founder / CTO" },
-      { label: "Interface", val: "Mobile-First" },
+      { label: "Interface", val: "Mobile-First PWA" },
     ],
-    code: `// Arcfield Discover: Hyperlocal Search & Discovery Filter
-export async function queryLocalMerchants(coords: GeoLocation, category?: string) {
-  return await db.merchant.findMany({
+    code: `// Arcfield Discover: Business & Service Discovery Query Engine
+export async function queryDiscoveredServices(coords: GeoLocation, category?: string) {
+  return await db.businessProfile.findMany({
     where: {
-      isVerified: true,
+      isPublished: true,
       category: category ?? undefined,
-      serviceRadiusKm: { gte: calculateDistance(coords, merchant.location) },
+      serviceRadiusKm: { gte: calculateDistance(coords, business.location) },
     },
-    select: { id: true, businessName: true, services: true, ratings: true, storefrontCover: true },
-    orderBy: { rankingScore: "desc" },
+    select: { id: true, businessName: true, services: true, operatingHours: true, profileCover: true },
+    orderBy: { engagementScore: "desc" },
   });
 }`,
   },
@@ -256,7 +256,7 @@ export function transitionOrderStatus(orderId: string, nextState: OrderLifecycle
     desc: "Core engineering foundation bridging design engineering and robust server-side state. Specialized in Next.js 15 App Router, TypeScript, React 19, Tailwind CSS, PostgreSQL, and Unix systems.",
     problem: "Design without engineering rigor creates brittle products; backend engineering without design sensitivity creates sterile, clunky user experiences.",
     solution: "Disciplined end-to-end full-stack development marrying type-safe API contracts, relational data schemas, and microsecond-level client rendering with high-taste typography and fluid motion.",
-    impact: "Shipped commercial applications across retail ERP, social discovery, and healthcare with 100% type safety and zero client runtime exceptions.",
+    impact: "Shipped commercial applications across retail ERP, business & service discovery, and healthcare with 100% type safety and zero client runtime exceptions.",
     x: -1050,
     y: -160,
     z: -20,
@@ -272,7 +272,7 @@ export function transitionOrderStatus(orderId: string, nextState: OrderLifecycle
     code: `// Strict Type-Safe Domain Entity Definition
 export interface ProductionSystem<TConfig> {
   readonly id: string;
-  readonly domain: "commerce" | "social" | "health" | "spatial";
+  readonly domain: "discovery" | "commerce" | "health" | "spatial";
   readonly status: "active_mvp" | "production" | "research";
   deploy(config: TConfig): Promise<DeploymentResult>;
   verifySLA(latencyTargetMs: number): Promise<boolean>;
