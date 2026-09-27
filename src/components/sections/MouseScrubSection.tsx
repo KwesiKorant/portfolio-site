@@ -391,7 +391,7 @@ export const MouseScrubSection: React.FC = () => {
 
           {/* Narrative Thesis */}
           <p className="font-sans text-xs sm:text-sm text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-            As a startup CTO and design engineer, I don&apos;t write software in isolation. I harness autonomous AI agents as an engineering force-multiplier to rapidly scaffold systems, audit edge cases, and test prototypes &mdash; enabling a solo builder to deliver enterprise-grade software at 10x velocity.
+            As a startup CTO and design engineer, I don't write software in isolation. I harness autonomous AI agents as an engineering force-multiplier to rapidly scaffold systems, audit edge cases, and test prototypes enabling a solo builder to deliver enterprise-grade software at 10x velocity.
           </p>
 
           {/* 4-Step Engineering Pipeline Grid */}
@@ -514,7 +514,7 @@ export const MouseScrubSection: React.FC = () => {
                 01 &bull; ARCFIELD DISCOVER
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Co-founded Arcfield Systems (CTO) &mdash; prototyped, designed, and launched a live business and service discovery MVP, enabling local enterprises to list services and users to discover them seamlessly.
+                Co-founded Arcfield Systems (CTO) - prototyped, designed, and launched a live business and service discovery MVP, enabling local enterprises to list services and users to discover them seamlessly.
               </p>
             </div>
 

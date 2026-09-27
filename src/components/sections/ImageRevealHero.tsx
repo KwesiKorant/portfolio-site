@@ -257,7 +257,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
         {/* Engaging Contextual Narrative */}
         <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-5">
-          Ghanaian software engineer and Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy &mdash; from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
+          Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
         {/* Venture & Capabilities Highlight Strip */}

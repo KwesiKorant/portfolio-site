@@ -380,7 +380,7 @@ export const FinaleSection: React.FC = () => {
             </h2>
 
             <p className="font-sans text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
-              Kwesi Ankomah-Koranteng &mdash; Ghanaian software engineer and Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
+              Kwesi Ankomah-Koranteng, Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
             </p>
           </div>
 
