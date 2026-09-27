@@ -269,16 +269,12 @@ export function transitionOrderStatus(orderId: string, nextState: OrderLifecycle
   // Cluster C: Technical Skills & Capabilities (Ground Flank, hovering above floor)
   {
     id: "infra-compute",
-    title: "Core Technical Skills & Stack",
-    category: "TECHNICAL SKILLS // FULL-STACK & SPATIAL",
-    badge: "12 CORE PROFICIENCIES",
+    title: "Technical Skills",
+    category: "TECHNICAL PROFICIENCIES",
+    badge: "12 CORE SKILLS",
     badgeColor: "lime",
     subsystemType: "skills",
-    role: "Full-Stack, Mobile & Spatial Engineer",
-    desc: "Comprehensive engineering toolkit spanning interactive 3D WebGL interfaces, cross-platform mobile apps, robust Express.js backends, and relational PostgreSQL architecture.",
-    problem: "Modern web products often divide sharply between visual craft and system reliability. Finding engineers who command both low-level GPU/spatial frontends and resilient relational backends is exceptionally rare.",
-    solution: "Applying disciplined full-stack craft across the entire product lifecycle: from 120 FPS Three.js/WebGL spatial interactions and React/React Native apps to high-throughput Express.js APIs, PostgreSQL schema design, and seamless third-party API integrations.",
-    impact: "Shipped scalable production systems across retail ERP, business & service discovery, pet healthcare, and 3D web canvases with 100% type safety, zero client runtime errors, and zero compositor reflow.",
+    desc: "Core engineering proficiencies across 3D spatial graphics, mobile applications, backend services, and relational databases.",
     x: -1050,
     y: -160,
     z: -20,
@@ -287,47 +283,16 @@ export function transitionOrderStatus(orderId: string, nextState: OrderLifecycle
     tags: [
       "TypeScript",
       "React",
-      "React Native",
       "Three.js",
       "WebGL",
-      "PostgreSQL",
-      "Express.js",
-      "Tailwind CSS",
       "HTML5",
-      "API Integration",
+      "Tailwind CSS",
+      "React Native",
+      "Express.js",
+      "PostgreSQL",
       "Database Design",
+      "API Integration",
       "Google Stitch / Figma",
     ],
-    metrics: [
-      { label: "Verified Skills", val: "12 Core Techs" },
-      { label: "Frontend & 3D", val: "Three.js / WebGL / React" },
-      { label: "Mobile UX", val: "React Native" },
-      { label: "Data & APIs", val: "PostgreSQL / Express" },
-    ],
-    code: `// Kwesi's Production Engineering Skills & Domain Architecture
-export const TECHNICAL_SKILLS = {
-  frontendAndSpatial: [
-    { skill: "TypeScript", role: "Primary Language", standard: "Strict Type Safety" },
-    { skill: "React", role: "Frontend Engine", standard: "React 19 / Modern Hooks" },
-    { skill: "Three.js", role: "3D Spatial Graphics", standard: "Scene Graphs & Projections" },
-    { skill: "WebGL", role: "Hardware GPU Rendering", standard: "120 FPS Zero-Reflow" },
-    { skill: "Tailwind CSS", role: "Design Systems & UI", standard: "Fluid Compositor Layouts" },
-    { skill: "HTML5", role: "Semantic Markup", standard: "WCAG & Web APIs" }
-  ],
-  mobileDevelopment: [
-    { skill: "React Native", role: "Cross-Platform Mobile", standard: "Native iOS / Android UX" }
-  ],
-  backendAndAPIs: [
-    { skill: "Express.js", role: "API Framework", standard: "High-Throughput Services" },
-    { skill: "API Integration", role: "Third-Party Pipelines", standard: "Webhooks & Sync Bridges" }
-  ],
-  databaseAndSystems: [
-    { skill: "PostgreSQL", role: "Relational Storage", standard: "ACID & Constraints" },
-    { skill: "Database Design", role: "Schema Modeling", standard: "3NF & Query Optimization" }
-  ],
-  designAndTooling: [
-    { skill: "Google Stitch / Figma", role: "UI/UX & Prototyping", standard: "Interactive Design Systems" }
-  ]
-} as const;`,
   },
 ];
