@@ -254,10 +254,74 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
+  const handleToSpatial = () => {
+    const el = document.getElementById("section-spatial");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   const handleToFinale = () => {
     const el = document.getElementById("section-finale");
     el?.scrollIntoView({ behavior: "smooth" });
   };
+
+  // Wheel navigation: Smooth scroll transitions to Stage 03 (scroll up) and Stage 05 (scroll down)
+  useEffect(() => {
+    let overscrollUp = 0;
+    let overscrollDown = 0;
+    let overscrollTimer: NodeJS.Timeout | null = null;
+    let isNavigating = false;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isInViewRef.current) return;
+
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("button, a, input, select, textarea")) {
+        return;
+      }
+
+      // Scrolling UP towards Stage 03 (3D Spatial Deck)
+      if (e.deltaY < 0) {
+        overscrollUp += Math.abs(e.deltaY);
+        if (overscrollUp > 75 && !isNavigating) {
+          isNavigating = true;
+          const spatialEl = document.getElementById("section-spatial");
+          if (spatialEl) {
+            spatialEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setTimeout(() => {
+            isNavigating = false;
+            overscrollUp = 0;
+          }, 1200);
+        }
+      } else if (e.deltaY > 0) {
+        // Scrolling DOWN towards Stage 05 (Finale)
+        overscrollDown += Math.abs(e.deltaY);
+        if (overscrollDown > 75 && !isNavigating) {
+          isNavigating = true;
+          const finaleEl = document.getElementById("section-finale");
+          if (finaleEl) {
+            finaleEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setTimeout(() => {
+            isNavigating = false;
+            overscrollDown = 0;
+          }, 1200);
+        }
+      }
+
+      if (overscrollTimer) clearTimeout(overscrollTimer);
+      overscrollTimer = setTimeout(() => {
+        overscrollUp = 0;
+        overscrollDown = 0;
+      }, 400);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (overscrollTimer) clearTimeout(overscrollTimer);
+    };
+  }, []);
 
   return (
     <section
@@ -282,8 +346,17 @@ export const MouseScrubSection: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#050508]/80 via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
 
-      {/* Top Spacer */}
-      <div className="relative z-10 w-full" />
+      {/* Top Navigation Bar: Smooth scroll transition back to Stage 03 */}
+      <div className="relative z-20 flex justify-between items-center w-full font-mono text-[10px] text-zinc-400">
+        <button
+          onClick={handleToSpatial}
+          className="group cursor-pointer flex items-center gap-2 text-zinc-300 hover:text-white px-4 py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12]/80 hover:bg-[#080a12] transition-all backdrop-blur-md shadow-md pointer-events-auto"
+          title="Return to Stage 03 3D Spatial Deck"
+        >
+          <span className="text-accent-lime text-xs group-hover:-translate-y-0.5 transition-transform font-bold">&uarr;</span>
+          <span>STAGE 03 // 3D SPATIAL DECK</span>
+        </button>
+      </div>
 
       {/* Main Dual-Console View: Left Constructor Console + Center Active Model + Right Concept Panel */}
       <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto">

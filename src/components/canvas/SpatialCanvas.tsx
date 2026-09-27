@@ -981,15 +981,19 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           return;
         }
 
-        const dollySpeed =
-          (currentCamRef.current.z / DEFAULT_CAMERA_Z) * 110;
-
         const isNodeFocused = activeNodeIdRef.current !== "root";
-        const FLY_IN_MIN_Z = 620;
 
-        // User scrolling DOWN (dollying back/out)
+        // Symmetrical transition boundaries: exactly 890 units from DEFAULT_CAMERA_Z (1880)
+        const BOUNDARY_DOWN_Z = MAX_CAMERA_Z - 30; // 2770
+        const BOUNDARY_UP_Z = DEFAULT_CAMERA_Z - (MAX_CAMERA_Z - 30 - DEFAULT_CAMERA_Z); // 990
+
+        const distFromCenter = Math.abs(currentCamRef.current.z - DEFAULT_CAMERA_Z);
+        const speedFactor = Math.min(1.0, distFromCenter / 890);
+        const dollySpeed = 110 + speedFactor * 52;
+
+        // User scrolling DOWN (dollying back/out towards Stage 04)
         if (e.deltaY > 0) {
-          if (targetCamRef.current.z < MAX_CAMERA_Z - 30) {
+          if (targetCamRef.current.z < BOUNDARY_DOWN_Z) {
             e.preventDefault();
             targetCamRef.current.z = Math.min(
               MAX_CAMERA_Z,
@@ -997,7 +1001,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             );
             overscrollDown = 0;
           } else {
-            // Reached outer camera boundary -> continue scrolling to Stage 04
+            // Reached outer camera boundary -> smooth scroll transition to Stage 04
             overscrollDown += Math.abs(e.deltaY);
             if (overscrollDown > 75 && !isNavigatingStage) {
               isNavigatingStage = true;
@@ -1011,25 +1015,25 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             }
           }
         } else if (e.deltaY < 0) {
-          // User scrolling UP
+          // User scrolling UP (dollying in towards Stage 01)
           if (isNodeFocused) {
             // If zoomed into a card, scrolling up or back returns to overview
             e.preventDefault();
             focusNodeInternal("root");
             overscrollUp = 0;
-          } else if (targetCamRef.current.z > FLY_IN_MIN_Z + 35) {
-            // Smoothly dolly in towards inner depth limit (natural 3D flight)
+          } else if (targetCamRef.current.z > BOUNDARY_UP_Z) {
+            // Smoothly dolly in towards inner stage boundary with symmetrical speed
             e.preventDefault();
             targetCamRef.current.z = Math.max(
-              FLY_IN_MIN_Z,
+              BOUNDARY_UP_Z,
               targetCamRef.current.z - dollySpeed
             );
             overscrollUp = 0;
           } else {
-            // Reached inner camera boundary -> intentional stage transition back to Stage 01 via portal reverse
+            // Reached inner camera boundary -> smooth transition back to Stage 01 via portal reverse
             e.preventDefault();
             overscrollUp += Math.abs(e.deltaY);
-            if (overscrollUp > 45 && !isNavigatingStage) {
+            if (overscrollUp > 75 && !isNavigatingStage) {
               isNavigatingStage = true;
               if (onExitToPortal) {
                 onExitToPortal();
@@ -1618,6 +1622,15 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 lastFrameTime = performance.now();
                 if (!animFrameId) {
                   animFrameId = requestAnimationFrame(animate);
+                }
+                // When re-entering Stage 03 from Stage 04 or Stage 01, smoothly ease camera to default overview
+                if (activeNodeIdRef.current === "root") {
+                  targetCamRef.current.x = 0;
+                  targetCamRef.current.y = 75;
+                  targetCamRef.current.z = DEFAULT_CAMERA_Z;
+                  targetLookAtRef.current.x = 0;
+                  targetLookAtRef.current.y = -60;
+                  targetLookAtRef.current.z = 0;
                 }
               } else if (animFrameId) {
                 cancelAnimationFrame(animFrameId);
