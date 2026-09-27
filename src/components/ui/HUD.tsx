@@ -9,8 +9,8 @@ import {
 } from "@/lib/soundEngine";
 
 interface HUDProps {
-  activeCluster: ClusterType;
-  onSelectCluster: (cluster: ClusterType) => void;
+  activeCluster?: ClusterType;
+  onSelectCluster?: (cluster: ClusterType) => void;
   onOpenGuide: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
@@ -24,8 +24,6 @@ interface HUDProps {
 export const HUD = forwardRef<HTMLDivElement, HUDProps>(
   (
     {
-      activeCluster,
-      onSelectCluster,
       onOpenGuide,
       onZoomIn,
       onZoomOut,
@@ -53,11 +51,6 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       }
     };
 
-    const handleClusterClick = (c: ClusterType) => {
-      playKeyClick();
-      onSelectCluster(c);
-    };
-
     return (
       <div
         className={`absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-6 z-50 transition-opacity duration-300 ${
@@ -66,75 +59,21 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       >
         <header className="flex justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <div
-              className="flex items-center gap-2.5 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white pointer-events-auto cursor-pointer select-none px-4 py-2 rounded-xl border border-white/15 hover:border-accent-lime/50 bg-[#0c0d14]/90 backdrop-blur-md transition-all shadow-md"
-              onClick={() => handleClusterClick("root")}
-              role="button"
-              tabIndex={0}
-            >
-              <span className="status-pulse" />
-              <span>KWESI // 3D SPATIAL KERNEL</span>
-            </div>
             {onReturnToHero && (
               <button
-                className="hidden lg:flex items-center gap-1.5 font-mono text-[10px] tracking-wider text-zinc-400 hover:text-white pointer-events-auto cursor-pointer select-none px-3 py-2 rounded-xl border border-white/10 hover:border-white/25 bg-[#0c0d14]/70 backdrop-blur-md transition-all"
+                className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white hover:border-accent-lime/50 bg-[#0c0d14]/90 hover:bg-[#0c0d14] backdrop-blur-md border border-white/15 px-4 py-2 rounded-xl pointer-events-auto cursor-pointer select-none transition-all shadow-md active:scale-95"
                 onClick={() => {
                   playKeyClick();
                   onReturnToHero();
                 }}
-                title="Return to Hero Portrait via Reverse Portal [ESC / 0]"
+                title="Return to Hero Stage"
+                aria-label="Return to Hero"
               >
-                <span>&larr;</span>
-                <span>HERO [0]</span>
+                <span className="text-[13px] leading-none">&larr;</span>
+                <span>HERO</span>
               </button>
             )}
           </div>
-
-          <nav
-            className="hidden md:flex items-center gap-1.5 bg-[#0c0d14]/90 backdrop-blur-md border border-white/15 rounded-xl p-1.5 pointer-events-auto shadow-[0_8px_30px_rgba(0,0,0,0.6)]"
-            aria-label="Spatial clusters"
-          >
-            <button
-              className={`font-mono text-[10px] tracking-wider px-3.5 py-1.5 rounded-lg cursor-pointer inline-flex items-center transition-all ${
-                activeCluster === "root"
-                  ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
-                  : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
-              }`}
-              onClick={() => handleClusterClick("root")}
-            >
-              [01 // ROOT <kbd>1</kbd>]
-            </button>
-            <button
-              className={`font-mono text-[10px] tracking-wider px-3.5 py-1.5 rounded-lg cursor-pointer inline-flex items-center transition-all ${
-                activeCluster === "arch"
-                  ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
-                  : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
-              }`}
-              onClick={() => handleClusterClick("arch")}
-            >
-              [02 // ARCH <kbd>2</kbd>]
-            </button>
-            <button
-              className={`font-mono text-[10px] tracking-wider px-3.5 py-1.5 rounded-lg cursor-pointer inline-flex items-center transition-all ${
-                activeCluster === "projects"
-                  ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
-                  : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
-              }`}
-              onClick={() => handleClusterClick("projects")}
-            >
-              [03 // PROJECTS <kbd>3</kbd>]
-            </button>
-            <button
-              className={`font-mono text-[10px] tracking-wider px-3.5 py-1.5 rounded-lg cursor-pointer inline-flex items-center transition-all ${
-                activeCluster === "stack"
-                  ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
-                  : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
-              }`}
-              onClick={() => handleClusterClick("stack")}
-            >
-              [04 // SKILLS <kbd>4</kbd>]
-            </button>
-          </nav>
 
           <div className="flex items-center gap-2.5 pointer-events-auto">
             {/* Audio haptics toggle */}

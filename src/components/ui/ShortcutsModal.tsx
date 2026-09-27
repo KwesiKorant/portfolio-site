@@ -48,8 +48,15 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="bg-white/[0.03] border border-white/12 rounded-xl p-4">
             <h4 className="font-mono text-[11px] text-accent-lime mb-3 uppercase tracking-wider font-semibold">
-              Keyboard Shortcuts
+              Keyboard Navigation
             </h4>
+            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
+              <span>Next / Prev Card</span>
+              <div className="flex items-center gap-1">
+                <kbd>&larr;</kbd>
+                <kbd>&rarr;</kbd>
+              </div>
+            </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Root Gateway</span>
               <kbd>1</kbd>

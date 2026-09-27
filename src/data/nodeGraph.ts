@@ -14,7 +14,7 @@ export const WORLD_BOUNDS = {
 
 export const PRO_HINTS: string[] = [
   "Click any node card to smoothly zoom into the widescreen landscape architecture console",
-  "Press 1 - 4 to jump between spatial clusters • Press 0 for Portal to Hero",
+  "Press ← → or 1 - 4 to navigate between project cards • Press 0 for Hero",
   "Hover cards for dynamic 3D tilt & holographic light reflection",
   "Scroll mouse wheel to fly-through depth • Drag to orbit & pan",
   "Click any coordinate on the RADAR MAP to warp camera position",

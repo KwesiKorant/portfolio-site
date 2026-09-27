@@ -140,6 +140,52 @@ export default function SpatialPortfolioPage() {
         handleFocusNode("hyperscale");
       } else if (e.key === "4") {
         handleFocusNode("infra-compute");
+      } else if (e.key === "ArrowRight") {
+        const spatialSection = document.getElementById("section-spatial");
+        if (spatialSection) {
+          const rect = spatialSection.getBoundingClientRect();
+          const inView =
+            rect.top < window.innerHeight * 0.75 &&
+            rect.bottom > window.innerHeight * 0.25;
+          if (inView) {
+            e.preventDefault();
+            const order = [
+              "root",
+              "edge-gateway",
+              "event-stream",
+              "hyperscale",
+              "omnisync",
+              "kerneltrace",
+              "infra-compute",
+            ];
+            const currIdx = order.indexOf(activeNodeId);
+            const nextIdx = (currIdx + 1) % order.length;
+            handleFocusNode(order[nextIdx]);
+          }
+        }
+      } else if (e.key === "ArrowLeft") {
+        const spatialSection = document.getElementById("section-spatial");
+        if (spatialSection) {
+          const rect = spatialSection.getBoundingClientRect();
+          const inView =
+            rect.top < window.innerHeight * 0.75 &&
+            rect.bottom > window.innerHeight * 0.25;
+          if (inView) {
+            e.preventDefault();
+            const order = [
+              "root",
+              "edge-gateway",
+              "event-stream",
+              "hyperscale",
+              "omnisync",
+              "kerneltrace",
+              "infra-compute",
+            ];
+            const currIdx = order.indexOf(activeNodeId);
+            const prevIdx = (currIdx - 1 + order.length) % order.length;
+            handleFocusNode(order[prevIdx]);
+          }
+        }
       } else if (e.key === "?") {
         setIsGuideOpen((prev) => !prev);
       }
