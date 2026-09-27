@@ -93,7 +93,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
             </h4>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Pan 3D Viewport</span>
-              <span className="font-mono text-[10px] text-zinc-400">Drag or D-Pad (◀ ▲ ▼ ▶)</span>
+              <span className="font-mono text-[10px] text-zinc-400">Drag or D-Pad (↑ ↓ ← →)</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Fly-Through Dolly</span>
@@ -105,7 +105,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Rotate / Orbit 3D</span>
-              <span className="font-mono text-[10px] text-zinc-400">Hold (↺ ↻ ⤹ ⤸)</span>
+              <span className="font-mono text-[10px] text-zinc-400">Hold Diagonals (↖ ↗ ↙ ↘)</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Reset Overview</span>

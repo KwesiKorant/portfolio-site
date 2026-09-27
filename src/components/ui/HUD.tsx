@@ -24,6 +24,87 @@ interface HUDProps {
   isWarping?: boolean;
 }
 
+// Unified Vector SVG Icons for Flight Controls (Matching 2.75px stroke weight & geometry)
+const ChevronIcon = ({
+  angle = 0,
+  className = "",
+}: {
+  angle?: number;
+  className?: string;
+}) => (
+  <span
+    className="inline-flex items-center justify-center pointer-events-none select-none"
+    style={{ transform: `rotate(${angle}deg)` }}
+  >
+    <svg
+      width="11"
+      height="11"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.75"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M18 15l-6-6-6 6" />
+    </svg>
+  </span>
+);
+
+const ResetGimbalIcon = ({ className = "" }: { className?: string }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.4"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+    <path d="M3 3v5h5" />
+  </svg>
+);
+
+const PlusIcon = ({ className = "" }: { className?: string }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.75"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const MinusIcon = ({ className = "" }: { className?: string }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.75"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+  >
+    <path d="M5 12h14" />
+  </svg>
+);
+
 function useHoldAction(
   onPress: () => void,
   onContinuous: () => void,
@@ -145,24 +226,24 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       () => onPanBy?.(14, 0),
       16
     );
-    const rotLeftHold = useHoldAction(
-      () => onRotateBy?.(-0.065, 0),
-      () => onRotateBy?.(-0.008, 0),
+    const rotUpLeftHold = useHoldAction(
+      () => onRotateBy?.(-0.055, 0.045),
+      () => onRotateBy?.(-0.007, 0.0055),
       16
     );
-    const rotRightHold = useHoldAction(
-      () => onRotateBy?.(0.065, 0),
-      () => onRotateBy?.(0.008, 0),
+    const rotUpRightHold = useHoldAction(
+      () => onRotateBy?.(0.055, 0.045),
+      () => onRotateBy?.(0.007, 0.0055),
       16
     );
-    const tiltDownHold = useHoldAction(
-      () => onRotateBy?.(0, -0.055),
-      () => onRotateBy?.(0, -0.0065),
+    const rotDownLeftHold = useHoldAction(
+      () => onRotateBy?.(-0.055, -0.045),
+      () => onRotateBy?.(-0.007, -0.0055),
       16
     );
-    const tiltUpHold = useHoldAction(
-      () => onRotateBy?.(0, 0.055),
-      () => onRotateBy?.(0, 0.0065),
+    const rotDownRightHold = useHoldAction(
+      () => onRotateBy?.(0.055, -0.045),
+      () => onRotateBy?.(0.007, -0.0055),
       16
     );
 
@@ -252,7 +333,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 title="Dolly Forward / Zoom In (+ hold to fly in)"
                 aria-label="Zoom In"
               >
-                <span className="text-[17px] font-bold leading-none font-mono">+</span>
+                <PlusIcon className="mb-0.5 text-zinc-200 group-hover/btn:text-accent-lime" />
                 <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">IN</span>
               </button>
               <button
@@ -261,7 +342,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 title="Dolly Backward / Zoom Out (- hold to fly out)"
                 aria-label="Zoom Out"
               >
-                <span className="text-[17px] font-bold leading-none font-mono">&minus;</span>
+                <MinusIcon className="mb-0.5 text-zinc-200 group-hover/btn:text-accent-lime" />
                 <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">OUT</span>
               </button>
             </div>
@@ -272,48 +353,48 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 GIMBAL 3D
               </div>
 
-              {/* D-Pad Grid (3 rows x 3 cols) */}
+              {/* D-Pad Grid (3 rows x 3 cols: unified 8-way precision vector chevrons) */}
               <div className="grid grid-cols-3 gap-1 items-center justify-items-center flex-1">
-                {/* Row 1: Rotate Left (↺), Pan Up (▲), Rotate Right (↻) */}
+                {/* Row 1: Orbit Up-Left (↖), Pan Up (↑), Orbit Up-Right (↗) */}
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
-                  {...rotLeftHold}
-                  title="Orbit / Rotate Left (↺ hold to turn left)"
-                  aria-label="Rotate Left"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
+                  {...rotUpLeftHold}
+                  title="Orbit Up-Left (↖ hold to orbit)"
+                  aria-label="Orbit Up-Left"
                 >
-                  <span className="text-[12px] leading-none font-mono font-bold">↺</span>
+                  <ChevronIcon angle={-45} className="group-hover:scale-110 transition-transform" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
                   {...panUpHold}
-                  title="Pan Up (▲ hold to glide)"
+                  title="Pan Up (↑ hold to glide)"
                   aria-label="Pan Up"
                 >
-                  <span className="text-[10px] leading-none font-mono font-bold">▲</span>
+                  <ChevronIcon angle={0} className="group-hover:scale-110 transition-transform" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
-                  {...rotRightHold}
-                  title="Orbit / Rotate Right (↻ hold to turn right)"
-                  aria-label="Rotate Right"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
+                  {...rotUpRightHold}
+                  title="Orbit Up-Right (↗ hold to orbit)"
+                  aria-label="Orbit Up-Right"
                 >
-                  <span className="text-[12px] leading-none font-mono font-bold">↻</span>
+                  <ChevronIcon angle={45} className="group-hover:scale-110 transition-transform" />
                 </button>
 
-                {/* Row 2: Pan Left (◀), Center Reset (⟳), Pan Right (▶) */}
+                {/* Row 2: Pan Left (←), Center Reset (⟳), Pan Right (→) */}
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
                   {...panLeftHold}
-                  title="Pan Left (◀ hold to glide)"
+                  title="Pan Left (← hold to glide)"
                   aria-label="Pan Left"
                 >
-                  <span className="text-[10px] leading-none font-mono font-bold">◀</span>
+                  <ChevronIcon angle={-90} className="group-hover:scale-110 transition-transform" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-accent-lime/10 border border-accent-lime/40 hover:border-accent-lime hover:bg-accent-lime/25 text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-accent-lime/10 border border-accent-lime/40 hover:border-accent-lime hover:bg-accent-lime/25 text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 group"
                   onClick={() => {
                     playKeyClick();
                     onResetCamera();
@@ -321,44 +402,44 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   title="Reset Overview & Orientation (⟳)"
                   aria-label="Reset Overview and Orientation"
                 >
-                  <span className="text-[12px] font-bold leading-none font-mono">&#8635;</span>
+                  <ResetGimbalIcon className="transition-transform group-hover:rotate-180 duration-300" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
                   {...panRightHold}
-                  title="Pan Right (▶ hold to glide)"
+                  title="Pan Right (→ hold to glide)"
                   aria-label="Pan Right"
                 >
-                  <span className="text-[10px] leading-none font-mono font-bold">▶</span>
+                  <ChevronIcon angle={90} className="group-hover:scale-110 transition-transform" />
                 </button>
 
-                {/* Row 3: Tilt Down (⤹), Pan Down (▼), Tilt Up (⤸) */}
+                {/* Row 3: Orbit Down-Left (↙), Pan Down (↓), Orbit Down-Right (↘) */}
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
-                  {...tiltDownHold}
-                  title="Tilt Down (⤹ hold to tilt down)"
-                  aria-label="Tilt Down"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
+                  {...rotDownLeftHold}
+                  title="Orbit Down-Left (↙ hold to orbit)"
+                  aria-label="Orbit Down-Left"
                 >
-                  <span className="text-[11px] leading-none font-mono font-bold">⤹</span>
+                  <ChevronIcon angle={-135} className="group-hover:scale-110 transition-transform" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
                   {...panDownHold}
-                  title="Pan Down (▼ hold to glide)"
+                  title="Pan Down (↓ hold to glide)"
                   aria-label="Pan Down"
                 >
-                  <span className="text-[10px] leading-none font-mono font-bold">▼</span>
+                  <ChevronIcon angle={180} className="group-hover:scale-110 transition-transform" />
                 </button>
 
                 <button
-                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
-                  {...tiltUpHold}
-                  title="Tilt Up (⤸ hold to tilt up)"
-                  aria-label="Tilt Up"
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none group"
+                  {...rotDownRightHold}
+                  title="Orbit Down-Right (↘ hold to orbit)"
+                  aria-label="Orbit Down-Right"
                 >
-                  <span className="text-[11px] leading-none font-mono font-bold">⤸</span>
+                  <ChevronIcon angle={135} className="group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             </div>
