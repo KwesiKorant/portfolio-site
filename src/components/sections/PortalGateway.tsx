@@ -37,7 +37,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       }
     }, []);
 
-    // Forward warp sequence: 2.0s All-Intra cinematic flight into Stage 03
+    // Forward warp sequence: 1.5s All-Intra cinematic flight into Stage 03
     const triggerForward = useCallback(() => {
       const video = videoRef.current;
       if (!video || isWarpingRef.current) return;
@@ -48,13 +48,14 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       setOpacity(1);
 
       video.currentTime = 0;
-      video.playbackRate = 1.0;
+      // Play 2.0s source video at 1.333x speed to achieve exact 1.5s duration
+      video.playbackRate = 2.0 / 1.5;
 
       video
         .play()
         .catch((err) => console.warn("Portal forward play blocked:", err));
 
-      // At 1.65s (apex where warp tunnel explodes into deep-space starfield):
+      // At ~1.24s (apex where warp tunnel explodes into deep-space starfield):
       // Breach the 3D dimension and align Stage 03
       setTimeout(() => {
         const spatialEl = document.getElementById("section-spatial");
@@ -62,9 +63,9 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           spatialEl.scrollIntoView({ behavior: "instant" });
         }
         if (onBreachStage3) onBreachStage3();
-      }, 1650);
+      }, 1240);
 
-      // At 2.0s (video finish): fade out overlay to reveal active 3D world
+      // At 1.5s (video finish): fade out overlay to reveal active 3D world
       setTimeout(() => {
         setIsFadingOut(true);
         setOpacity(0);
@@ -72,7 +73,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           setIsActive(false);
           isWarpingRef.current = false;
         }, 300);
-      }, 2000);
+      }, 1500);
     }, [onBreachStage3]);
 
     // Reverse warp sequence: rewinds from starfield through tunnel back to Stage 01 portrait
@@ -147,7 +148,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
         style={{ opacity: isActive ? opacity : 0 }}
         aria-hidden={!isActive}
       >
-        {/* Fullscreen 2.0s All-Intra Warp Video */}
+        {/* Fullscreen 1.5s All-Intra Warp Video */}
         <video
           ref={videoRef}
           muted
