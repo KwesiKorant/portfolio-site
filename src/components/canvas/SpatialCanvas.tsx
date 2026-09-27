@@ -26,6 +26,8 @@ export interface SpatialCanvasHandle {
   focusNode: (nodeId: string) => void;
   dollyBy: (deltaZ: number) => void;
   warpToCoords: (wx: number, wy: number) => void;
+  panBy: (deltaX: number, deltaY: number) => void;
+  resetCamera: () => void;
   highlightConnection: (nodeId: string, isHovered: boolean) => void;
   triggerDimensionalBreach: (direction?: "enter" | "exit") => void;
 }
@@ -122,15 +124,44 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           focusNodeInternal(nodeId);
         },
         dollyBy: (deltaZ: number) => {
-          playKeyClick();
           targetCamRef.current.z = Math.min(
             Math.max(targetCamRef.current.z + deltaZ, MIN_CAMERA_Z),
             MAX_CAMERA_Z
           );
         },
         warpToCoords: (wx: number, wy: number) => {
-          targetCamRef.current.x = wx;
-          targetCamRef.current.y = wy;
+          targetCamRef.current.x = Math.max(
+            WORLD_BOUNDS.minX,
+            Math.min(wx, WORLD_BOUNDS.maxX)
+          );
+          targetCamRef.current.y = Math.max(
+            WORLD_BOUNDS.minY,
+            Math.min(wy, WORLD_BOUNDS.maxY)
+          );
+          targetLookAtRef.current.x = targetCamRef.current.x;
+          targetLookAtRef.current.y = targetCamRef.current.y - 135;
+        },
+        panBy: (deltaX: number, deltaY: number) => {
+          const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
+          targetCamRef.current.x = Math.max(
+            WORLD_BOUNDS.minX,
+            Math.min(targetCamRef.current.x + deltaX * depthFactor, WORLD_BOUNDS.maxX)
+          );
+          targetCamRef.current.y = Math.max(
+            WORLD_BOUNDS.minY,
+            Math.min(targetCamRef.current.y + deltaY * depthFactor, WORLD_BOUNDS.maxY)
+          );
+          targetLookAtRef.current.x = targetCamRef.current.x;
+          targetLookAtRef.current.y = targetCamRef.current.y - 135;
+        },
+        resetCamera: () => {
+          targetCamRef.current.x = 0;
+          targetCamRef.current.y = 75;
+          targetCamRef.current.z = DEFAULT_CAMERA_Z;
+          targetLookAtRef.current.x = 0;
+          targetLookAtRef.current.y = -60;
+          targetLookAtRef.current.z = 0;
+          focusNodeInternal("root");
         },
         highlightConnection: (nodeId: string, isHovered: boolean) => {
           if (highlightConnRef.current)
@@ -1096,8 +1127,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
         const dx = (e.clientX - dragStart.x) * depthFactor;
         const dy = (e.clientY - dragStart.y) * depthFactor;
-        targetCamRef.current.x -= dx;
-        targetCamRef.current.y += dy;
+        targetCamRef.current.x = Math.max(
+          WORLD_BOUNDS.minX,
+          Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
+        );
+        targetCamRef.current.y = Math.max(
+          WORLD_BOUNDS.minY,
+          Math.min(targetCamRef.current.y + dy, WORLD_BOUNDS.maxY)
+        );
+        if (activeNodeIdRef.current === "root") {
+          targetLookAtRef.current.x = targetCamRef.current.x;
+          targetLookAtRef.current.y = targetCamRef.current.y - 135;
+        }
         dragStart = { x: e.clientX, y: e.clientY };
       };
 
@@ -1146,8 +1187,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
           const dx = (e.touches[0].clientX - dragStart.x) * depthFactor;
           const dy = (e.touches[0].clientY - dragStart.y) * depthFactor;
-          targetCamRef.current.x -= dx;
-          targetCamRef.current.y += dy;
+          targetCamRef.current.x = Math.max(
+            WORLD_BOUNDS.minX,
+            Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
+          );
+          targetCamRef.current.y = Math.max(
+            WORLD_BOUNDS.minY,
+            Math.min(targetCamRef.current.y + dy, WORLD_BOUNDS.maxY)
+          );
+          if (activeNodeIdRef.current === "root") {
+            targetLookAtRef.current.x = targetCamRef.current.x;
+            targetLookAtRef.current.y = targetCamRef.current.y - 135;
+          }
           dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         } else if (e.touches.length === 2) {
           const dist = Math.hypot(

@@ -13,6 +13,7 @@ export const MouseScrubSection: React.FC = () => {
   const [isAutoOrbit, setIsAutoOrbit] = useState<boolean>(false);
   const cachedBounds = useRef<{ left: number; width: number } | null>(null);
   const isInViewRef = useRef<boolean>(true);
+  const lastEntryTimeRef = useRef<number>(Date.now());
 
   // Precision tracking refs to eliminate vertical movement jitter
   const lastClientX = useRef<number>(-1);
@@ -48,7 +49,11 @@ export const MouseScrubSection: React.FC = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[0];
+        const wasInView = isInViewRef.current;
         isInViewRef.current = entry.isIntersecting;
+        if (entry.isIntersecting && !wasInView) {
+          lastEntryTimeRef.current = Date.now();
+        }
         if (!entry.isIntersecting) {
           if (rafId.current) cancelAnimationFrame(rafId.current);
           if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
@@ -273,6 +278,17 @@ export const MouseScrubSection: React.FC = () => {
 
     const handleWheel = (e: WheelEvent) => {
       if (!isInViewRef.current) return;
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // Ensure Stage 04 is currently occupying the primary viewport window (not when user is on Stage 05)
+      const isStage4Active =
+        rect.top <= window.innerHeight * 0.35 &&
+        rect.bottom >= window.innerHeight * 0.65;
+      if (!isStage4Active) return;
+
+      // Prevent residual momentum scroll from skipping Stage 04 when arriving from Stage 05 or Stage 03
+      if (Date.now() - lastEntryTimeRef.current < 1000) return;
 
       const target = e.target as HTMLElement | null;
       if (target?.closest("button, a, input, select, textarea")) {
@@ -282,7 +298,7 @@ export const MouseScrubSection: React.FC = () => {
       // Scrolling UP towards Stage 03 (3D Spatial Deck)
       if (e.deltaY < 0) {
         overscrollUp += Math.abs(e.deltaY);
-        if (overscrollUp > 75 && !isNavigating) {
+        if (overscrollUp > 220 && !isNavigating) {
           isNavigating = true;
           const spatialEl = document.getElementById("section-spatial");
           if (spatialEl) {
@@ -291,12 +307,12 @@ export const MouseScrubSection: React.FC = () => {
           setTimeout(() => {
             isNavigating = false;
             overscrollUp = 0;
-          }, 1200);
+          }, 1400);
         }
       } else if (e.deltaY > 0) {
         // Scrolling DOWN towards Stage 05 (Finale)
         overscrollDown += Math.abs(e.deltaY);
-        if (overscrollDown > 75 && !isNavigating) {
+        if (overscrollDown > 220 && !isNavigating) {
           isNavigating = true;
           const finaleEl = document.getElementById("section-finale");
           if (finaleEl) {
@@ -305,7 +321,7 @@ export const MouseScrubSection: React.FC = () => {
           setTimeout(() => {
             isNavigating = false;
             overscrollDown = 0;
-          }, 1200);
+          }, 1400);
         }
       }
 

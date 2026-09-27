@@ -1,4 +1,4 @@
-import React, { forwardRef, useState, useEffect } from "react";
+import React, { forwardRef, useState, useEffect, useRef, useCallback } from "react";
 import { ClusterType } from "@/types/graph";
 import { RadarMiniMap } from "./RadarMiniMap";
 import {
@@ -14,11 +14,70 @@ interface HUDProps {
   onOpenGuide: () => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onContinuousZoom?: (deltaZ: number) => void;
+  onPanBy?: (deltaX: number, deltaY: number) => void;
   onResetCamera: () => void;
   onWarpToCoords: (wx: number, wy: number) => void;
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   onReturnToHero?: () => void;
   isWarping?: boolean;
+}
+
+function useHoldAction(
+  onPress: () => void,
+  onContinuous: () => void,
+  intervalMs = 16
+) {
+  const isHoldingRef = useRef(false);
+  const rafIdRef = useRef<number | null>(null);
+  const delayTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const stop = useCallback(() => {
+    isHoldingRef.current = false;
+    if (delayTimerRef.current) {
+      clearTimeout(delayTimerRef.current);
+      delayTimerRef.current = null;
+    }
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+  }, []);
+
+  const start = useCallback(
+    (e: React.PointerEvent) => {
+      if (e.button !== 0) return;
+      playKeyClick();
+      onPress();
+      isHoldingRef.current = true;
+
+      delayTimerRef.current = setTimeout(() => {
+        let lastTime = performance.now();
+        const loop = () => {
+          if (!isHoldingRef.current) return;
+          const now = performance.now();
+          if (now - lastTime >= intervalMs) {
+            onContinuous();
+            lastTime = now;
+          }
+          rafIdRef.current = requestAnimationFrame(loop);
+        };
+        rafIdRef.current = requestAnimationFrame(loop);
+      }, 200);
+    },
+    [onPress, onContinuous, intervalMs]
+  );
+
+  useEffect(() => {
+    return stop;
+  }, [stop]);
+
+  return {
+    onPointerDown: start,
+    onPointerUp: stop,
+    onPointerLeave: stop,
+    onPointerCancel: stop,
+  };
 }
 
 export const HUD = forwardRef<HTMLDivElement, HUDProps>(
@@ -27,6 +86,8 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       onOpenGuide,
       onZoomIn,
       onZoomOut,
+      onContinuousZoom,
+      onPanBy,
       onResetCamera,
       onWarpToCoords,
       radarCanvasRef,
@@ -50,6 +111,38 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
         playKeyClick();
       }
     };
+
+    // Flight control continuous hold handlers
+    const zoomInHold = useHoldAction(
+      onZoomIn,
+      () => (onContinuousZoom ? onContinuousZoom(-16) : onZoomIn()),
+      16
+    );
+    const zoomOutHold = useHoldAction(
+      onZoomOut,
+      () => (onContinuousZoom ? onContinuousZoom(16) : onZoomOut()),
+      16
+    );
+    const panUpHold = useHoldAction(
+      () => onPanBy?.(0, 100),
+      () => onPanBy?.(0, 12),
+      16
+    );
+    const panDownHold = useHoldAction(
+      () => onPanBy?.(0, -100),
+      () => onPanBy?.(0, -12),
+      16
+    );
+    const panLeftHold = useHoldAction(
+      () => onPanBy?.(-120, 0),
+      () => onPanBy?.(-14, 0),
+      16
+    );
+    const panRightHold = useHoldAction(
+      () => onPanBy?.(120, 0),
+      () => onPanBy?.(14, 0),
+      16
+    );
 
     return (
       <div
@@ -119,50 +212,101 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
           <div className="flex-1 pointer-events-none" />
 
           {/* Right: Tactical Radar Navigation Pod & High-Contrast Flight Controls */}
-          <div className="flex items-center gap-2.5 pointer-events-auto bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group">
+          <div className="flex items-center gap-2.5 pointer-events-auto bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group">
+            {/* 3D Radar Mini-Map */}
             <RadarMiniMap
               ref={radarCanvasRef}
               onWarpToCoords={onWarpToCoords}
             />
 
-            {/* High-Contrast Cockpit Action Keys */}
-            <div className="flex flex-col justify-between h-[122px] w-[50px] gap-1.5">
+            {/* Tactical Divider */}
+            <div className="w-[1px] h-[116px] bg-white/10" />
+
+            {/* Zoom / Depth Column (+ / −) */}
+            <div className="flex flex-col justify-between h-[122px] w-[38px] gap-1.5">
               <button
-                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
-                onClick={() => {
-                  playKeyClick();
-                  onZoomIn();
-                }}
-                title="Dolly Forward / Zoom In (+)"
+                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn touch-none"
+                {...zoomInHold}
+                title="Dolly Forward / Zoom In (+ hold to fly in)"
                 aria-label="Zoom In"
               >
                 <span className="text-[17px] font-bold leading-none font-mono">+</span>
                 <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">IN</span>
               </button>
               <button
-                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
-                onClick={() => {
-                  playKeyClick();
-                  onZoomOut();
-                }}
-                title="Dolly Backward / Zoom Out (-)"
+                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn touch-none"
+                {...zoomOutHold}
+                title="Dolly Backward / Zoom Out (- hold to fly out)"
                 aria-label="Zoom Out"
               >
                 <span className="text-[17px] font-bold leading-none font-mono">&minus;</span>
                 <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">OUT</span>
               </button>
-              <button
-                className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn"
-                onClick={() => {
-                  playKeyClick();
-                  onResetCamera();
-                }}
-                title="Reset Overview / Center (1)"
-                aria-label="Reset Overview"
-              >
-                <span className="text-[14px] font-bold leading-none font-mono">&#8635;</span>
-                <span className="text-[7.5px] font-mono font-semibold tracking-wider text-zinc-400 group-hover/btn:text-accent-lime">CTR</span>
-              </button>
+            </div>
+
+            {/* Tactical 5-Way Flight D-Pad Matrix (Pan X/Y + Center Reset) */}
+            <div className="flex flex-col justify-between h-[122px] w-[96px] bg-[#0c0e1a]/80 border border-white/10 rounded-xl p-1.5">
+              <div className="font-mono text-[7.5px] tracking-widest text-zinc-400 uppercase text-center font-semibold pb-0.5">
+                GIMBAL // PAN
+              </div>
+
+              {/* D-Pad Grid (3 rows x 3 cols) */}
+              <div className="grid grid-cols-3 gap-1 items-center justify-items-center flex-1">
+                {/* Row 1: Spacer, Up, Spacer */}
+                <div className="w-[28px] h-[26px]" />
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...panUpHold}
+                  title="Pan Up (▲ hold to glide)"
+                  aria-label="Pan Up"
+                >
+                  <span className="text-[10px] leading-none font-mono font-bold">▲</span>
+                </button>
+                <div className="w-[28px] h-[26px]" />
+
+                {/* Row 2: Left, Center Reset, Right */}
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...panLeftHold}
+                  title="Pan Left (◀ hold to glide)"
+                  aria-label="Pan Left"
+                >
+                  <span className="text-[10px] leading-none font-mono font-bold">◀</span>
+                </button>
+
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-accent-lime/10 border border-accent-lime/40 hover:border-accent-lime hover:bg-accent-lime/25 text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90"
+                  onClick={() => {
+                    playKeyClick();
+                    onResetCamera();
+                  }}
+                  title="Reset Overview / Center (⟳)"
+                  aria-label="Reset Overview"
+                >
+                  <span className="text-[12px] font-bold leading-none font-mono">&#8635;</span>
+                </button>
+
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...panRightHold}
+                  title="Pan Right (▶ hold to glide)"
+                  aria-label="Pan Right"
+                >
+                  <span className="text-[10px] leading-none font-mono font-bold">▶</span>
+                </button>
+
+                {/* Row 3: Spacer, Down, Spacer */}
+                <div className="w-[28px] h-[26px]" />
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...panDownHold}
+                  title="Pan Down (▼ hold to glide)"
+                  aria-label="Pan Down"
+                >
+                  <span className="text-[10px] leading-none font-mono font-bold">▼</span>
+                </button>
+                <div className="w-[28px] h-[26px]" />
+              </div>
             </div>
           </div>
         </footer>

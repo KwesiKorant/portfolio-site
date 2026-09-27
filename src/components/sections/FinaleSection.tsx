@@ -60,10 +60,58 @@ export const FinaleSection: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleToSpatial = () => {
-    const el = document.getElementById("section-spatial");
-    el?.scrollIntoView({ behavior: "smooth" });
+  const handleToScrub = () => {
+    const el = document.getElementById("section-scrub");
+    el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  // Wheel navigation: Smooth scroll transition back to Stage 04 when scrolling up from Stage 05
+  useEffect(() => {
+    let overscrollUp = 0;
+    let overscrollTimer: NodeJS.Timeout | null = null;
+    let isNavigating = false;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!isInView) return;
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      // Ensure Stage 05 is the predominant section in view
+      if (rect.top > window.innerHeight * 0.4) return;
+
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("button, a, input, select, textarea")) {
+        return;
+      }
+
+      // Scrolling UP towards Stage 04 (AI Augmented Workflow)
+      if (e.deltaY < 0 && window.scrollY <= el.offsetTop + 80) {
+        overscrollUp += Math.abs(e.deltaY);
+        if (overscrollUp > 160 && !isNavigating) {
+          isNavigating = true;
+          const scrubEl = document.getElementById("section-scrub");
+          if (scrubEl) {
+            scrubEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setTimeout(() => {
+            isNavigating = false;
+            overscrollUp = 0;
+          }, 1400);
+        }
+      }
+
+      if (overscrollTimer) clearTimeout(overscrollTimer);
+      overscrollTimer = setTimeout(() => {
+        overscrollUp = 0;
+      }, 400);
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (overscrollTimer) clearTimeout(overscrollTimer);
+    };
+  }, [isInView]);
 
   return (
     <footer
@@ -303,10 +351,11 @@ export const FinaleSection: React.FC = () => {
       {/* Top Navigation Actions: Cleanly anchored without stage header bar */}
       <div className="relative z-10 flex justify-end items-center gap-2 font-mono text-[10px] pb-4 w-full">
         <button
-          onClick={handleToSpatial}
+          onClick={handleToScrub}
           className="text-zinc-400 hover:text-white px-3.5 py-1.5 rounded-lg border border-white/12 hover:border-accent-lime/40 bg-white/[0.03] hover:bg-white/[0.08] transition-all cursor-pointer backdrop-blur-sm"
+          title="Return to Stage 04 AI Workflow"
         >
-          &uarr; SPATIAL DECK
+          &uarr; STAGE 04 // AI WORKFLOW
         </button>
         <button
           onClick={handleBackToTop}

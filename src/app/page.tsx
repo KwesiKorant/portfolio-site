@@ -283,9 +283,14 @@ export default function SpatialPortfolioPage() {
           activeCluster={activeCluster}
           onSelectCluster={handleSelectCluster}
           onOpenGuide={() => setIsGuideOpen(true)}
-          onZoomIn={() => canvasHandleRef.current?.dollyBy(-220)}
-          onZoomOut={() => canvasHandleRef.current?.dollyBy(220)}
-          onResetCamera={() => handleFocusNode("root")}
+          onZoomIn={() => canvasHandleRef.current?.dollyBy(-180)}
+          onZoomOut={() => canvasHandleRef.current?.dollyBy(180)}
+          onContinuousZoom={(dz) => canvasHandleRef.current?.dollyBy(dz)}
+          onPanBy={(dx, dy) => canvasHandleRef.current?.panBy(dx, dy)}
+          onResetCamera={() => {
+            canvasHandleRef.current?.resetCamera();
+            handleFocusNode("root");
+          }}
           onWarpToCoords={(wx, wy) =>
             canvasHandleRef.current?.warpToCoords(wx, wy)
           }

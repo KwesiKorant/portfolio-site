@@ -89,27 +89,27 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
 
           <div className="bg-white/[0.03] border border-white/12 rounded-xl p-4">
             <h4 className="font-mono text-[11px] text-accent-lime mb-3 uppercase tracking-wider font-semibold">
-              Spatial Mouse / Touch
+              Spatial Mouse / Cockpit
             </h4>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Pan 3D Viewport</span>
-              <span className="font-mono text-[10px] text-zinc-400">Left-Click Drag</span>
+              <span className="font-mono text-[10px] text-zinc-400">Drag or D-Pad (◀ ▲ ▼ ▶)</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Fly-Through Dolly</span>
-              <span className="font-mono text-[10px] text-zinc-400">Mouse Scroll</span>
+              <span className="font-mono text-[10px] text-zinc-400">Scroll or Hold (+ / −)</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
+              <span>Radar Mini-Map</span>
+              <span className="font-mono text-[10px] text-accent-lime">Click or Drag Grid</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
+              <span>Reset Overview</span>
+              <span className="font-mono text-[10px] text-zinc-400">Click Center (⟳)</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>3D Card Tilt</span>
               <span className="font-mono text-[10px] text-zinc-400">Hover Card</span>
-            </div>
-            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
-              <span>Open Deep-Dive</span>
-              <span className="font-mono text-[10px] text-zinc-400">Click Node</span>
-            </div>
-            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
-              <span>Jump Anywhere</span>
-              <span className="font-mono text-[10px] text-zinc-400">Click Mini-Map</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-1">
               <span>Pinch Dolly</span>
