@@ -34,7 +34,7 @@ interface SpatialCanvasProps {
   onNodeActivated: (nodeId: string) => void;
   onShowTemporaryHint: (msg: string) => void;
   statementRef: React.RefObject<HTMLDivElement | null>;
-  heroBadgeRef: React.RefObject<HTMLDivElement | null>;
+  heroBadgeRef?: React.RefObject<HTMLDivElement | null>;
   telemetryRef: React.RefObject<HTMLDivElement | null>;
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   nodeRefs: React.RefObject<Map<string, SpatialNodeElement>>;
@@ -740,10 +740,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       scene.add(clusterNebulaGroup);
 
       const clusterCenters = [
-        { x: -800, y: 200, z: -160, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 700 }, // Ingress / Edge
-        { x: 1300, y: 200, z: -80, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Projects / Arcfield Discover
-        { x: -1050, y: -200, z: -320, color: "rgba(6, 182, 212, 0.12)", halo: "rgba(6, 182, 212, 0.03)", size: 650 }, // Infrastructure / Compute
-        { x: 1050, y: -200, z: -320, color: "rgba(204, 255, 0, 0.13)", halo: "rgba(204, 255, 0, 0.04)", size: 660 }, // Projects / CRDT
+        { x: -1240, y: 140, z: -160, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 850 }, // Left / Systems & Tech
+        { x: 1240, y: 140, z: -80, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 850 }, // Right / Production Projects
       ];
 
       const clusterNebulaGeos: THREE.BufferGeometry[] = [];
@@ -1538,7 +1536,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
 
         // Perspective-project Hero Status Badge: Anchored below bottom of video at Z = 45
-        const badgeEl = heroBadgeRef.current;
+        const badgeEl = heroBadgeRef?.current;
         if (badgeEl) {
           const badgeWorldY = HERO_Y - cardHeight * 0.5 - 28;
           const badgeProj = projectToScreen(0, badgeWorldY, 45);

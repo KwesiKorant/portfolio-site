@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { NODE_GRAPH } from "@/data/nodeGraph";
 import { ClusterType } from "@/types/graph";
 import { HeroStatement } from "@/components/ui/HeroStatement";
-import { HeroMetaBadge } from "@/components/ui/HeroMetaBadge";
 import {
   SpatialNodeCard,
   SpatialNodeElement,
@@ -34,7 +33,6 @@ export default function SpatialPortfolioPage() {
   const canvasHandleRef = useRef<SpatialCanvasHandle | null>(null);
   const portalGatewayRef = useRef<PortalGatewayHandle | null>(null);
   const statementRef = useRef<HTMLDivElement | null>(null);
-  const heroBadgeRef = useRef<HTMLDivElement | null>(null);
   const telemetryRef = useRef<HTMLDivElement | null>(null);
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const nodeRefs = useRef<Map<string, SpatialNodeElement>>(new Map());
@@ -236,7 +234,6 @@ export default function SpatialPortfolioPage() {
           onNodeActivated={setActiveNodeId}
           onShowTemporaryHint={handleShowTemporaryHint}
           statementRef={statementRef}
-          heroBadgeRef={heroBadgeRef}
           telemetryRef={telemetryRef}
           radarCanvasRef={radarCanvasRef}
           nodeRefs={nodeRefs}
@@ -260,10 +257,6 @@ export default function SpatialPortfolioPage() {
         {/* Spatial World: 3D perspective projected DOM elements (Elevated to z-40 so active card sits above backdrop) */}
         <div id="spatial-world" className="relative z-40 pointer-events-none">
           <HeroStatement ref={statementRef} />
-          <HeroMetaBadge
-            ref={heroBadgeRef}
-            onResetView={() => handleFocusNode("root")}
-          />
 
           {/* Multi-depth child node cards: smoothly zoom in-place on selection */}
           {NODE_GRAPH.filter((n) => n.id !== "root").map((node) => (
