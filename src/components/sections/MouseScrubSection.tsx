@@ -53,10 +53,23 @@ export const MouseScrubSection: React.FC = () => {
         isInViewRef.current = entry.isIntersecting;
         if (entry.isIntersecting && !wasInView) {
           lastEntryTimeRef.current = Date.now();
+          updateCachedBounds();
+          isSettled.current = true;
+          lastClientX.current = -1;
+          lastClientY.current = -1;
         }
         if (!entry.isIntersecting) {
-          if (rafId.current) cancelAnimationFrame(rafId.current);
-          if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+          if (rafId.current) {
+            cancelAnimationFrame(rafId.current);
+            rafId.current = null;
+          }
+          if (autoOrbitRafId.current) {
+            cancelAnimationFrame(autoOrbitRafId.current);
+            autoOrbitRafId.current = null;
+          }
+          isSettled.current = true;
+          // Automatically disengage auto-orbit when navigating away so state, UI button, and mouse scrubbing are not bricked on return
+          setIsAutoOrbit(false);
         }
       },
       { threshold: 0.05 }
@@ -64,7 +77,7 @@ export const MouseScrubSection: React.FC = () => {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [updateCachedBounds]);
 
   // Wait for loadedmetadata before calculating targetTime
   useEffect(() => {
@@ -93,12 +106,14 @@ export const MouseScrubSection: React.FC = () => {
   const easeScrub = useCallback(() => {
     if (!isInViewRef.current) {
       isSettled.current = true;
+      rafId.current = null;
       return;
     }
 
     const video = videoRef.current;
     if (!video || !video.duration) {
       isSettled.current = true;
+      rafId.current = null;
       return;
     }
 
@@ -109,6 +124,7 @@ export const MouseScrubSection: React.FC = () => {
     if (absDiff < 0.002) {
       displayedTimeRef.current = targetTimeRef.current;
       isSettled.current = true;
+      rafId.current = null;
     } else {
       // Responsive, critically damped easing:
       // 0.36 provides immediate, tactile tracking while smoothing pointer jitter
@@ -146,7 +162,10 @@ export const MouseScrubSection: React.FC = () => {
   // Auto-Orbit Continuous Loop: fast & fluid rotation (~2.2s for complete 360° turn)
   useEffect(() => {
     if (!isAutoOrbit) {
-      if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+      if (autoOrbitRafId.current) {
+        cancelAnimationFrame(autoOrbitRafId.current);
+        autoOrbitRafId.current = null;
+      }
       return;
     }
 
@@ -161,7 +180,7 @@ export const MouseScrubSection: React.FC = () => {
         // Snappy, energetic orbit: 2.2s per 360° rotation
         const delta = (dt / 2.2) * video.duration;
         targetTimeRef.current = (targetTimeRef.current + delta) % video.duration;
-        if (isSettled.current) {
+        if (isSettled.current || !rafId.current) {
           isSettled.current = false;
           rafId.current = requestAnimationFrame(easeScrub);
         }
@@ -172,7 +191,10 @@ export const MouseScrubSection: React.FC = () => {
 
     autoOrbitRafId.current = requestAnimationFrame(loop);
     return () => {
-      if (autoOrbitRafId.current) cancelAnimationFrame(autoOrbitRafId.current);
+      if (autoOrbitRafId.current) {
+        cancelAnimationFrame(autoOrbitRafId.current);
+        autoOrbitRafId.current = null;
+      }
     };
   }, [isAutoOrbit, easeScrub]);
 
@@ -227,7 +249,7 @@ export const MouseScrubSection: React.FC = () => {
 
     targetTimeRef.current = newTarget;
 
-    if (isSettled.current) {
+    if (isSettled.current || !rafId.current) {
       isSettled.current = false;
       rafId.current = requestAnimationFrame(easeScrub);
     }
@@ -244,7 +266,7 @@ export const MouseScrubSection: React.FC = () => {
       Math.min(video.duration, targetTimeRef.current + delta)
     );
 
-    if (isSettled.current) {
+    if (isSettled.current || !rafId.current) {
       isSettled.current = false;
       rafId.current = requestAnimationFrame(easeScrub);
     }
@@ -253,7 +275,7 @@ export const MouseScrubSection: React.FC = () => {
   const handleReset = () => {
     setIsAutoOrbit(false);
     targetTimeRef.current = 0;
-    if (isSettled.current) {
+    if (isSettled.current || !rafId.current) {
       isSettled.current = false;
       rafId.current = requestAnimationFrame(easeScrub);
     }
