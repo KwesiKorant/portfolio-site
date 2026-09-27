@@ -147,6 +147,8 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
         } ${isActive ? "pointer-events-auto" : "pointer-events-none invisible"}`}
         style={{ opacity: isActive ? opacity : 0 }}
         aria-hidden={!isActive}
+        onWheel={(e) => e.preventDefault()}
+        onTouchMove={(e) => e.preventDefault()}
       >
         {/* Fullscreen 1.5s All-Intra Warp Video */}
         <video

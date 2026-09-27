@@ -309,18 +309,21 @@ export const MouseScrubSection: React.FC = () => {
         rect.bottom >= window.innerHeight * 0.65;
       if (!isStage4Active) return;
 
-      // Prevent residual momentum scroll from skipping Stage 04 when arriving from Stage 05 or Stage 03
-      if (Date.now() - lastEntryTimeRef.current < 1000) return;
-
       const target = e.target as HTMLElement | null;
       if (target?.closest("button, a, input, select, textarea")) {
         return;
       }
 
+      // Prevent native free-scroll blowout while Stage 04 is active
+      e.preventDefault();
+
+      // Prevent residual momentum scroll from skipping Stage 04 when arriving from Stage 05 or Stage 03
+      if (Date.now() - lastEntryTimeRef.current < 750) return;
+
       // Scrolling UP towards Stage 03 (3D Spatial Deck)
       if (e.deltaY < 0) {
         overscrollUp += Math.abs(e.deltaY);
-        if (overscrollUp > 220 && !isNavigating) {
+        if (overscrollUp > 130 && !isNavigating) {
           isNavigating = true;
           const spatialEl = document.getElementById("section-spatial");
           if (spatialEl) {
@@ -329,12 +332,12 @@ export const MouseScrubSection: React.FC = () => {
           setTimeout(() => {
             isNavigating = false;
             overscrollUp = 0;
-          }, 1400);
+          }, 1100);
         }
       } else if (e.deltaY > 0) {
         // Scrolling DOWN towards Stage 05 (Finale)
         overscrollDown += Math.abs(e.deltaY);
-        if (overscrollDown > 220 && !isNavigating) {
+        if (overscrollDown > 130 && !isNavigating) {
           isNavigating = true;
           const finaleEl = document.getElementById("section-finale");
           if (finaleEl) {
@@ -343,7 +346,7 @@ export const MouseScrubSection: React.FC = () => {
           setTimeout(() => {
             isNavigating = false;
             overscrollDown = 0;
-          }, 1400);
+          }, 1100);
         }
       }
 
@@ -351,10 +354,10 @@ export const MouseScrubSection: React.FC = () => {
       overscrollTimer = setTimeout(() => {
         overscrollUp = 0;
         overscrollDown = 0;
-      }, 400);
+      }, 350);
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       window.removeEventListener("wheel", handleWheel);
       if (overscrollTimer) clearTimeout(overscrollTimer);

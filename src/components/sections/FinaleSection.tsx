@@ -85,9 +85,10 @@ export const FinaleSection: React.FC = () => {
       }
 
       // Scrolling UP towards Stage 04 (AI Augmented Workflow)
-      if (e.deltaY < 0 && window.scrollY <= el.offsetTop + 80) {
+      if (e.deltaY < 0 && window.scrollY <= el.offsetTop + 100) {
+        e.preventDefault();
         overscrollUp += Math.abs(e.deltaY);
-        if (overscrollUp > 160 && !isNavigating) {
+        if (overscrollUp > 120 && !isNavigating) {
           isNavigating = true;
           const scrubEl = document.getElementById("section-scrub");
           if (scrubEl) {
@@ -96,17 +97,17 @@ export const FinaleSection: React.FC = () => {
           setTimeout(() => {
             isNavigating = false;
             overscrollUp = 0;
-          }, 1400);
+          }, 1100);
         }
       }
 
       if (overscrollTimer) clearTimeout(overscrollTimer);
       overscrollTimer = setTimeout(() => {
         overscrollUp = 0;
-      }, 400);
+      }, 350);
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: true });
+    window.addEventListener("wheel", handleWheel, { passive: false });
     return () => {
       window.removeEventListener("wheel", handleWheel);
       if (overscrollTimer) clearTimeout(overscrollTimer);

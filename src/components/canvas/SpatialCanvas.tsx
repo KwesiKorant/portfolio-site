@@ -1056,6 +1056,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           return;
         }
 
+        // Always prevent native free-scroll leak when focused on Stage 03
+        e.preventDefault();
+
         const isNodeFocused = activeNodeIdRef.current !== "root";
 
         // Symmetrical transition boundaries: exactly 890 units from DEFAULT_CAMERA_Z (1880)
@@ -1069,7 +1072,6 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // User scrolling DOWN (dollying back/out towards Stage 04)
         if (e.deltaY > 0) {
           if (targetCamRef.current.z < BOUNDARY_DOWN_Z) {
-            e.preventDefault();
             targetCamRef.current.z = Math.min(
               MAX_CAMERA_Z,
               targetCamRef.current.z + dollySpeed
@@ -1093,12 +1095,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           // User scrolling UP (dollying in towards Stage 01)
           if (isNodeFocused) {
             // If zoomed into a card, scrolling up or back returns to overview
-            e.preventDefault();
             focusNodeInternal("root");
             overscrollUp = 0;
           } else if (targetCamRef.current.z > BOUNDARY_UP_Z) {
             // Smoothly dolly in towards inner stage boundary with symmetrical speed
-            e.preventDefault();
             targetCamRef.current.z = Math.max(
               BOUNDARY_UP_Z,
               targetCamRef.current.z - dollySpeed
@@ -1106,7 +1106,6 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             overscrollUp = 0;
           } else {
             // Reached inner camera boundary -> smooth transition back to Stage 01 via portal reverse
-            e.preventDefault();
             overscrollUp += Math.abs(e.deltaY);
             if (overscrollUp > 75 && !isNavigatingStage) {
               isNavigatingStage = true;

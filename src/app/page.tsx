@@ -64,6 +64,20 @@ export default function SpatialPortfolioPage() {
     }, 200);
   }, []);
 
+  // Lock scroll propagation during cinematic portal warp (Stage 02) to prevent momentum leakage
+  useEffect(() => {
+    if (!isWarping) return;
+    const preventScroll = (e: Event) => {
+      e.preventDefault();
+    };
+    window.addEventListener("wheel", preventScroll, { passive: false });
+    window.addEventListener("touchmove", preventScroll, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", preventScroll);
+      window.removeEventListener("touchmove", preventScroll);
+    };
+  }, [isWarping]);
+
   const activeCluster: ClusterType =
     NODE_GRAPH.find((n) => n.id === activeNodeId)?.cluster || "root";
 
