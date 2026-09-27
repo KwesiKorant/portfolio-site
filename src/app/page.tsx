@@ -101,9 +101,6 @@ export default function SpatialPortfolioPage() {
         case "stack":
           handleFocusNode("infra-compute");
           break;
-        case "dossier":
-          handleFocusNode("dossier");
-          break;
       }
     },
     [handleFocusNode]
@@ -143,8 +140,6 @@ export default function SpatialPortfolioPage() {
         handleFocusNode("hyperscale");
       } else if (e.key === "4") {
         handleFocusNode("infra-compute");
-      } else if (e.key === "5") {
-        handleFocusNode("dossier");
       } else if (e.key === "?") {
         setIsGuideOpen((prev) => !prev);
       }

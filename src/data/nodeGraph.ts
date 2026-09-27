@@ -14,7 +14,7 @@ export const WORLD_BOUNDS = {
 
 export const PRO_HINTS: string[] = [
   "Click any node card to smoothly zoom into the widescreen landscape architecture console",
-  "Press 1 - 5 to jump between spatial clusters • Press 0 for Portal to Hero",
+  "Press 1 - 4 to jump between spatial clusters • Press 0 for Portal to Hero",
   "Hover cards for dynamic 3D tilt & holographic light reflection",
   "Scroll mouse wheel to fly-through depth • Drag to orbit & pan",
   "Click any coordinate on the RADAR MAP to warp camera position",
@@ -131,6 +131,20 @@ function projectWorldToScreen(worldPos: Vector3, cam: PerspectiveCamera): Screen
   // Apply exclusively via hardware-accelerated 3D transform without touching top/left
   return { transform: \`translate3d(\${screenX}px, \${screenY}px, 0)\` };
 }`,
+    screenshots: [
+      {
+        url: "/projects/spatial/portfolio-hero-wireframe.webp",
+        title: "Stage 01: Hardware-Accelerated Interactive Hero & Wireframe",
+        caption: "Tactile digital craft combining video scrub physics with an interactive 3D facial wireframe mesh, mouse parallax, and zero-reflow CSS compositor dynamics.",
+        badge: "3D FACE MESH",
+      },
+      {
+        url: "/projects/spatial/portfolio-spatial-deck.webp",
+        title: "Stage 03: 3D Spatial Perspective Orbit Deck & Radar",
+        caption: "Dynamic 3D coordinate projection mapping project cards across continuous depth over an infinite neon green vector grid with interactive telemetry.",
+        badge: "SPATIAL 3D DECK",
+      },
+    ],
   },
   // Cluster B: Featured Case Studies & Production Systems (Right Flank - 4 Distinct Non-Overlapping Columns)
   {
@@ -252,80 +266,68 @@ export function transitionOrderStatus(orderId: string, nextState: OrderLifecycle
   return dispatchKitchenEvent({ orderId, nextState, timestamp: Date.now() });
 }`,
   },
-  // Cluster C: Infrastructure Stack (Deep in the foundation, hovering above floor)
+  // Cluster C: Technical Skills & Capabilities (Ground Flank, hovering above floor)
   {
     id: "infra-compute",
-    title: "Full-Stack & Systems Architecture",
-    category: "CORE TECHNICAL STACK",
-    badge: "PRODUCTION READY",
+    title: "Core Technical Skills & Stack",
+    category: "TECHNICAL SKILLS // FULL-STACK & SPATIAL",
+    badge: "12 CORE PROFICIENCIES",
     badgeColor: "lime",
-    subsystemType: "cluster",
-    role: "Full-Stack Software Architecture",
-    desc: "Core engineering foundation bridging design engineering and robust server-side state. Specialized in Next.js 15 App Router, TypeScript, React 19, Tailwind CSS, PostgreSQL, and Unix systems.",
-    problem: "Design without engineering rigor creates brittle products; backend engineering without design sensitivity creates sterile, clunky user experiences.",
-    solution: "Disciplined end-to-end full-stack development marrying type-safe API contracts, relational data schemas, and microsecond-level client rendering with high-taste typography and fluid motion.",
-    impact: "Shipped commercial applications across retail ERP, business & service discovery, and healthcare with 100% type safety and zero client runtime exceptions.",
+    subsystemType: "skills",
+    role: "Full-Stack, Mobile & Spatial Engineer",
+    desc: "Comprehensive engineering toolkit spanning interactive 3D WebGL interfaces, cross-platform mobile apps, robust Express.js backends, and relational PostgreSQL architecture.",
+    problem: "Modern web products often divide sharply between visual craft and system reliability. Finding engineers who command both low-level GPU/spatial frontends and resilient relational backends is exceptionally rare.",
+    solution: "Applying disciplined full-stack craft across the entire product lifecycle: from 120 FPS Three.js/WebGL spatial interactions and React/React Native apps to high-throughput Express.js APIs, PostgreSQL schema design, and seamless third-party API integrations.",
+    impact: "Shipped scalable production systems across retail ERP, business & service discovery, pet healthcare, and 3D web canvases with 100% type safety, zero client runtime errors, and zero compositor reflow.",
     x: -1050,
     y: -160,
     z: -20,
     camTarget: { x: -1050, y: -160, z: 500 },
     cluster: "stack",
-    tags: ["TypeScript", "Next.js 15", "React 19", "PostgreSQL", "Tailwind CSS", "REST/GraphQL"],
-    metrics: [
-      { label: "Type Safety", val: "100% Strict" },
-      { label: "Compositor Standard", val: "Zero-Reflow" },
-      { label: "Accessibility", val: "WCAG Compliant" },
-      { label: "Architecture", val: "Full-Stack" },
+    tags: [
+      "TypeScript",
+      "React",
+      "React Native",
+      "Three.js",
+      "WebGL",
+      "PostgreSQL",
+      "Express.js",
+      "Tailwind CSS",
+      "HTML5",
+      "API Integration",
+      "Database Design",
+      "Google Stitch / Figma",
     ],
-    code: `// Strict Type-Safe Domain Entity Definition
-export interface ProductionSystem<TConfig> {
-  readonly id: string;
-  readonly domain: "discovery" | "commerce" | "health" | "spatial";
-  readonly status: "active_mvp" | "production" | "research";
-  deploy(config: TConfig): Promise<DeploymentResult>;
-  verifySLA(latencyTargetMs: number): Promise<boolean>;
-}`,
-  },
-  // Cluster D: Dossier & Terminal Uplink (Crown Flank, Clear of Center Hero Statement)
-  {
-    id: "dossier",
-    title: "Kwesi Ankomah-Koranteng",
-    category: "DESIGN ENGINEER // CREATIVE TECHNOLOGIST",
-    badge: "AVAILABLE // GHANA",
-    badgeColor: "lime",
-    subsystemType: "identity",
-    role: "Design Engineer & Co-Founder",
-    desc: "Ghanaian software engineer and startup co-founder (Arcfield Systems). Crafts tactile, hardware-accelerated digital interfaces, 3D web experiences, and resilient business software.",
-    problem: "Modern digital products often lack either visual craftsmanship or architectural resilience. Finding engineers who operate across both spatial design engineering and production backend systems is rare.",
-    solution: "Pursuing deep mechanical sympathy: combining Three.js WebGL creative frontends, strict zero-reflow CSS physics, and robust full-stack systems that solve concrete problems for real businesses.",
-    impact: "Co-founded Arcfield Systems (CTO), built production ERP for Nayak Furniture, contributed to digital healthcare and food ordering platforms, and built high-performance spatial web architectures.",
-    x: 800,
-    y: 230,
-    z: 20,
-    camTarget: { x: 800, y: 230, z: 520 },
-    cluster: "dossier",
-    tags: ["Design Engineering", "Three.js & WebGL", "Next.js 15", "TypeScript", "Startups & Co-Founder", "Ghana / Remote"],
     metrics: [
-      { label: "Target Role", val: "Design Engineer" },
-      { label: "Startup", val: "Arcfield Systems (CTO)" },
-      { label: "Compositor", val: "120 FPS Mandate" },
-      { label: "Location", val: "Ghana (Remote)" },
+      { label: "Verified Skills", val: "12 Core Techs" },
+      { label: "Frontend & 3D", val: "Three.js / WebGL / React" },
+      { label: "Mobile UX", val: "React Native" },
+      { label: "Data & APIs", val: "PostgreSQL / Express" },
     ],
-    code: `const engineer = {
-  name: "Kwesi Ankomah-Koranteng",
-  origin: "Ghana",
-  role: "Design Engineer / Creative Technologist",
-  startup: "Arcfield Systems (Co-Founder & CTO)",
-  ethos: [
-    "Mechanical sympathy with browser compositors",
-    "High agency — from local ERPs to 3D spatial web canvases",
-    "Tactile micro-interactions with zero layout reflow"
+    code: `// Kwesi's Production Engineering Skills & Domain Architecture
+export const TECHNICAL_SKILLS = {
+  frontendAndSpatial: [
+    { skill: "TypeScript", role: "Primary Language", standard: "Strict Type Safety" },
+    { skill: "React", role: "Frontend Engine", standard: "React 19 / Modern Hooks" },
+    { skill: "Three.js", role: "3D Spatial Graphics", standard: "Scene Graphs & Projections" },
+    { skill: "WebGL", role: "Hardware GPU Rendering", standard: "120 FPS Zero-Reflow" },
+    { skill: "Tailwind CSS", role: "Design Systems & UI", standard: "Fluid Compositor Layouts" },
+    { skill: "HTML5", role: "Semantic Markup", standard: "WCAG & Web APIs" }
   ],
-  links: {
-    linkedin: "linkedin.com/in/kaykorant",
-    whatsapp: "+233 20 456 3873",
-    github: "github.com/KwesiKorant"
-  }
-};`,
+  mobileDevelopment: [
+    { skill: "React Native", role: "Cross-Platform Mobile", standard: "Native iOS / Android UX" }
+  ],
+  backendAndAPIs: [
+    { skill: "Express.js", role: "API Framework", standard: "High-Throughput Services" },
+    { skill: "API Integration", role: "Third-Party Pipelines", standard: "Webhooks & Sync Bridges" }
+  ],
+  databaseAndSystems: [
+    { skill: "PostgreSQL", role: "Relational Storage", standard: "ACID & Constraints" },
+    { skill: "Database Design", role: "Schema Modeling", standard: "3NF & Query Optimization" }
+  ],
+  designAndTooling: [
+    { skill: "Google Stitch / Figma", role: "UI/UX & Prototyping", standard: "Interactive Design Systems" }
+  ]
+} as const;`,
   },
 ];

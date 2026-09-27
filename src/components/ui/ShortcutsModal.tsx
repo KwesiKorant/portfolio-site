@@ -63,12 +63,8 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
               <kbd>3</kbd>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
-              <span>Infrastructure Stack</span>
+              <span>Core Technical Skills</span>
               <kbd>4</kbd>
-            </div>
-            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
-              <span>Lead Dossier</span>
-              <kbd>5</kbd>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Reverse Portal to Hero</span>

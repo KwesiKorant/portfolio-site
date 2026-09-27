@@ -14,7 +14,8 @@ export type SubsystemType =
   | "crdt"
   | "ebpf"
   | "cluster"
-  | "identity";
+  | "identity"
+  | "skills";
 
 export interface NodeData {
   id: string;

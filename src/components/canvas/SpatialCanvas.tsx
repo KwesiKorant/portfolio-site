@@ -393,7 +393,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         // Exact physical bottom edge of each card
         const cardHalfHeight =
-          node.id === "dossier" || node.id === "edge-gateway" ? 185 : 165;
+          node.id === "edge-gateway" || node.id === "event-stream" ? 175 : 165;
         const cardBottomY = node.y - cardHalfHeight;
         const floorY = Y_FLOOR + 1;
         const beaconColor =
@@ -741,7 +741,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       const clusterCenters = [
         { x: -800, y: 200, z: -160, color: "rgba(6, 182, 212, 0.14)", halo: "rgba(6, 182, 212, 0.04)", size: 700 }, // Ingress / Edge
-        { x: 800, y: 200, z: 80, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Dossier / Identity
+        { x: 1300, y: 200, z: -80, color: "rgba(204, 255, 0, 0.12)", halo: "rgba(204, 255, 0, 0.03)", size: 680 }, // Projects / Arcfield Discover
         { x: -1050, y: -200, z: -320, color: "rgba(6, 182, 212, 0.12)", halo: "rgba(6, 182, 212, 0.03)", size: 650 }, // Infrastructure / Compute
         { x: 1050, y: -200, z: -320, color: "rgba(204, 255, 0, 0.13)", halo: "rgba(204, 255, 0, 0.04)", size: 660 }, // Projects / CRDT
       ];

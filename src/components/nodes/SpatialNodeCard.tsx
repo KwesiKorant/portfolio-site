@@ -71,6 +71,56 @@ function HighlightedCode({ code }: { code: string }) {
   );
 }
 
+const VERIFIED_SKILLS_CATEGORIES = [
+  {
+    category: "Spatial & 3D Web",
+    badge: "120 FPS COMPOSITOR",
+    color: "cyan",
+    skills: [
+      { name: "Three.js", tag: "3D Scenes", desc: "Scene graphs, camera projections, custom GLSL meshes" },
+      { name: "WebGL", tag: "GPU Canvas", desc: "Hardware-accelerated shaders & zero-reflow buffers" },
+      { name: "HTML5", tag: "Semantic Web", desc: "Clean document structure, Canvas API & media streaming" },
+      { name: "Tailwind CSS", tag: "Design Tokens", desc: "Fluid layouts, CSS variables & responsive design systems" },
+    ],
+  },
+  {
+    category: "Frontend & Mobile",
+    badge: "REACTIVE RUNTIME",
+    color: "lime",
+    skills: [
+      { name: "TypeScript", tag: "Strict Types", desc: "Strict static typing, generics & compile-time correctness" },
+      { name: "React", tag: "React 19 / Hooks", desc: "Component architecture, concurrent rendering & state machines" },
+      { name: "React Native", tag: "Cross-Platform", desc: "Native iOS & Android apps with 60 FPS gesture mechanics" },
+    ],
+  },
+  {
+    category: "Backend & Services",
+    badge: "HIGH THROUGHPUT",
+    color: "emerald",
+    skills: [
+      { name: "Express.js", tag: "API Framework", desc: "RESTful endpoints, middleware chains & event pipelines" },
+      { name: "API Integration", tag: "Pipelines", desc: "Third-party webhooks, payments & low-latency data sync" },
+    ],
+  },
+  {
+    category: "Data & Architecture",
+    badge: "RELATIONAL INTEGRITY",
+    color: "lime",
+    skills: [
+      { name: "PostgreSQL", tag: "Relational DB", desc: "ACID transactions, relational constraints & indexing" },
+      { name: "Database Design", tag: "Schema 3NF", desc: "Entity-relationship modeling & query optimization" },
+    ],
+  },
+  {
+    category: "Product Design & Tooling",
+    badge: "DESIGN SYSTEMS",
+    color: "cyan",
+    skills: [
+      { name: "Google Stitch / Figma", tag: "UI/UX Craft", desc: "Interactive wireframes, micro-interactions & design specs" },
+    ],
+  },
+];
+
 function PipelineDiagram({ type }: { type?: SubsystemType }) {
   const stepsMap: Record<string, string[]> = {
     router: ["Inventory Ingress", "Material Costing", "P&L Engine", "Audit Report"],
@@ -78,18 +128,8 @@ function PipelineDiagram({ type }: { type?: SubsystemType }) {
     vectordb: ["Business Profile", "Service Catalog", "Geo Ingress", "User Discovery"],
     crdt: ["Pet Profile", "Vaccine Scheduler", "Clinical History", "Care Commerce"],
     ebpf: ["Order Ingress", "Real-Time Bus", "Kitchen Display", "Pickup Alert"],
-    cluster: [
-      "Type Contract",
-      "Component Tree",
-      "API Route",
-      "Relational DB",
-    ],
-    identity: [
-      "Design Engineer",
-      "Co-Founder & CTO",
-      "120 FPS Standard",
-      "Ghana / Remote",
-    ],
+    skills: ["Creative UI & 3D", "Mobile UX", "Backend APIs", "PostgreSQL Data"],
+    cluster: ["Type Contract", "Component Tree", "API Route", "Relational DB"],
   };
 
   const steps = (type && stepsMap[type]) || [
@@ -297,53 +337,34 @@ function SubsystemWidget({ type }: { type?: SubsystemType }) {
         </div>
       );
 
+    case "skills":
     case "cluster":
       return (
-        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
+        <div className="mb-3 p-2.5 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9px] shadow-sm">
           <div className="flex justify-between items-center text-zinc-300 mb-1.5">
             <span className="flex items-center gap-1.5 text-accent-lime font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-              POD REPLICAS
+              SKILLS MATRIX
             </span>
-            <span className="text-emerald-400 font-bold">
-              128/128 HEALTHY
-            </span>
+            <span className="text-zinc-400 font-semibold text-[8px]">12 PROFICIENCIES</span>
           </div>
-          <div className="grid grid-cols-4 gap-1 text-[8.5px] text-center font-bold">
-            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
-              US-E
+          <div className="grid grid-cols-2 gap-1 text-[8.5px]">
+            <div className="p-1 rounded bg-white/[0.04] border border-white/10 flex items-center justify-between">
+              <span className="text-zinc-400">3D / Web</span>
+              <span className="text-accent-lime font-medium">Three &bull; WebGL &bull; React</span>
             </div>
-            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
-              US-W
+            <div className="p-1 rounded bg-white/[0.04] border border-white/10 flex items-center justify-between">
+              <span className="text-zinc-400">Mobile</span>
+              <span className="text-accent-cyan font-medium">React Native</span>
             </div>
-            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
-              EU-C
+            <div className="p-1 rounded bg-white/[0.04] border border-white/10 flex items-center justify-between">
+              <span className="text-zinc-400">Backend</span>
+              <span className="text-zinc-200 font-medium">Express &bull; APIs</span>
             </div>
-            <div className="py-0.5 rounded bg-emerald-500/25 text-emerald-300 border border-emerald-500/40">
-              AP-S
+            <div className="p-1 rounded bg-white/[0.04] border border-white/10 flex items-center justify-between">
+              <span className="text-zinc-400">Data & UI</span>
+              <span className="text-zinc-200 font-medium">Postgres &bull; Figma</span>
             </div>
-          </div>
-        </div>
-      );
-
-    case "identity":
-      return (
-        <div className="mb-3.5 p-3 rounded-xl bg-[#101424] border border-white/20 font-mono text-[9.5px] shadow-sm">
-          <div className="flex justify-between items-center text-zinc-300 mb-1.5">
-            <span className="flex items-center gap-1.5 text-accent-lime font-bold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-              VERIFIED KEY
-            </span>
-            <span className="text-zinc-100 font-bold">ED25519</span>
-          </div>
-          <div className="text-[9px] text-zinc-300 tracking-wider truncate font-semibold">
-            FINGERPRINT: 4A7F 90B2 C811 09E4
-          </div>
-          <div className="flex justify-between text-[8.5px] text-zinc-400 mt-1.5 font-medium">
-            <span>UPTIME: 99.99%</span>
-            <span className="text-accent-lime font-bold">
-              SYSTEM ARCHITECT
-            </span>
           </div>
         </div>
       );
@@ -362,6 +383,7 @@ export const SpatialNodeCard = forwardRef<
   const [activeRightTab, setActiveRightTab] = useState<"screenshots" | "code">(
     node.screenshots && node.screenshots.length > 0 ? "screenshots" : "code"
   );
+  const [activeSkillsTab, setActiveSkillsTab] = useState<"matrix" | "code">("matrix");
   const [selectedScreenshotIdx, setSelectedScreenshotIdx] = useState(0);
 
   const handleMouseEnter = useCallback(() => {
@@ -619,99 +641,220 @@ export const SpatialNodeCard = forwardRef<
                 )}
               </div>
 
-              {/* Right Column: Pipeline Diagram, Screenshots & Code Blueprint */}
+              {/* Right Column: Pipeline Diagram, Screenshots, Skills Matrix & Code Blueprint */}
               <div className="lg:col-span-7 flex flex-col space-y-3">
                 {/* System Pipeline Flow */}
                 <PipelineDiagram type={node.subsystemType} />
 
-                {/* Tab Switcher if Screenshots are available */}
-                {node.screenshots && node.screenshots.length > 0 && node.code && (
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-                    <button
-                      onClick={() => setActiveRightTab("screenshots")}
-                      className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-                        activeRightTab === "screenshots"
-                          ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
-                          : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
-                      }`}
-                    >
-                      <span>📸 PRODUCTION SCREENS ({node.screenshots.length})</span>
-                    </button>
-                    <button
-                      onClick={() => setActiveRightTab("code")}
-                      className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
-                        activeRightTab === "code"
-                          ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
-                          : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
-                      }`}
-                    >
-                      <span>⚡ CODE BLUEPRINT</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* Screenshots View */}
-                {activeRightTab === "screenshots" && node.screenshots && node.screenshots.length > 0 ? (
+                {/* Case 1: Screenshots Available (Project Cards) */}
+                {node.screenshots && node.screenshots.length > 0 ? (
                   <div className="flex-1 flex flex-col space-y-2.5">
-                    {/* Thumbnail Switcher Pills */}
-                    <div className="flex flex-wrap gap-2">
-                      {node.screenshots.map((s, idx) => (
+                    {/* Mode Selector Tabs (Screenshots vs Code Blueprint) */}
+                    {node.code && (
+                      <div className="flex items-center gap-2 border-b border-white/10 pb-2">
                         <button
-                          key={idx}
-                          onClick={() => setSelectedScreenshotIdx(idx)}
-                          className={`font-mono text-[10px] px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 border ${
-                            selectedScreenshotIdx === idx
-                              ? "bg-accent-lime/15 border-accent-lime text-white font-semibold shadow-sm"
-                              : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-zinc-200"
+                          onClick={() => setActiveRightTab("screenshots")}
+                          className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                            activeRightTab === "screenshots"
+                              ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                              : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
                           }`}
                         >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              selectedScreenshotIdx === idx
-                                ? "bg-accent-lime shadow-[0_0_6px_#ccff00]"
-                                : "bg-zinc-600"
-                            }`}
-                          />
-                          <span>{s.badge || `VIEW 0${idx + 1}`}</span>
+                          <span>📸 PRODUCTION SCREENS ({node.screenshots.length})</span>
                         </button>
-                      ))}
+                        <button
+                          onClick={() => setActiveRightTab("code")}
+                          className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                            activeRightTab === "code"
+                              ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                              : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
+                          }`}
+                        >
+                          <span>⚡ CODE BLUEPRINT</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {activeRightTab === "screenshots" ? (
+                      <div className="flex-1 flex flex-col space-y-2.5">
+                        {/* Thumbnail Switcher Pills */}
+                        <div className="flex flex-wrap gap-2">
+                          {node.screenshots.map((s, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => setSelectedScreenshotIdx(idx)}
+                              className={`font-mono text-[10px] px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1.5 border ${
+                                selectedScreenshotIdx === idx
+                                  ? "bg-accent-lime/15 border-accent-lime text-white font-semibold shadow-sm"
+                                  : "bg-white/[0.03] border-white/10 text-zinc-400 hover:text-zinc-200"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full ${
+                                  selectedScreenshotIdx === idx
+                                    ? "bg-accent-lime shadow-[0_0_6px_#ccff00]"
+                                    : "bg-zinc-600"
+                                }`}
+                              />
+                              <span>{s.badge || `VIEW 0${idx + 1}`}</span>
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Screenshot Display Card */}
+                        {(() => {
+                          const currentShot =
+                            node.screenshots[selectedScreenshotIdx] || node.screenshots[0];
+                          return (
+                            <div className="relative rounded-xl overflow-hidden border border-white/20 bg-black/60 shadow-lg">
+                              <picture className="w-full block aspect-[16/9] overflow-hidden bg-black/80">
+                                <img
+                                  src={currentShot.url}
+                                  alt={currentShot.title}
+                                  className="w-full h-full object-contain object-center"
+                                  loading="eager"
+                                />
+                              </picture>
+                              <div className="p-3 bg-[#0a0d17]/95 border-t border-white/10">
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                  <span className="font-display text-xs font-bold text-white">
+                                    {currentShot.title}
+                                  </span>
+                                  {currentShot.badge && (
+                                    <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
+                                      {currentShot.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="font-sans text-[11px] text-zinc-300 leading-relaxed">
+                                  {currentShot.caption}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : (
+                      /* Code Blueprint for project with screenshots */
+                      node.code && (
+                        <div className="flex-1 flex flex-col">
+                          <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
+                            <span className="text-zinc-300 uppercase tracking-wider font-bold">
+                              ARCHITECTURE BLUEPRINT
+                            </span>
+                            <button
+                              onClick={handleCopyCode}
+                              className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
+                            >
+                              <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
+                            </button>
+                          </div>
+                          <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-56 flex-1 font-medium shadow-inner">
+                            <HighlightedCode code={node.code} />
+                          </pre>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ) : node.subsystemType === "skills" ? (
+                  /* Case 2: Skills Card - Dedicated Rich Categorized Skills Board */
+                  <div className="flex-1 flex flex-col space-y-2.5">
+                    {/* Tab Switcher: Matrix vs Code */}
+                    <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                      <button
+                        onClick={() => setActiveSkillsTab("matrix")}
+                        className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                          activeSkillsTab === "matrix"
+                            ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                            : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
+                        }`}
+                      >
+                        <span>⚡ VERIFIED SKILLS MATRIX (12)</span>
+                      </button>
+                      <button
+                        onClick={() => setActiveSkillsTab("code")}
+                        className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                          activeSkillsTab === "code"
+                            ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
+                            : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
+                        }`}
+                      >
+                        <span>&lt;/&gt; ARCHITECTURE BLUEPRINT</span>
+                      </button>
                     </div>
 
-                    {/* Screenshot Display Card */}
-                    {(() => {
-                      const currentShot =
-                        node.screenshots[selectedScreenshotIdx] || node.screenshots[0];
-                      return (
-                        <div className="relative rounded-xl overflow-hidden border border-white/20 bg-black/60 shadow-lg">
-                          <picture className="w-full block aspect-[16/9] overflow-hidden bg-black/80">
-                            <img
-                              src={currentShot.url}
-                              alt={currentShot.title}
-                              className="w-full h-full object-contain object-center"
-                              loading="eager"
-                            />
-                          </picture>
-                          <div className="p-3 bg-[#0a0d17]/95 border-t border-white/10">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <span className="font-display text-xs font-bold text-white">
-                                {currentShot.title}
+                    {activeSkillsTab === "matrix" ? (
+                      /* Rich Categorized Skills Matrix */
+                      <div className="space-y-2.5">
+                        {VERIFIED_SKILLS_CATEGORIES.map((cat, cIdx) => (
+                          <div
+                            key={cIdx}
+                            className="p-3 rounded-xl bg-[#0c101c] border border-white/15 shadow-sm"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-mono text-[10.5px] text-white font-bold tracking-wider uppercase flex items-center gap-2">
+                                <span
+                                  className={`w-1.5 h-1.5 rounded-full ${
+                                    cat.color === "cyan"
+                                      ? "bg-accent-cyan shadow-[0_0_6px_#06b6d4]"
+                                      : cat.color === "emerald"
+                                      ? "bg-accent-emerald shadow-[0_0_6px_#10b981]"
+                                      : "bg-accent-lime shadow-[0_0_6px_#ccff00]"
+                                  }`}
+                                />
+                                {cat.category}
                               </span>
-                              {currentShot.badge && (
-                                <span className="font-mono text-[9px] px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
-                                  {currentShot.badge}
-                                </span>
-                              )}
+                              <span className="font-mono text-[8.5px] px-2 py-0.5 rounded bg-white/[0.06] border border-white/10 text-zinc-300 font-semibold">
+                                {cat.badge}
+                              </span>
                             </div>
-                            <p className="font-sans text-[11px] text-zinc-300 leading-relaxed">
-                              {currentShot.caption}
-                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                              {cat.skills.map((skill, sIdx) => (
+                                <div
+                                  key={sIdx}
+                                  className="p-2 rounded-lg bg-white/[0.03] border border-white/10 hover:border-accent-lime/40 transition-colors"
+                                >
+                                  <div className="flex items-center justify-between mb-0.5">
+                                    <span className="font-display text-[12px] font-bold text-white">
+                                      {skill.name}
+                                    </span>
+                                    <span className="font-mono text-[8.5px] px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10 text-accent-lime font-medium">
+                                      {skill.tag}
+                                    </span>
+                                  </div>
+                                  <p className="font-sans text-[10.5px] text-zinc-300 leading-tight">
+                                    {skill.desc}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                    ) : (
+                      /* Code Blueprint for Skills */
+                      node.code && (
+                        <div className="flex-1 flex flex-col">
+                          <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
+                            <span className="text-zinc-300 uppercase tracking-wider font-bold">
+                              TECHNICAL STACK DEFINITION
+                            </span>
+                            <button
+                              onClick={handleCopyCode}
+                              className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
+                            >
+                              <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
+                            </button>
+                          </div>
+                          <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-64 flex-1 font-medium shadow-inner">
+                            <HighlightedCode code={node.code} />
+                          </pre>
                         </div>
-                      );
-                    })()}
+                      )
+                    )}
                   </div>
                 ) : (
-                  /* Code / Configuration Blueprint */
+                  /* Case 3: Standard Code Blueprint */
                   node.code && (
                     <div className="flex-1 flex flex-col">
                       <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
@@ -734,18 +877,7 @@ export const SpatialNodeCard = forwardRef<
               </div>
             </div>
           </div>
-
-            {/* Bottom Bar for Landscape Console: Clean pinned telemetry */}
-            <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-white/15 font-mono text-[10px] text-zinc-400 shrink-0">
-              <span className="flex items-center gap-2 text-accent-lime text-[9.5px] font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-                ACTIVE NODE TELEMETRY // ZERO-COPY RUNTIME
-              </span>
-              <span className="text-zinc-500 text-[9px] font-mono">
-                STAGE 03 SPATIAL INSPECTION
-              </span>
-            </div>
-          </div>
+        </div>
         ) : (
           /* Compact Overview Layout when Idle */
           <div>

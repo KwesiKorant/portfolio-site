@@ -132,17 +132,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               }`}
               onClick={() => handleClusterClick("stack")}
             >
-              [04 // STACK <kbd>4</kbd>]
-            </button>
-            <button
-              className={`font-mono text-[10px] tracking-wider px-3.5 py-1.5 rounded-lg cursor-pointer inline-flex items-center transition-all ${
-                activeCluster === "dossier"
-                  ? "text-white bg-accent-lime/15 border border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.25)] font-semibold"
-                  : "text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/12"
-              }`}
-              onClick={() => handleClusterClick("dossier")}
-            >
-              [05 // DOSSIER <kbd>5</kbd>]
+              [04 // SKILLS <kbd>4</kbd>]
             </button>
           </nav>
 

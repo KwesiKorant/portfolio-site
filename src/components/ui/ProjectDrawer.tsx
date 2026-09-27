@@ -16,8 +16,8 @@ function PipelineDiagram({ type }: { type?: SubsystemType }) {
     vectordb: ["Business Profile", "Service Catalog", "Geo Ingress", "User Discovery"],
     crdt: ["Pet Profile", "Vaccine Scheduler", "Clinical History", "Care Commerce"],
     ebpf: ["Order Ingress", "Real-Time Bus", "Kitchen Display", "Pickup Alert"],
+    skills: ["Creative UI & 3D", "Mobile UX", "Backend APIs", "PostgreSQL Data"],
     cluster: ["Type Contract", "Component Tree", "API Route", "Relational DB"],
-    identity: ["Design Engineer", "Co-Founder & CTO", "120 FPS Standard", "Ghana / Remote"],
   };
 
   const steps = (type && stepsMap[type]) || ["Ingress", "Processor", "Buffer", "Destination"];
