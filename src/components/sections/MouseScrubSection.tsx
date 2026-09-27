@@ -287,56 +287,56 @@ export const MouseScrubSection: React.FC = () => {
 
       {/* Main Dual-Console View: Left Constructor Console + Center Active Model + Right Concept Panel */}
       <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto">
-        {/* Left: Autonomous Constructor Console (Translucent glassmorphism with crisp legibility) */}
+        {/* Left: AI-Augmented Engineering Workflow Console */}
         <div className="w-full max-w-lg lg:max-w-xl p-6 md:p-8 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
-          {/* Pill Tag */}
+          {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-            <span>AUTONOMOUS CONSTRUCTOR // STAGE 04</span>
+            <span>ENGINEERING PHILOSOPHY // AI-AUGMENTED WORKFLOW</span>
           </div>
 
           {/* Title */}
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-            Synthesizing Kwesi&apos;s Digital Presence
+            The AI-Augmented Engineering Workflow
           </h2>
 
-          {/* Narrative context */}
+          {/* Narrative Thesis */}
           <p className="font-sans text-xs sm:text-sm text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-            Behind the interface is an automated robotic constructor actively compiling my website, assembling code pipelines, and projecting holographic assets of my work in real-time.
+            As a startup CTO and design engineer, I don&apos;t write software in isolation. I harness autonomous AI agents as an engineering force-multiplier to rapidly scaffold systems, audit edge cases, and test prototypes &mdash; enabling a solo builder to deliver enterprise-grade software at 10x velocity.
           </p>
 
-          {/* Technical Specs Grid */}
+          {/* 4-Step Engineering Pipeline Grid */}
           <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                CONSTRUCTOR ACTION
+              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+                01 &bull; AI SCAFFOLDING
               </span>
-              <span className="text-accent-lime font-semibold">
-                Autonomous Site Build
-              </span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                TIMELINE ENGINE
-              </span>
-              <span className="text-white font-semibold">
-                120 FPS All-Intra Seek
+              <span className="text-zinc-200">
+                Rapid prototype generation &amp; boilerplate reduction
               </span>
             </div>
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                INPUT FILTER
+              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+                02 &bull; ARCHITECTURAL RIGOR
               </span>
-              <span className="text-white font-semibold">
-                Vertical-Isolated Dampening
+              <span className="text-zinc-200">
+                Human ownership of schema, domain &amp; financial math
               </span>
             </div>
             <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-zinc-400 uppercase block text-[9px] mb-0.5 font-medium">
-                PROJECTION
+              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+                03 &bull; FRONTEND POLISH
               </span>
-              <span className="text-accent-lime font-semibold">
-                Holographic Workstation
+              <span className="text-zinc-200">
+                120 FPS compositor budgets &amp; zero DOM reflows
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+                04 &bull; MECHANICAL SYMPATHY
+              </span>
+              <span className="text-zinc-200">
+                Hardware All-Intra seek &amp; directional cursor filter
               </span>
             </div>
           </div>
@@ -344,7 +344,7 @@ export const MouseScrubSection: React.FC = () => {
           {/* Real-time scrub gauge */}
           <div className="space-y-1.5 font-mono text-[10px] mb-5">
             <div className="flex justify-between text-zinc-300">
-              <span className="font-medium">ASSEMBLY PROGRESS:</span>
+              <span className="font-medium">WORKFLOW SCRUB PROGRESS:</span>
               <span ref={progressTextRef} className="text-accent-lime font-bold">
                 0.0%
               </span>
@@ -403,46 +403,47 @@ export const MouseScrubSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: The Creative Concept Panel */}
+        {/* Right: Real-World Leverage & Shipped Production Panel */}
         <div className="w-full max-w-lg lg:max-w-sm p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+          {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-            <span>THE CREATIVE CONCEPT</span>
+            <span>REAL-WORLD LEVERAGE // SHIPPED SYSTEMS</span>
           </div>
 
           <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-            Building the Builder
+            From Concept to Shipped Production
           </h3>
 
           <p className="font-sans text-xs text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-            Modern web design shouldn&apos;t feel like a static template. Stage 04 reveals the digital workshop where my portfolio itself is engineered and constructed:
+            How AI-augmented engineering translates into tangible, shipped software across startups, enterprise applications, and high-performance interfaces:
           </p>
 
           <div className="space-y-2.5 font-sans text-xs">
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                01 &bull; THE AUTONOMOUS ARCHITECT
+                01 &bull; ARCFIELD DISCOVER
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                The constructor actively projects my photos, UI components, and system telemetry across background holographic screens in real time.
+                Co-founded Arcfield Systems (CTO) &mdash; prototyped, designed, and launched a live hyperlocal commerce MVP at startup speed.
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                02 &bull; ZERO-REFLOW ALL-INTRA
+                02 &bull; NAYAK FURNITURE ERP
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                All 96 frames of the workstation are encoded as hardware-accelerated All-Intra keyframes, enabling fluid horizontal scrubbing without DOM reflow.
+                Solo engineer delivering full factory inventory, point-of-sale cataloging, and automated P&amp;L financial reports in Ghanaian Cedis (GH₵).
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
-                03 &bull; DIRECTIONAL FILTERING
+                03 &bull; 120 FPS KINETIC COMPOSITOR
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Vertical cursor gestures are isolated from timeline scrub targets, preventing hardware decoder thrashing and guaranteeing stutter-free playback.
+                Zero-reflow All-Intra scrubbing engine with directional tremor filtering, spring haptics, and sub-8ms input response.
               </p>
             </div>
           </div>
