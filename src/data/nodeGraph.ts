@@ -169,6 +169,14 @@ export async function queryDiscoveredServices(coords: GeoLocation, category?: st
     orderBy: { engagementScore: "desc" },
   });
 }`,
+    screenshots: [
+      {
+        url: "/projects/arcfield/arcfield-admin-overview.webp",
+        title: "Arcfield Discover: Admin Operations & Activity Ledger",
+        caption: "Centralized administrative overview monitoring pending business listings, verified merchant reviews, media ingestion queues, and real-time operational audit logs.",
+        badge: "ADMIN OVERVIEW",
+      },
+    ],
   },
   {
     id: "omnisync",

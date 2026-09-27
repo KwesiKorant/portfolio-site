@@ -450,7 +450,7 @@ export const SpatialNodeCard = forwardRef<
       id={`node-${node.id}`}
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
         isActive
-          ? "w-[1040px] max-w-[94vw] z-50 cursor-default"
+          ? "w-[1040px] max-w-[94vw] max-h-[84vh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
           : "w-[330px] max-w-[90vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
@@ -463,10 +463,10 @@ export const SpatialNodeCard = forwardRef<
       {/* Inner Card: 3D tilt when idle, crisp 2D flat rendering when active */}
       <div
         ref={innerCardRef}
-        className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out overflow-hidden antialiased ${
+        className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
-            ? "p-6 bg-[#0a0c16] border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 overflow-hidden [transform-style:flat]"
-            : "p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d]"
+            ? "max-h-[84vh] sm:max-h-[86vh] flex flex-col p-5 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
+            : "p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
         }`}
         onMouseEnter={handleMouseEnter}
         onMouseMove={handleMouseMove}
@@ -491,11 +491,13 @@ export const SpatialNodeCard = forwardRef<
         />
 
         {/* Header Bar */}
-        <div className="flex items-center justify-between gap-3 mb-2.5 font-mono text-[10px] tracking-wider uppercase text-zinc-400">
+        <div className={`flex items-center justify-between gap-3 font-mono text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
+          isActive ? "pb-3 mb-3 border-b border-white/10" : "mb-2.5"
+        }`}>
           <div className="flex items-center gap-2">
             <span className="font-semibold text-zinc-300">{node.category}</span>
             {isActive && (
-              <span className="text-zinc-600 font-mono text-[9px] hidden sm:inline">
+              <span className="text-zinc-500 font-mono text-[9px] hidden sm:inline">
                 // SYSTEM DEEP DIVE
               </span>
             )}
@@ -510,7 +512,7 @@ export const SpatialNodeCard = forwardRef<
             {isActive && (
               <button
                 onClick={handleCloseZoom}
-                className="px-2 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-300 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors"
+                className="px-2.5 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-300 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors"
                 title="Zoom Out / Overview (ESC)"
                 aria-label="Zoom Out"
               >
@@ -522,7 +524,9 @@ export const SpatialNodeCard = forwardRef<
 
         {/* Widescreen Landscape Layout when Active */}
         {isActive ? (
-          <div className="space-y-4">
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Scrollable Content Area without visible scrollbar */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
               {/* Left Column: Specs, Metrics, Description */}
               <div className="lg:col-span-5 flex flex-col justify-between space-y-3.5">
@@ -729,9 +733,10 @@ export const SpatialNodeCard = forwardRef<
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Bottom Bar for Landscape Console */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/15 font-mono text-[10.5px] text-zinc-300">
+            {/* Bottom Bar for Landscape Console: Pinned to bottom of modal */}
+            <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/15 font-mono text-[10.5px] text-zinc-300 shrink-0">
               <span className="flex items-center gap-2 text-accent-lime text-[10px] font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
                 ACTIVE NODE TELEMETRY // ZERO-COPY RUNTIME
@@ -747,6 +752,29 @@ export const SpatialNodeCard = forwardRef<
         ) : (
           /* Compact Overview Layout when Idle */
           <div>
+            {/* If node has screenshots, display high-impact image preview */}
+            {node.screenshots && node.screenshots.length > 0 && (
+              <div className="relative mb-3 rounded-xl overflow-hidden border border-white/15 bg-black/60 aspect-[16/10] group-hover:border-accent-lime/50 transition-all duration-200 shadow-md">
+                <img
+                  src={node.screenshots[0].url}
+                  alt={node.screenshots[0].title || node.title}
+                  className="w-full h-full object-cover object-top filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 group-hover:brightness-100 transition-all duration-300"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0d14] via-transparent to-transparent pointer-events-none opacity-85" />
+                <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between font-mono text-[9px] pointer-events-none">
+                  <span className="px-2 py-0.5 rounded-md bg-black/80 border border-white/20 text-accent-lime font-bold shadow-sm">
+                    {node.screenshots[0].badge || "SHIPPED UI"}
+                  </span>
+                  {node.screenshots.length > 1 && (
+                    <span className="px-2 py-0.5 rounded-md bg-black/80 border border-white/20 text-zinc-300 font-medium shadow-sm">
+                      +{node.screenshots.length - 1} SCREENS
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
               {node.title}
             </div>

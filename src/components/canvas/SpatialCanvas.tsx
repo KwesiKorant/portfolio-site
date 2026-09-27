@@ -1579,7 +1579,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 const halfH = Math.round(el.offsetHeight * 0.5);
                 const posX = Math.round(proj.screenX) - halfW;
                 const posY = Math.round(proj.screenY) - halfH;
-                el.style.transform = `translate3d(${posX}px, ${posY}px, 0) scale3d(1, 1, 1)`;
+                const clampedX = Math.max(16, Math.min(window.innerWidth - el.offsetWidth - 16, posX));
+                const clampedY = Math.max(16, Math.min(window.innerHeight - el.offsetHeight - 16, posY));
+                el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
                 el.style.zIndex = "50";
               } else {
                 el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${proj.scale.toFixed(3)}, ${proj.scale.toFixed(3)}, 1)`;
