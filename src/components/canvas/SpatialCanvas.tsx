@@ -87,6 +87,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     const targetOrbitAngleRef = useRef({ yaw: 0, pitch: 0 });
     const currentOrbitAngleRef = useRef({ yaw: 0, pitch: 0 });
     const activeNodeIdRef = useRef<string>("root");
+    const hoveredNodeIdRef = useRef<string | null>(null);
     const highlightConnRef = useRef<
       ((nodeId: string, isHovered: boolean) => void) | null
     >(null);
@@ -97,6 +98,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         if (!node) return;
 
         activeNodeIdRef.current = nodeId;
+        hoveredNodeIdRef.current = null;
         onNodeActivated(nodeId);
         playWarpSound();
 
@@ -957,8 +959,33 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       video.addEventListener("loadedmetadata", calibrateVideoDimensions);
       calibrateVideoDimensions();
 
-      // Highlight connection trigger
+      // Highlight connection & depth-peeking trigger
       const highlightConnection = (nodeId: string, isHovered: boolean) => {
+        if (isHovered) {
+          hoveredNodeIdRef.current = nodeId;
+        } else if (hoveredNodeIdRef.current === nodeId) {
+          hoveredNodeIdRef.current = null;
+        }
+
+        // Instantaneous 0ms DOM styling update (Option B: Z-index elevation + sibling dimming)
+        if (activeNodeIdRef.current === "root" && nodeRefs.current) {
+          const activeHoverId = hoveredNodeIdRef.current;
+          nodeRefs.current.forEach((el, id) => {
+            if (activeHoverId) {
+              if (id === activeHoverId) {
+                el.style.zIndex = "45";
+                el.style.opacity = "1";
+              } else {
+                el.style.zIndex = "20";
+                el.style.opacity = "0.35";
+              }
+            } else {
+              el.style.zIndex = "20";
+              el.style.opacity = "1";
+            }
+          });
+        }
+
         curvesList.forEach((c) => {
           if (c.nodeId === nodeId) {
             (c.lineMesh.material as THREE.LineBasicMaterial).color.setHex(
@@ -1662,13 +1689,28 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
             if (proj.isVisible) {
               const isThisNodeActive = activeNodeIdRef.current === node.id;
-              el.style.opacity = isNodeFocused
-                ? isThisNodeActive
-                  ? "1"
-                  : "0"
-                : "1";
-              el.style.pointerEvents =
-                isNodeFocused && !isThisNodeActive ? "none" : "auto";
+              const isThisNodeHovered = hoveredNodeIdRef.current === node.id;
+              const isAnyNodeHovered = hoveredNodeIdRef.current !== null;
+
+              if (isNodeFocused) {
+                el.style.opacity = isThisNodeActive ? "1" : "0";
+                el.style.pointerEvents =
+                  isThisNodeActive ? "auto" : "none";
+                el.style.zIndex = isThisNodeActive ? "50" : "20";
+              } else {
+                if (isThisNodeHovered) {
+                  el.style.opacity = "1";
+                  el.style.zIndex = "45"; // Float in front of obstructed siblings
+                } else if (isAnyNodeHovered) {
+                  el.style.opacity = "0.35"; // Subtly dim siblings for clarity
+                  el.style.zIndex = "20";
+                } else {
+                  el.style.opacity = "1";
+                  el.style.zIndex = "20";
+                }
+                el.style.pointerEvents = "auto";
+              }
+
               if (isThisNodeActive) {
                 // Ensure active card is positioned with exact integer pixels (avoiding calc(-50%) on odd heights which creates 0.5px subpixel font blur)
                 const halfW = Math.round(el.offsetWidth * 0.5);
@@ -1681,7 +1723,6 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 el.style.zIndex = "50";
               } else {
                 el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${proj.scale.toFixed(3)}, ${proj.scale.toFixed(3)}, 1)`;
-                el.style.zIndex = "20";
               }
             } else {
               el.style.opacity = "0";
