@@ -27,6 +27,7 @@ export interface SpatialCanvasHandle {
   dollyBy: (deltaZ: number) => void;
   warpToCoords: (wx: number, wy: number) => void;
   panBy: (deltaX: number, deltaY: number) => void;
+  rotateBy: (deltaYaw: number, deltaPitch: number) => void;
   resetCamera: () => void;
   highlightConnection: (nodeId: string, isHovered: boolean) => void;
   triggerDimensionalBreach: (direction?: "enter" | "exit") => void;
@@ -83,6 +84,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     const currentCamRef = useRef({ x: 0, y: 75, z: DEFAULT_CAMERA_Z });
     const targetLookAtRef = useRef({ x: 0, y: -60, z: 0 });
     const currentLookAtRef = useRef({ x: 0, y: -60, z: 0 });
+    const targetOrbitAngleRef = useRef({ yaw: 0, pitch: 0 });
+    const currentOrbitAngleRef = useRef({ yaw: 0, pitch: 0 });
     const activeNodeIdRef = useRef<string>("root");
     const highlightConnRef = useRef<
       ((nodeId: string, isHovered: boolean) => void) | null
@@ -98,6 +101,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         playWarpSound();
 
         if (nodeId === "root") {
+          targetOrbitAngleRef.current.yaw = 0;
+          targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
           targetCamRef.current.y = 75;
           targetCamRef.current.z = DEFAULT_CAMERA_Z;
@@ -154,7 +159,19 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           targetLookAtRef.current.x = targetCamRef.current.x;
           targetLookAtRef.current.y = targetCamRef.current.y - 135;
         },
+        rotateBy: (deltaYaw: number, deltaPitch: number) => {
+          targetOrbitAngleRef.current.yaw = Math.max(
+            -0.58,
+            Math.min(targetOrbitAngleRef.current.yaw + deltaYaw, 0.58)
+          );
+          targetOrbitAngleRef.current.pitch = Math.max(
+            -0.32,
+            Math.min(targetOrbitAngleRef.current.pitch + deltaPitch, 0.32)
+          );
+        },
         resetCamera: () => {
+          targetOrbitAngleRef.current.yaw = 0;
+          targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
           targetCamRef.current.y = 75;
           targetCamRef.current.z = DEFAULT_CAMERA_Z;
@@ -1416,10 +1433,36 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         ambientParallaxX += (targetParallaxX - ambientParallaxX) * lerpFactor;
         ambientParallaxY += (targetParallaxY - ambientParallaxY) * lerpFactor;
 
+        // Camera orbit angle lerp (critically damped)
+        const dyaw = targetOrbitAngleRef.current.yaw - currentOrbitAngleRef.current.yaw;
+        const dpitch = targetOrbitAngleRef.current.pitch - currentOrbitAngleRef.current.pitch;
+        currentOrbitAngleRef.current.yaw += Math.abs(dyaw) < 0.0005 ? dyaw : dyaw * lerpFactor;
+        currentOrbitAngleRef.current.pitch += Math.abs(dpitch) < 0.0005 ? dpitch : dpitch * lerpFactor;
+
+        // Orbit rotation around lookAt target focus point
+        const vx = currentCamRef.current.x - currentLookAtRef.current.x;
+        const vy = currentCamRef.current.y - currentLookAtRef.current.y;
+        const vz = currentCamRef.current.z - currentLookAtRef.current.z;
+
+        const cyaw = Math.cos(currentOrbitAngleRef.current.yaw);
+        const syaw = Math.sin(currentOrbitAngleRef.current.yaw);
+        const cpitch = Math.cos(currentOrbitAngleRef.current.pitch);
+        const spitch = Math.sin(currentOrbitAngleRef.current.pitch);
+
+        // Yaw rotation around Y axis
+        const rotY_x = vx * cyaw + vz * syaw;
+        const rotY_z = -vx * syaw + vz * cyaw;
+        const rotY_y = vy;
+
+        // Pitch rotation around local X axis
+        const rot_x = rotY_x;
+        const rot_y = rotY_y * cpitch + rotY_z * spitch;
+        const rot_z = -rotY_y * spitch + rotY_z * cpitch;
+
         camera.position.set(
-          currentCamRef.current.x + ambientParallaxX,
-          currentCamRef.current.y + ambientParallaxY,
-          currentCamRef.current.z
+          currentLookAtRef.current.x + rot_x + ambientParallaxX,
+          currentLookAtRef.current.y + rot_y + ambientParallaxY,
+          currentLookAtRef.current.z + rot_z
         );
         camera.lookAt(
           currentLookAtRef.current.x + ambientParallaxX * 0.35,
@@ -1650,7 +1693,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Update telemetry
         const telEl = telemetryRef.current;
         if (telEl) {
-          telEl.textContent = `POS: [${currentCamRef.current.x.toFixed(0)}, ${currentCamRef.current.y.toFixed(0)}, ${currentCamRef.current.z.toFixed(0)}] | ${fps} FPS`;
+          const yawDeg = Math.round((currentOrbitAngleRef.current.yaw * 180) / Math.PI);
+          const pitchDeg = Math.round((currentOrbitAngleRef.current.pitch * 180) / Math.PI);
+          telEl.textContent = `POS: [${camera.position.x.toFixed(0)}, ${camera.position.y.toFixed(0)}, ${camera.position.z.toFixed(0)}] | ROT: [${yawDeg}°, ${pitchDeg}°] | ${fps} FPS`;
         }
 
         // Throttle radar render to 40 FPS

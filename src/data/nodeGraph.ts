@@ -17,7 +17,7 @@ export const PRO_HINTS: string[] = [
   "Press ← → or 1 - 4 to navigate between project cards • Press 0 for Hero",
   "Hover cards for dynamic 3D tilt & holographic light reflection",
   "Scroll mouse wheel to fly-through depth • Drag to orbit & pan",
-  "Click or drag RADAR MAP • Hold + / − or D-Pad (◀ ▲ ▼ ▶) for smooth 3D flight",
+  "Click or drag RADAR MAP • D-Pad (◀ ▲ ▼ ▶) to pan • (↺ ↻ ⤹ ⤸) to orbit",
   "Press ESC or click outside card to return to high-angle system overview • Press ? for guide",
 ];
 

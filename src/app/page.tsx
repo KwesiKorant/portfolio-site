@@ -287,6 +287,7 @@ export default function SpatialPortfolioPage() {
           onZoomOut={() => canvasHandleRef.current?.dollyBy(180)}
           onContinuousZoom={(dz) => canvasHandleRef.current?.dollyBy(dz)}
           onPanBy={(dx, dy) => canvasHandleRef.current?.panBy(dx, dy)}
+          onRotateBy={(dyaw, dpitch) => canvasHandleRef.current?.rotateBy(dyaw, dpitch)}
           onResetCamera={() => {
             canvasHandleRef.current?.resetCamera();
             handleFocusNode("root");

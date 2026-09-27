@@ -104,6 +104,10 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
               <span className="font-mono text-[10px] text-accent-lime">Click or Drag Grid</span>
             </div>
             <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
+              <span>Rotate / Orbit 3D</span>
+              <span className="font-mono text-[10px] text-zinc-400">Hold (↺ ↻ ⤹ ⤸)</span>
+            </div>
+            <div className="flex justify-between items-center text-[11px] text-zinc-300 mb-2">
               <span>Reset Overview</span>
               <span className="font-mono text-[10px] text-zinc-400">Click Center (⟳)</span>
             </div>

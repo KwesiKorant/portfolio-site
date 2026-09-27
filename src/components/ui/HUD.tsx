@@ -16,6 +16,7 @@ interface HUDProps {
   onZoomOut: () => void;
   onContinuousZoom?: (deltaZ: number) => void;
   onPanBy?: (deltaX: number, deltaY: number) => void;
+  onRotateBy?: (deltaYaw: number, deltaPitch: number) => void;
   onResetCamera: () => void;
   onWarpToCoords: (wx: number, wy: number) => void;
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -88,6 +89,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       onZoomOut,
       onContinuousZoom,
       onPanBy,
+      onRotateBy,
       onResetCamera,
       onWarpToCoords,
       radarCanvasRef,
@@ -141,6 +143,26 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
     const panRightHold = useHoldAction(
       () => onPanBy?.(120, 0),
       () => onPanBy?.(14, 0),
+      16
+    );
+    const rotLeftHold = useHoldAction(
+      () => onRotateBy?.(-0.065, 0),
+      () => onRotateBy?.(-0.008, 0),
+      16
+    );
+    const rotRightHold = useHoldAction(
+      () => onRotateBy?.(0.065, 0),
+      () => onRotateBy?.(0.008, 0),
+      16
+    );
+    const tiltDownHold = useHoldAction(
+      () => onRotateBy?.(0, -0.055),
+      () => onRotateBy?.(0, -0.0065),
+      16
+    );
+    const tiltUpHold = useHoldAction(
+      () => onRotateBy?.(0, 0.055),
+      () => onRotateBy?.(0, 0.0065),
       16
     );
 
@@ -244,16 +266,24 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               </button>
             </div>
 
-            {/* Tactical 5-Way Flight D-Pad Matrix (Pan X/Y + Center Reset) */}
+            {/* Tactical 9-Way Flight & Gimbal D-Pad Matrix (Pan X/Y + Orbit Yaw/Pitch + Center Reset) */}
             <div className="flex flex-col justify-between h-[122px] w-[96px] bg-[#0c0e1a]/80 border border-white/10 rounded-xl p-1.5">
               <div className="font-mono text-[7.5px] tracking-widest text-zinc-400 uppercase text-center font-semibold pb-0.5">
-                GIMBAL // PAN
+                GIMBAL 3D
               </div>
 
               {/* D-Pad Grid (3 rows x 3 cols) */}
               <div className="grid grid-cols-3 gap-1 items-center justify-items-center flex-1">
-                {/* Row 1: Spacer, Up, Spacer */}
-                <div className="w-[28px] h-[26px]" />
+                {/* Row 1: Rotate Left (↺), Pan Up (▲), Rotate Right (↻) */}
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...rotLeftHold}
+                  title="Orbit / Rotate Left (↺ hold to turn left)"
+                  aria-label="Rotate Left"
+                >
+                  <span className="text-[12px] leading-none font-mono font-bold">↺</span>
+                </button>
+
                 <button
                   className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
                   {...panUpHold}
@@ -262,9 +292,17 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 >
                   <span className="text-[10px] leading-none font-mono font-bold">▲</span>
                 </button>
-                <div className="w-[28px] h-[26px]" />
 
-                {/* Row 2: Left, Center Reset, Right */}
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...rotRightHold}
+                  title="Orbit / Rotate Right (↻ hold to turn right)"
+                  aria-label="Rotate Right"
+                >
+                  <span className="text-[12px] leading-none font-mono font-bold">↻</span>
+                </button>
+
+                {/* Row 2: Pan Left (◀), Center Reset (⟳), Pan Right (▶) */}
                 <button
                   className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
                   {...panLeftHold}
@@ -280,8 +318,8 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                     playKeyClick();
                     onResetCamera();
                   }}
-                  title="Reset Overview / Center (⟳)"
-                  aria-label="Reset Overview"
+                  title="Reset Overview & Orientation (⟳)"
+                  aria-label="Reset Overview and Orientation"
                 >
                   <span className="text-[12px] font-bold leading-none font-mono">&#8635;</span>
                 </button>
@@ -295,8 +333,16 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                   <span className="text-[10px] leading-none font-mono font-bold">▶</span>
                 </button>
 
-                {/* Row 3: Spacer, Down, Spacer */}
-                <div className="w-[28px] h-[26px]" />
+                {/* Row 3: Tilt Down (⤹), Pan Down (▼), Tilt Up (⤸) */}
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...tiltDownHold}
+                  title="Tilt Down (⤹ hold to tilt down)"
+                  aria-label="Tilt Down"
+                >
+                  <span className="text-[11px] leading-none font-mono font-bold">⤹</span>
+                </button>
+
                 <button
                   className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
                   {...panDownHold}
@@ -305,7 +351,15 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 >
                   <span className="text-[10px] leading-none font-mono font-bold">▼</span>
                 </button>
-                <div className="w-[28px] h-[26px]" />
+
+                <button
+                  className="w-[28px] h-[26px] flex items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/20 text-zinc-300 hover:text-accent-lime rounded-lg transition-all cursor-pointer shadow-sm active:scale-90 touch-none"
+                  {...tiltUpHold}
+                  title="Tilt Up (⤸ hold to tilt up)"
+                  aria-label="Tilt Up"
+                >
+                  <span className="text-[11px] leading-none font-mono font-bold">⤸</span>
+                </button>
               </div>
             </div>
           </div>
