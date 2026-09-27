@@ -735,89 +735,134 @@ export const SpatialNodeCard = forwardRef<
             </div>
           </div>
 
-            {/* Bottom Bar for Landscape Console: Pinned to bottom of modal */}
-            <div className="flex items-center justify-between pt-3 mt-3 border-t border-white/15 font-mono text-[10.5px] text-zinc-300 shrink-0">
-              <span className="flex items-center gap-2 text-accent-lime text-[10px] font-semibold">
+            {/* Bottom Bar for Landscape Console: Clean pinned telemetry */}
+            <div className="flex items-center justify-between pt-2.5 mt-2.5 border-t border-white/15 font-mono text-[10px] text-zinc-400 shrink-0">
+              <span className="flex items-center gap-2 text-accent-lime text-[9.5px] font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
                 ACTIVE NODE TELEMETRY // ZERO-COPY RUNTIME
               </span>
-              <button
-                onClick={handleCloseZoom}
-                className="text-accent-lime font-bold hover:underline cursor-pointer flex items-center gap-1.5 px-3 py-1 rounded-md bg-accent-lime/10 border border-accent-lime/30 hover:bg-accent-lime/20 transition-all text-[10.5px]"
-              >
-                <span>&larr; ZOOM OUT [ESC]</span>
-              </button>
+              <span className="text-zinc-500 text-[9px] font-mono">
+                STAGE 03 SPATIAL INSPECTION
+              </span>
             </div>
           </div>
         ) : (
           /* Compact Overview Layout when Idle */
           <div>
-            {/* If node has screenshots, display high-impact image preview */}
-            {node.screenshots && node.screenshots.length > 0 && (
-              <div className="relative mb-3 rounded-xl overflow-hidden border border-white/15 bg-black/60 aspect-[16/10] group-hover:border-accent-lime/50 transition-all duration-200 shadow-md">
-                <img
-                  src={node.screenshots[0].url}
-                  alt={node.screenshots[0].title || node.title}
-                  className="w-full h-full object-cover object-top filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 group-hover:brightness-100 transition-all duration-300"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0c0d14] via-transparent to-transparent pointer-events-none opacity-85" />
-                <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between font-mono text-[9px] pointer-events-none">
-                  <span className="px-2 py-0.5 rounded-md bg-black/80 border border-white/20 text-accent-lime font-bold shadow-sm">
-                    {node.screenshots[0].badge || "SHIPPED UI"}
-                  </span>
-                  {node.screenshots.length > 1 && (
-                    <span className="px-2 py-0.5 rounded-md bg-black/80 border border-white/20 text-zinc-300 font-medium shadow-sm">
-                      +{node.screenshots.length - 1} SCREENS
+            {node.screenshots && node.screenshots.length > 0 ? (
+              /* Compact Layout for cards WITH image preview */
+              <div>
+                {/* High-impact image preview */}
+                <div className="relative mb-2.5 rounded-xl overflow-hidden border border-white/15 bg-black/60 aspect-[16/9] group-hover:border-accent-lime/60 transition-all duration-200 shadow-md">
+                  <img
+                    src={node.screenshots[0].url}
+                    alt={node.screenshots[0].title || node.title}
+                    className="w-full h-full object-cover object-top filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 group-hover:brightness-100 transition-all duration-300"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0c0d14]/85 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between font-mono text-[8.5px] pointer-events-none">
+                    <span className="px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-accent-lime font-bold shadow-sm">
+                      {node.screenshots[0].badge || "SHIPPED UI"}
+                    </span>
+                    {node.screenshots.length > 1 && (
+                      <span className="px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-zinc-300 font-medium shadow-sm">
+                        +{node.screenshots.length - 1} MORE
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Title */}
+                <div className="font-display text-[16px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
+                  {node.title}
+                </div>
+
+                {/* Role & Key Metric */}
+                <div className="flex items-center justify-between gap-2 font-mono text-[9px] mb-2">
+                  {node.role && (
+                    <span className="text-accent-lime font-medium truncate flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-accent-lime" />
+                      {node.role}
+                    </span>
+                  )}
+                  {node.metrics && node.metrics[0] && (
+                    <span className="text-zinc-400 font-mono px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/10 shrink-0">
+                      {node.metrics[0].label}: <strong className="text-white font-medium">{node.metrics[0].val}</strong>
                     </span>
                   )}
                 </div>
-              </div>
-            )}
 
-            <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
-              {node.title}
-            </div>
-
-            {node.role && (
-              <div className="font-mono text-[9.5px] text-accent-lime font-medium mb-2 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="w-1 h-1 rounded-full bg-accent-lime" />
-                <span>{node.role}</span>
-              </div>
-            )}
-
-            {node.desc && (
-              <div className="font-sans text-[12.5px] leading-relaxed text-zinc-300 mb-3 line-clamp-2">
-                {node.desc}
-              </div>
-            )}
-
-            <SubsystemWidget type={node.subsystemType} />
-
-            {node.tags && node.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2.5 mb-3">
-                {node.tags.slice(0, 3).map((t) => (
-                  <span
-                    key={t}
-                    className="font-mono text-[9px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/12 text-zinc-400"
-                  >
-                    {t}
-                  </span>
-                ))}
-                {node.tags.length > 3 && (
-                  <span className="font-mono text-[9px] px-1.5 py-0.5 text-zinc-500">
-                    +{node.tags.length - 3}
-                  </span>
+                {/* 2 Key Tags */}
+                {node.tags && node.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mb-2.5">
+                    {node.tags.slice(0, 2).map((t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-[8.5px] px-2 py-0.5 rounded bg-white/[0.04] border border-white/10 text-zinc-400"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 )}
+
+                {/* Compact Footer */}
+                <div className="flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] text-zinc-400">
+                  <span className="text-zinc-500">LIVE MVP</span>
+                  <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150 flex items-center gap-1">
+                    Inspect Node &rarr;
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Standard Layout for cards WITHOUT image preview */
+              <div>
+                <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
+                  {node.title}
+                </div>
+
+                {node.role && (
+                  <div className="font-mono text-[9.5px] text-accent-lime font-medium mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-accent-lime" />
+                    <span>{node.role}</span>
+                  </div>
+                )}
+
+                {node.desc && (
+                  <div className="font-sans text-[12.5px] leading-relaxed text-zinc-300 mb-3 line-clamp-2">
+                    {node.desc}
+                  </div>
+                )}
+
+                <SubsystemWidget type={node.subsystemType} />
+
+                {node.tags && node.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5 mb-3">
+                    {node.tags.slice(0, 3).map((t) => (
+                      <span
+                        key={t}
+                        className="font-mono text-[9px] px-2 py-0.5 rounded-md bg-white/[0.05] border border-white/12 text-zinc-400"
+                      >
+                        {t}
+                      </span>
+                    ))}
+                    {node.tags.length > 3 && (
+                      <span className="font-mono text-[9px] px-1.5 py-0.5 text-zinc-500">
+                        +{node.tags.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9.5px] text-zinc-400">
+                  <span>ONLINE</span>
+                  <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150">
+                    Inspect Node &rarr;
+                  </span>
+                </div>
               </div>
             )}
-
-            <div className="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9.5px] text-zinc-400">
-              <span>ONLINE</span>
-              <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150">
-                Inspect Node &rarr;
-              </span>
-            </div>
           </div>
         )}
       </div>
