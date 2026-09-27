@@ -425,7 +425,7 @@ export const MouseScrubSection: React.FC = () => {
                 01 &bull; ARCFIELD DISCOVER
               </div>
               <p className="text-zinc-200 text-[11.5px] leading-relaxed">
-                Co-founded Arcfield Systems (CTO) &mdash; prototyped, designed, and launched a live hyperlocal commerce MVP at startup speed.
+                Co-founded Arcfield Systems (CTO) &mdash; prototyped, designed, and launched a live business and service discovery MVP at startup speed.
               </p>
             </div>
 
