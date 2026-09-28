@@ -20,6 +20,13 @@ export const MouseScrubSection: React.FC = () => {
   const lastClientY = useRef<number>(-1);
   const lastCommittedTimeRef = useRef<number>(-1);
 
+  // Touch scrubbing state with directional intent separation
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const touchStartTimeRef = useRef<number>(0);
+  const isTouchDragging = useRef<boolean>(false);
+  const touchIntent = useRef<"horizontal" | "vertical" | null>(null);
+
   // Easing values for zero-reflow rAF loop
   const targetTimeRef = useRef<number>(0);
   const displayedTimeRef = useRef<number>(0);
@@ -255,6 +262,59 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
+  // High-performance touch scrubbing with directional intent guard
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) return;
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchStartTimeRef.current = targetTimeRef.current;
+    isTouchDragging.current = true;
+    touchIntent.current = null;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!isTouchDragging.current || e.touches.length !== 1) return;
+    const video = videoRef.current;
+    if (!video || !video.duration) return;
+
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const totalDx = currentX - (touchStartX.current ?? currentX);
+    const totalDy = currentY - (touchStartY.current ?? currentY);
+
+    if (touchIntent.current === null) {
+      const dist = Math.hypot(totalDx, totalDy);
+      if (dist > 8) {
+        if (Math.abs(totalDx) >= Math.abs(totalDy) * 1.15) {
+          touchIntent.current = "horizontal";
+          setIsAutoOrbit(false);
+        } else {
+          touchIntent.current = "vertical";
+        }
+      }
+    }
+
+    if (touchIntent.current === "horizontal") {
+      const scrubWidth = Math.max(260, window.innerWidth * 0.72);
+      const deltaRatio = -totalDx / scrubWidth;
+      let newTime = ((touchStartTimeRef.current ?? 0) + deltaRatio * video.duration) % video.duration;
+      if (newTime < 0) newTime += video.duration;
+
+      targetTimeRef.current = newTime;
+      if (isSettled.current || !rafId.current) {
+        isSettled.current = false;
+        rafId.current = requestAnimationFrame(easeScrub);
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    isTouchDragging.current = false;
+    touchIntent.current = null;
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
   const handleStep = (stepRatio: number) => {
     setIsAutoOrbit(false);
     const video = videoRef.current;
@@ -368,8 +428,11 @@ export const MouseScrubSection: React.FC = () => {
     <section
       ref={containerRef}
       id="section-scrub"
-      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-6 md:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
+      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-4 sm:p-8 md:p-12 overflow-y-auto md:overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
       onMouseMove={handleMouseMove}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       aria-label="Kinetic Frame Interaction Section"
     >
       {/* Video Element: Always Paused, Hardware Seek Only */}
@@ -391,18 +454,24 @@ export const MouseScrubSection: React.FC = () => {
       <div className="relative z-20 flex justify-between items-center w-full font-mono text-[10px] text-zinc-400">
         <button
           onClick={handleToSpatial}
-          className="group cursor-pointer flex items-center gap-2 text-zinc-300 hover:text-white px-4 py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12]/80 hover:bg-[#080a12] transition-all backdrop-blur-md shadow-md pointer-events-auto"
+          className="group cursor-pointer flex items-center gap-2 text-zinc-300 hover:text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12]/80 hover:bg-[#080a12] transition-all backdrop-blur-md shadow-md pointer-events-auto active:scale-95"
           title="Return to Stage 03 3D Spatial Deck"
         >
           <span className="text-accent-lime text-xs group-hover:-translate-y-0.5 transition-transform font-bold">&uarr;</span>
-          <span>STAGE 03 // 3D SPATIAL DECK</span>
+          <span>STAGE 03 // 3D DECK</span>
         </button>
+
+        {/* Mobile touch scrubber cue */}
+        <div className="flex md:hidden items-center gap-1.5 text-zinc-400 text-[9px] font-mono">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+          <span>SWIPE &harr; TO SCRUB 360°</span>
+        </div>
       </div>
 
       {/* Main Dual-Console View: Left Constructor Console + Center Active Model + Right Concept Panel */}
-      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto">
+      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto py-4 sm:py-6">
         {/* Left: AI-Augmented Engineering Workflow Console */}
-        <div className="w-full max-w-lg lg:max-w-xl p-6 md:p-8 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-lg lg:max-w-xl p-5 sm:p-6 md:p-8 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -479,21 +548,21 @@ export const MouseScrubSection: React.FC = () => {
           </div>
 
           {/* Interactive Control Deck */}
-          <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/10">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/10">
             <button
               onClick={() => setIsAutoOrbit((prev) => !prev)}
-              className={`font-mono text-[10.5px] px-4 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`font-mono text-[10px] sm:text-[10.5px] px-3.5 sm:px-4 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isAutoOrbit
                   ? "bg-accent-lime/25 border-accent-lime text-accent-lime font-bold shadow-[0_0_15px_rgba(204,255,0,0.3)]"
                   : "bg-white/[0.06] hover:bg-white/[0.12] border-white/20 text-white font-medium"
               }`}
             >
-              <span>{isAutoOrbit ? "■ STOP ORBIT" : "▶ AUTO-ORBIT 360°"}</span>
+              <span>{isAutoOrbit ? "■ STOP" : "▶ AUTO-ORBIT"}</span>
             </button>
 
             <button
               onClick={() => handleStep(-0.05)}
-              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer"
+              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
               title="Step back 5%"
             >
               &larr; STEP
@@ -501,7 +570,7 @@ export const MouseScrubSection: React.FC = () => {
 
             <button
               onClick={() => handleStep(0.05)}
-              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer"
+              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
               title="Step forward 5%"
             >
               STEP &rarr;
@@ -509,7 +578,7 @@ export const MouseScrubSection: React.FC = () => {
 
             <button
               onClick={handleReset}
-              className="font-mono text-[10.5px] px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ml-auto"
+              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ml-auto active:scale-95"
               title="Reset rotation to 0°"
             >
               RESET 0&deg;
@@ -518,7 +587,7 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Right: Real-World Leverage & Shipped Production Panel */}
-        <div className="w-full max-w-lg lg:max-w-sm p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-lg lg:max-w-sm p-5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />

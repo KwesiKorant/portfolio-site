@@ -489,7 +489,7 @@ export const SpatialNodeCard = forwardRef<
       id={`node-${node.id}`}
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
         isActive
-          ? "w-[1040px] max-w-[94vw] max-h-[84vh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
+          ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[85dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
           : "w-[330px] max-w-[90vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
@@ -504,7 +504,7 @@ export const SpatialNodeCard = forwardRef<
         ref={innerCardRef}
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
-            ? "max-h-[84vh] sm:max-h-[86vh] flex flex-col p-5 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
+            ? "max-h-[85dvh] sm:max-h-[86vh] flex flex-col p-4 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
             : "p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
         }`}
         style={isActive ? { transform: "none" } : undefined}
@@ -548,11 +548,13 @@ export const SpatialNodeCard = forwardRef<
             {isActive && (
               <button
                 onClick={handleCloseZoom}
-                className="px-2.5 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-300 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors"
+                className="px-2.5 sm:px-3 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-200 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors active:scale-95"
                 title="Zoom Out / Overview (ESC)"
                 aria-label="Zoom Out"
               >
-                <span>&times; ESC</span>
+                <span className="font-bold text-xs leading-none">&times;</span>
+                <span className="hidden sm:inline">ESC</span>
+                <span className="sm:hidden">CLOSE</span>
               </button>
             )}
           </div>
@@ -563,7 +565,7 @@ export const SpatialNodeCard = forwardRef<
           node.subsystemType === "skills" ? (
             /* Dedicated Minimalist Skills Modal (Zero fluff, zero pipeline) */
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y">
                 {/* Header Info */}
                 <div>
                   <h2 className="font-display text-[22px] sm:text-[26px] font-bold text-white tracking-tight mb-1">
@@ -606,8 +608,8 @@ export const SpatialNodeCard = forwardRef<
             /* Standard Project Case Study Layout */
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Scrollable Content Area without visible scrollbar */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
                 {/* Left Column: Specs, Metrics, Description */}
                 <div className="lg:col-span-5 flex flex-col justify-between space-y-3.5">
                   <div>
@@ -709,20 +711,20 @@ export const SpatialNodeCard = forwardRef<
                     <div className="flex-1 flex flex-col space-y-2.5">
                       {/* Mode Selector Tabs (Screenshots vs Code Blueprint) */}
                       {node.code && (
-                        <div className="flex items-center gap-2 border-b border-white/10 pb-2">
+                        <div className="flex items-center gap-1.5 sm:gap-2 border-b border-white/10 pb-2 flex-wrap">
                           <button
                             onClick={() => setActiveRightTab("screenshots")}
-                            className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                            className={`font-mono text-[9.5px] sm:text-[10.5px] px-2.5 sm:px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                               activeRightTab === "screenshots"
                                 ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
                                 : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
                             }`}
                           >
-                            <span>📸 PRODUCTION SCREENS ({node.screenshots.length})</span>
+                            <span>📸 SCREENS ({node.screenshots.length})</span>
                           </button>
                           <button
                             onClick={() => setActiveRightTab("code")}
-                            className={`font-mono text-[10.5px] px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
+                            className={`font-mono text-[9.5px] sm:text-[10.5px] px-2.5 sm:px-3 py-1 rounded-md transition-all flex items-center gap-1.5 cursor-pointer ${
                               activeRightTab === "code"
                                 ? "bg-accent-lime/15 border border-accent-lime text-accent-lime font-bold shadow-sm"
                                 : "text-zinc-400 hover:text-white bg-white/[0.04] border border-transparent"
@@ -807,7 +809,7 @@ export const SpatialNodeCard = forwardRef<
                                 <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
                               </button>
                             </div>
-                            <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-56 flex-1 font-medium shadow-inner">
+                            <pre className="p-3 sm:p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[10px] sm:text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-52 sm:max-h-56 flex-1 font-medium shadow-inner">
                               <HighlightedCode code={node.code} />
                             </pre>
                           </div>

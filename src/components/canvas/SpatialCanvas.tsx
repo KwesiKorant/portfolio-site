@@ -224,7 +224,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const scene = new THREE.Scene();
       scene.fog = new THREE.FogExp2(0x050508, 0.00042);
 
-      const camera = new THREE.PerspectiveCamera(50, width / height, 1, 6000);
+      const initialAspect = width / height;
+      const initialFov = initialAspect < 1.0 ? Math.min(74, (50 / initialAspect) * 0.68) : 50;
+      const camera = new THREE.PerspectiveCamera(initialFov, initialAspect, 1, 6000);
       camera.position.set(0, 180, DEFAULT_CAMERA_Z);
       camera.lookAt(0, -70, 0);
 
@@ -1283,7 +1285,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       function drawRadar() {
         const radarCanvas = radarCanvasRef.current;
-        if (!radarCanvas) return;
+        if (!radarCanvas || radarCanvas.offsetParent === null) return;
         const radarCtx = radarCanvas.getContext("2d");
         if (!radarCtx) return;
 
@@ -1398,10 +1400,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const handleResize = () => {
         width = window.innerWidth;
         height = window.innerHeight;
-        camera.aspect = width / height;
+        const aspect = width / height;
+        camera.aspect = aspect;
+        camera.fov = aspect < 1.0 ? Math.min(74, (50 / aspect) * 0.68) : 50;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
         calibrateVideoDimensions();
+        cachedActiveDims = null;
       };
       window.addEventListener("resize", handleResize);
 
@@ -1414,6 +1419,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let frameCount = 0;
       let fps = 120;
       let radarFrameCounter = 0;
+      let cachedActiveDims: { id: string; w: number; h: number } | null = null;
 
       const animate = () => {
         if (!isVisible) {
@@ -1711,13 +1717,22 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               }
 
               if (isThisNodeActive) {
-                // Ensure active card is positioned with exact integer pixels (avoiding calc(-50%) on odd heights which creates 0.5px subpixel font blur)
-                const halfW = Math.round(el.offsetWidth * 0.5);
-                const halfH = Math.round(el.offsetHeight * 0.5);
+                // Eliminate Layout Thrashing: Cache active node card dimensions outside per-frame rAF reads
+                if (!cachedActiveDims || cachedActiveDims.id !== node.id) {
+                  cachedActiveDims = {
+                    id: node.id,
+                    w: el.offsetWidth || (window.innerWidth < 640 ? Math.round(window.innerWidth * 0.94) : 1040),
+                    h: el.offsetHeight || 500,
+                  };
+                }
+                const cardW = cachedActiveDims.w;
+                const cardH = cachedActiveDims.h;
+                const halfW = Math.round(cardW * 0.5);
+                const halfH = Math.round(cardH * 0.5);
                 const posX = Math.round(proj.screenX) - halfW;
                 const posY = Math.round(proj.screenY) - halfH;
-                const clampedX = Math.max(16, Math.min(window.innerWidth - el.offsetWidth - 16, posX));
-                const clampedY = Math.max(16, Math.min(window.innerHeight - el.offsetHeight - 16, posY));
+                const clampedX = Math.max(12, Math.min(window.innerWidth - cardW - 12, posX));
+                const clampedY = Math.max(12, Math.min(window.innerHeight - cardH - 12, posY));
                 el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
                 el.style.zIndex = "50";
               } else {

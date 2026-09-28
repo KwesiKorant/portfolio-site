@@ -118,7 +118,7 @@ export const FinaleSection: React.FC = () => {
     <footer
       ref={containerRef}
       id="section-finale"
-      className="relative w-full min-h-[100dvh] flex flex-col justify-between py-12 md:py-16 px-6 sm:px-10 md:px-16 lg:px-24 bg-[#050508] select-none [contain:layout_style_paint] overflow-hidden"
+      className="relative w-full min-h-[100dvh] flex flex-col justify-between py-8 sm:py-12 md:py-16 px-4 sm:px-10 md:px-16 lg:px-24 bg-[#050508] select-none [contain:layout_style_paint] overflow-hidden"
       aria-label="Engineer Dossier & Terminal Finale"
     >
       {/* Dynamic Multi-Directional Wavy Keyframes (Zero-Reflow Compositor Only) */}
@@ -367,54 +367,54 @@ export const FinaleSection: React.FC = () => {
       </div>
 
       {/* Main Content Body: Two-Column Architecture */}
-      <div className="relative z-10 w-full max-w-6xl mx-auto my-auto py-8 md:py-12 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
+      <div className="relative z-10 w-full max-w-6xl mx-auto my-auto py-6 sm:py-8 md:py-12 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-stretch">
         {/* Left Column: Mission Narrative & Transparent Telemetry Card at Bottom Left */}
-        <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-5 sm:space-y-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[10px] text-accent-lime tracking-widest uppercase mb-4 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[9.5px] sm:text-[10px] text-accent-lime tracking-widest uppercase mb-3 sm:mb-4 backdrop-blur-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               <span>DIRECT CONTACT // OPEN FOR DESIGN ENGINEERING ROLES</span>
             </div>
 
-            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-5 leading-[1.12]">
+            <h2 className="font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-3 sm:mb-5 leading-[1.14]">
               Bridging tactile design engineering &amp; scalable software.
             </h2>
 
-            <p className="font-sans text-sm sm:text-base text-zinc-300 leading-relaxed max-w-2xl">
+            <p className="font-sans text-xs sm:text-sm md:text-base text-zinc-300 leading-relaxed max-w-2xl">
               Kwesi Ankomah-Koranteng, Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
             </p>
           </div>
 
           {/* Technical System Footprint Grid: Applied Stage 4 Card Transparency Effect */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[10px] text-zinc-300 space-y-2.5">
+          <div className="p-3.5 sm:p-5 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[9.5px] sm:text-[10px] text-zinc-300 space-y-2 sm:space-y-2.5">
             <div className="flex items-center justify-between pb-2 mb-1 border-b border-white/10">
-              <div className="flex items-center gap-2 text-accent-lime font-mono text-[9px] tracking-wider uppercase font-semibold">
+              <div className="flex items-center gap-2 text-accent-lime font-mono text-[8.5px] sm:text-[9px] tracking-wider uppercase font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
                 <span>SYSTEM TELEMETRY // FOOTPRINT</span>
               </div>
-              <span className="font-mono text-[8.5px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.05] border border-white/10">
+              <span className="font-mono text-[8px] sm:text-[8.5px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.05] border border-white/10">
                 VERIFIED SPEC
               </span>
             </div>
 
             <div className="space-y-1.5 pt-1">
-              <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
+              <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">ENGINEER:</span>
                 <span className="text-zinc-100 font-mono font-medium">KWESI ANKOMAH-KORANTENG</span>
               </div>
-              <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
+              <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">TARGET ROLE:</span>
                 <span className="text-accent-lime font-mono font-medium">DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
               </div>
-              <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
+              <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">STARTUP // ROLE:</span>
                 <span className="text-zinc-200 font-mono font-medium">ARCFIELD SYSTEMS // CO-FOUNDER &amp; CTO</span>
               </div>
-              <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
+              <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">COMPOSITOR STANDARD:</span>
                 <span className="text-accent-lime font-medium">120 FPS ZERO REFLOW MANDATE</span>
               </div>
-              <div className="px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
+              <div className="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-2 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">LOCATION:</span>
                 <span className="text-zinc-200">GHANA // WORLDWIDE REMOTE</span>
               </div>
@@ -424,7 +424,7 @@ export const FinaleSection: React.FC = () => {
 
         {/* Right Column: Contact Card with Original Brand Icons */}
         <div className="lg:col-span-5 flex flex-col">
-          <div className="p-5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
+          <div className="p-4 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
             <div>
               {/* Header Stating Contact */}
               <div className="flex items-center justify-between gap-3 mb-2">

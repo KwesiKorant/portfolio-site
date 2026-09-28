@@ -247,17 +247,19 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
       16
     );
 
+    const [isMobilePodOpen, setIsMobilePodOpen] = useState(false);
+
     return (
       <div
-        className={`absolute inset-0 pointer-events-none flex flex-col justify-between p-5 md:p-6 z-50 transition-opacity duration-300 ${
+        className={`absolute inset-0 pointer-events-none flex flex-col justify-between p-4 sm:p-5 md:p-6 z-50 transition-opacity duration-300 ${
           isWarping ? "opacity-0" : "opacity-100"
         }`}
       >
-        <header className="flex justify-between items-center gap-4">
+        <header className="flex justify-between items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             {onReturnToHero && (
               <button
-                className="flex items-center gap-2 font-mono text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white hover:border-accent-lime/50 bg-[#0c0d14]/90 hover:bg-[#0c0d14] backdrop-blur-md border border-white/15 px-4 py-2 rounded-xl pointer-events-auto cursor-pointer select-none transition-all shadow-md active:scale-95"
+                className="flex items-center gap-1.5 sm:gap-2 font-mono text-[10px] sm:text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white hover:border-accent-lime/50 bg-[#0c0d14]/90 hover:bg-[#0c0d14] backdrop-blur-md border border-white/15 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl pointer-events-auto cursor-pointer select-none transition-all shadow-md active:scale-95"
                 onClick={() => {
                   playKeyClick();
                   onReturnToHero();
@@ -265,16 +267,16 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
                 title="Return to Hero Stage"
                 aria-label="Return to Hero"
               >
-                <span className="text-[13px] leading-none">&larr;</span>
+                <span className="text-[12px] sm:text-[13px] leading-none">&larr;</span>
                 <span>HERO</span>
               </button>
             )}
           </div>
 
-          <div className="flex items-center gap-2.5 pointer-events-auto">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 pointer-events-auto">
             {/* Audio haptics toggle */}
             <button
-              className={`font-mono text-[11px] px-3 py-1.5 rounded-xl cursor-pointer flex items-center gap-1.5 transition-all shadow-sm ${
+              className={`font-mono text-[10px] sm:text-[11px] px-2.5 sm:px-3 py-1.5 rounded-xl cursor-pointer flex items-center gap-1.5 transition-all shadow-sm ${
                 muted
                   ? "bg-white/[0.04] border border-white/15 text-zinc-400 hover:text-zinc-200 hover:border-white/30"
                   : "bg-accent-lime/10 border border-accent-lime/45 text-accent-lime hover:bg-accent-lime/20 hover:text-white"
@@ -282,12 +284,12 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               onClick={handleToggleSound}
               title="Toggle Web Audio Synthesizer"
             >
-              <span>{muted ? "AUDIO: OFF" : "AUDIO: ON"}</span>
-              <span className="text-[10px]">{muted ? "🔇" : "🔊"}</span>
+              <span className="hidden sm:inline">{muted ? "AUDIO: OFF" : "AUDIO: ON"}</span>
+              <span className="text-[11px]">{muted ? "🔇" : "🔊"}</span>
             </button>
 
             <button
-              className="bg-accent-lime/10 border border-accent-lime/45 text-accent-lime font-mono text-[11px] px-3.5 py-1.5 rounded-xl cursor-pointer flex items-center gap-2 hover:bg-accent-lime/20 hover:border-accent-lime hover:text-white transition-all shadow-sm"
+              className="bg-accent-lime/10 border border-accent-lime/45 text-accent-lime font-mono text-[10px] sm:text-[11px] px-2.5 sm:px-3.5 py-1.5 rounded-xl cursor-pointer flex items-center gap-1.5 sm:gap-2 hover:bg-accent-lime/20 hover:border-accent-lime hover:text-white transition-all shadow-sm"
               onClick={() => {
                 playKeyClick();
                 onOpenGuide();
@@ -295,19 +297,19 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               title="View Navigation Guide"
             >
               <span>GUIDE</span>
-              <kbd>?</kbd>
+              <kbd className="hidden sm:inline-block">?</kbd>
             </button>
             <div
-              className="font-mono text-[11px] tracking-wider text-zinc-300 text-right bg-[#0c0d14]/90 border border-white/15 px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-sm"
+              className="font-mono text-[10px] sm:text-[11px] tracking-wider text-zinc-300 text-right bg-[#0c0d14]/90 border border-white/15 px-2.5 sm:px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-sm"
               ref={telemetryRef}
               id="telemetry"
             >
-              POS: [0, 40, 1100] | 120 FPS
+              <span className="hidden sm:inline">POS: [0, 40, 1100] | </span>120 FPS
             </div>
           </div>
         </header>
 
-        <footer className="flex justify-between items-end gap-5">
+        <footer className="flex justify-between items-end gap-3 sm:gap-5">
           {/* Left spacer: clean view without bottom-left stage descriptions */}
           <div className="flex-1 pointer-events-none" />
 
@@ -315,18 +317,51 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
           <div className="flex-1 pointer-events-none" />
 
           {/* Right: Tactical Radar Navigation Pod & High-Contrast Flight Controls */}
-          <div className="flex items-center gap-2.5 pointer-events-auto bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group">
-            {/* 3D Radar Mini-Map */}
-            <RadarMiniMap
-              ref={radarCanvasRef}
-              onWarpToCoords={onWarpToCoords}
-            />
+          <div className="pointer-events-auto">
+            {/* Mobile Collapsed Pod Trigger: visible only on mobile when pod is closed */}
+            {!isMobilePodOpen && (
+              <button
+                onClick={() => setIsMobilePodOpen(true)}
+                className="md:hidden flex items-center gap-2 font-mono text-[10px] tracking-wider uppercase font-semibold text-accent-lime bg-[#0a0c16]/95 backdrop-blur-xl border border-accent-lime/45 hover:border-accent-lime px-3.5 py-2 rounded-xl pointer-events-auto cursor-pointer shadow-lg active:scale-95"
+                aria-label="Open 3D Cockpit"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
+                <span>RADAR & COCKPIT</span>
+                <span className="text-[10px] text-zinc-400">&#9650;</span>
+              </button>
+            )}
 
-            {/* Tactical Divider */}
-            <div className="w-[1px] h-[116px] bg-white/10" />
+            {/* Tactical Pod Container: always flex on desktop md:, toggled on mobile */}
+            <div
+              className={`${
+                isMobilePodOpen ? "flex" : "hidden md:flex"
+              } flex-col items-end gap-2 bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group`}
+            >
+              {/* Mobile-only Close Header inside Cockpit */}
+              {isMobilePodOpen && (
+                <div className="w-full flex md:hidden items-center justify-between pb-1.5 mb-0.5 border-b border-white/10 font-mono text-[9px]">
+                  <span className="text-accent-lime font-bold tracking-wider">TACTICAL COCKPIT</span>
+                  <button
+                    onClick={() => setIsMobilePodOpen(false)}
+                    className="text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-white/[0.06] border border-white/12 cursor-pointer font-bold"
+                  >
+                    ✕ HIDE
+                  </button>
+                </div>
+              )}
 
-            {/* Zoom / Depth Column (+ / −) */}
-            <div className="flex flex-col justify-between h-[122px] w-[38px] gap-1.5">
+              <div className="flex items-center gap-2.5">
+                {/* 3D Radar Mini-Map */}
+                <RadarMiniMap
+                  ref={radarCanvasRef}
+                  onWarpToCoords={onWarpToCoords}
+                />
+
+                {/* Tactical Divider */}
+                <div className="w-[1px] h-[116px] bg-white/10" />
+
+                {/* Zoom / Depth Column (+ / −) */}
+                <div className="flex flex-col justify-between h-[122px] w-[38px] gap-1.5">
               <button
                 className="flex-1 flex flex-col items-center justify-center bg-[#131626] border border-white/20 hover:border-accent-lime hover:bg-accent-lime/15 text-white hover:text-accent-lime rounded-xl transition-all cursor-pointer shadow-sm active:scale-95 group/btn touch-none"
                 {...zoomInHold}
@@ -444,8 +479,10 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               </div>
             </div>
           </div>
-        </footer>
+        </div>
       </div>
+    </footer>
+  </div>
     );
   }
 );

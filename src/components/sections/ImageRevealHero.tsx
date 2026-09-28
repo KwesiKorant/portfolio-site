@@ -64,6 +64,11 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
   const isMoving = useRef<boolean>(false);
   const cachedRect = useRef<{ left: number; top: number; width: number; height: number } | null>(null);
 
+  // Touch coordinates for mobile lens reveal and swipe-up navigation
+  const touchStartY = useRef<number | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchLeaveTimer = useRef<NodeJS.Timeout | null>(null);
+
   // Cache container bounds on mount and window resize (Zero layout thrashing)
   const updateCachedBounds = useCallback(() => {
     if (containerRef.current) {
@@ -77,6 +82,14 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
     window.addEventListener("resize", updateCachedBounds, { passive: true });
     return () => window.removeEventListener("resize", updateCachedBounds);
   }, [updateCachedBounds]);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (touchLeaveTimer.current) clearTimeout(touchLeaveTimer.current);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+    };
+  }, []);
 
   // Update CSS variables --reveal-x and --reveal-y inside single rAF loop
   const updateMask = useCallback(() => {
@@ -101,6 +114,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
   }, []);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return; // Touch handled cleanly by handleTouchMove
     if (!cachedRect.current) {
       updateCachedBounds();
     }
@@ -131,6 +145,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
   };
 
   const handlePointerEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return;
     updateCachedBounds();
     const rect = cachedRect.current;
     if (rect) {
@@ -148,20 +163,91 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
     setIsHovered(true);
   };
 
-  const handlePointerLeave = () => {
+  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") return; // Touch handled cleanly by handleTouchEnd
     setIsHovered(false);
     if (rafId.current) cancelAnimationFrame(rafId.current);
     isMoving.current = false;
+  };
+
+  // Dedicated Mobile Touch Handlers
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      if (touchLeaveTimer.current) clearTimeout(touchLeaveTimer.current);
+      touchStartY.current = e.touches[0].clientY;
+      touchStartX.current = e.touches[0].clientX;
+
+      if (!cachedRect.current) {
+        updateCachedBounds();
+      }
+      const rect = cachedRect.current;
+      if (rect) {
+        const x = e.touches[0].clientX - rect.left;
+        const y = e.touches[0].clientY - rect.top;
+        targetX.current = x;
+        targetY.current = y;
+        currentX.current = x;
+        currentY.current = y;
+        setIsHovered(true);
+        if (frontImageRef.current) {
+          frontImageRef.current.style.setProperty("--reveal-x", `${x.toFixed(1)}px`);
+          frontImageRef.current.style.setProperty("--reveal-y", `${y.toFixed(1)}px`);
+        }
+      }
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length === 1) {
+      const rect = cachedRect.current;
+      if (!rect) return;
+      const x = e.touches[0].clientX - rect.left;
+      const y = e.touches[0].clientY - rect.top;
+      targetX.current = x;
+      targetY.current = y;
+      if (!isMoving.current) {
+        isMoving.current = true;
+        rafId.current = requestAnimationFrame(updateMask);
+      }
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchStartY.current !== null && e.changedTouches.length === 1) {
+      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
+      const deltaX = Math.abs((touchStartX.current || 0) - e.changedTouches[0].clientX);
+      // Intentional swipe up on hero triggers cinematic portal warp into Stage 03
+      if (deltaY > 60 && deltaY > deltaX * 1.2) {
+        if (onEnterPortal) {
+          onEnterPortal();
+        } else if (onScrollNext) {
+          onScrollNext();
+        }
+      }
+    }
+    touchStartY.current = null;
+    touchStartX.current = null;
+
+    // Smoothly hold lens for 1.2s after touch release before returning to idle
+    if (touchLeaveTimer.current) clearTimeout(touchLeaveTimer.current);
+    touchLeaveTimer.current = setTimeout(() => {
+      setIsHovered(false);
+      if (rafId.current) cancelAnimationFrame(rafId.current);
+      isMoving.current = false;
+    }, 1200);
   };
 
   return (
     <section
       ref={containerRef}
       id="section-hero"
-      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-6 md:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
+      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-4 sm:p-8 md:p-12 overflow-y-auto md:overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
       aria-label="Image Reveal Hero"
     >
       {/* Visual Asset Stack: bottom = REVEAL, top = FRONT */}
@@ -197,12 +283,12 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
             isHovered ? "mask-active" : "mask-idle"
           }`}
           style={{
-            /* Radial mask: reveals the underlying layer centered on (--reveal-x, --reveal-y) */
+            /* Responsive radial mask: clamp(180px, 48vw, 280px) ensures mobile screens have a focused x-ray circle while desktop preserves the exact 280px radius */
             WebkitMaskImage: isHovered
-              ? "radial-gradient(circle 280px at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
+              ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
               : "none",
             maskImage: isHovered
-              ? "radial-gradient(circle 280px at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
+              ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
               : "none",
           }}
         >
@@ -238,33 +324,33 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       </div>
 
       {/* Captivating Editorial Hero Content */}
-      <div className="relative z-10 my-auto py-8 sm:py-12 max-w-2xl lg:max-w-3xl pointer-events-none">
+      <div className="relative z-10 my-auto py-6 sm:py-10 md:py-12 max-w-2xl lg:max-w-3xl pointer-events-none">
         {/* Role tag pill */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
+        <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-3.5 sm:mb-5 text-accent-lime font-mono text-[10px] sm:text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
           <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
         </div>
 
         {/* Captivating Bold Header */}
-        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-4">
+        <h1 className="font-display text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.96] sm:leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-3 sm:mb-4 break-words">
           KWESI ANKOMAH-KORANTENG
         </h1>
 
         {/* Punchy Subtitle */}
-        <p className="font-sans text-base sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-4">
+        <p className="font-sans text-sm sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-3 sm:mb-4">
           Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
         </p>
 
         {/* Engaging Contextual Narrative */}
-        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-5">
+        <p className="font-sans text-[11.5px] sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-4 sm:mb-5">
           Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
         {/* Venture & Capabilities Highlight Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 max-w-xl mb-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-4 sm:mb-5">
           <div
             onClick={() => onSelectProject && onSelectProject("hyperscale")}
-            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -277,14 +363,14 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
             <div className="font-sans text-xs font-semibold text-white">
               Arcfield Discover
             </div>
-            <div className="font-sans text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
               Business &amp; Service Discovery MVP
             </div>
           </div>
 
           <div
             onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -297,14 +383,14 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
             <div className="font-sans text-xs font-semibold text-white">
               Nayak Furniture ERP
             </div>
-            <div className="font-sans text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
               Inventory &amp; P&amp;L Engine
             </div>
           </div>
 
           <div
             onClick={() => onSelectProject && onSelectProject("event-stream")}
-            className={`px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -317,28 +403,34 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
             <div className="font-sans text-xs font-semibold text-white">
               120 FPS Compositor
             </div>
-            <div className="font-sans text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
               Zero-Reflow Spatial UI
             </div>
           </div>
         </div>
 
         {/* Focus Badges */}
-        <div className="flex flex-wrap gap-2 font-mono text-[10px]">
-          <span className="px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px]">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
             120 FPS COMPOSITOR MANDATE
           </span>
-          <span className="px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
             THREE.JS // WEBGL SPATIAL
           </span>
-          <span className="px-3 py-1 rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
             ACCRA, GHANA // REMOTE
           </span>
         </div>
       </div>
 
       {/* Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="relative z-10 flex justify-end items-center w-full pt-8">
+      <div className="relative z-10 flex justify-between sm:justify-end items-center w-full pt-4 sm:pt-8">
+        {/* Mobile touch guidance cue */}
+        <div className="flex sm:hidden items-center gap-1.5 text-zinc-400 font-mono text-[9px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime/80 shadow-[0_0_6px_#ccff00] animate-pulse" />
+          <span>TOUCH TO SCAN // SWIPE &uarr;</span>
+        </div>
+
         <button
           onClick={() => {
             if (onEnterPortal) {
@@ -350,13 +442,13 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               el?.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group cursor-pointer flex items-center gap-3 px-5 py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm"
+          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm"
           aria-label="Scroll to Portal Section"
         >
-          <span className="font-mono text-xs tracking-wider font-semibold">
+          <span className="font-mono text-[11px] sm:text-xs tracking-wider font-semibold">
             ENTER PORTAL GATE
           </span>
-          <span className="text-accent-lime text-sm group-hover:translate-y-1 transition-transform">
+          <span className="text-accent-lime text-xs sm:text-sm group-hover:translate-y-1 transition-transform">
             &darr;
           </span>
         </button>
