@@ -16,6 +16,7 @@ import {
   MAX_CAMERA_Z,
   WORLD_BOUNDS,
 } from "@/data/nodeGraph";
+import { NodeData } from "@/types/graph";
 import { SpatialNodeElement } from "@/components/nodes/SpatialNodeCard";
 import {
   playWarpSound,
@@ -60,6 +61,29 @@ interface CurveInfo {
   lineMesh: THREE.Line;
   defaultColor: number;
   highlightColor: number;
+}
+
+export function getNodeCoordinates(
+  node: NodeData,
+  isMobile: boolean
+): { x: number; y: number; z: number } {
+  if (!isMobile) return { x: node.x, y: node.y, z: node.z };
+  switch (node.id) {
+    case "edge-gateway": // Nayak ERP (Upper Left Flank)
+      return { x: -430, y: 20, z: node.z };
+    case "infra-compute": // Technical Skills (Lower Left Flank)
+      return { x: -430, y: -310, z: node.z };
+    case "event-stream": // Spatial Dimension (Outer Left Orbit)
+      return { x: -720, y: -145, z: node.z };
+    case "hyperscale": // Arcfield Discover (Upper Right Flank)
+      return { x: 430, y: 20, z: node.z };
+    case "omnisync": // CareSync (Lower Right Flank)
+      return { x: 430, y: -310, z: node.z };
+    case "kerneltrace": // Arcfield Eats (Outer Right Orbit)
+      return { x: 720, y: -145, z: node.z };
+    default:
+      return { x: node.x, y: node.y, z: node.z };
+  }
 }
 
 export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>(
@@ -115,13 +139,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           targetLookAtRef.current.y = -60;
           targetLookAtRef.current.z = 0;
         } else {
-          // Center camera directly on focused card with comfortable landscape framing
-          targetCamRef.current.x = node.x;
-          targetCamRef.current.y = node.y;
-          targetCamRef.current.z = node.camTarget ? node.camTarget.z : node.z + 520;
-          targetLookAtRef.current.x = node.x;
-          targetLookAtRef.current.y = node.y;
-          targetLookAtRef.current.z = node.z;
+          // Center camera directly on focused card with comfortable framing
+          const coords = getNodeCoordinates(node, isMobile);
+          targetCamRef.current.x = coords.x;
+          targetCamRef.current.y = coords.y;
+          targetCamRef.current.z = isMobile
+            ? coords.z + 650
+            : node.camTarget
+            ? node.camTarget.z
+            : node.z + 520;
+          targetLookAtRef.current.x = coords.x;
+          targetLookAtRef.current.y = coords.y;
+          targetLookAtRef.current.z = coords.z;
         }
       },
       [onNodeActivated]
@@ -453,205 +482,221 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       }
       const floorBeacons: FloorBeacon[] = [];
 
-      NODE_GRAPH.forEach((node) => {
-        if (node.id === "root") return;
+      function rebuildFloorBeacons() {
+        while (floorBeaconGroup.children.length > 0) {
+          const obj = floorBeaconGroup.children[0];
+          floorBeaconGroup.remove(obj);
+          if ((obj as THREE.Mesh).geometry) {
+            (obj as THREE.Mesh).geometry.dispose();
+          }
+        }
+        floorBeacons.length = 0;
 
-        const nodeX = node.x;
-        const nodeY = node.y;
+        const isMobileView = width < 768;
+        NODE_GRAPH.forEach((node) => {
+          if (node.id === "root") return;
 
-        // Exact physical bottom edge of each card
-        const cardHalfHeight =
-          node.id === "edge-gateway" || node.id === "event-stream" ? 175 : 165;
-        const cardBottomY = nodeY - cardHalfHeight;
-        const floorY = Y_FLOOR + 1;
-        const beaconColor =
-          node.badgeColor === "cyan"
-            ? 0x06b6d4
-            : node.badgeColor === "emerald"
-            ? 0x10b981
-            : 0xccff00;
-        const beamTex =
-          node.badgeColor === "cyan"
-            ? cyanBeamTex
-            : node.badgeColor === "emerald"
-            ? emeraldBeamTex
-            : limeBeamTex;
-        const pulseTex =
-          node.badgeColor === "cyan"
-            ? cyanPulseTex
-            : node.badgeColor === "emerald"
-            ? emeraldPulseTex
-            : limePulseTex;
-        const flareTex =
-          node.badgeColor === "cyan"
-            ? cyanFlareTex
-            : node.badgeColor === "emerald"
-            ? emeraldFlareTex
-            : limeFlareTex;
+          const coords = getNodeCoordinates(node, isMobileView);
+          const nodeX = coords.x;
+          const nodeY = coords.y;
+          const nodeZ = coords.z;
 
-        // Base static outer reticle ring on the floor at (nodeX, floorY, node.z)
-        const baseOuterRingGeo = new THREE.RingGeometry(38, 48, 48);
-        const baseOuterRingMat = new THREE.MeshBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          opacity: 0.28,
-          side: THREE.DoubleSide,
-          depthWrite: false,
+          // Exact physical bottom edge of each card
+          const cardHalfHeight = isMobileView
+            ? (node.id === "edge-gateway" || node.id === "event-stream" ? 85 : 75)
+            : (node.id === "edge-gateway" || node.id === "event-stream" ? 175 : 165);
+          const cardBottomY = nodeY - cardHalfHeight;
+          const floorY = Y_FLOOR + 1;
+          const beaconColor =
+            node.badgeColor === "cyan"
+              ? 0x06b6d4
+              : node.badgeColor === "emerald"
+              ? 0x10b981
+              : 0xccff00;
+          const beamTex =
+            node.badgeColor === "cyan"
+              ? cyanBeamTex
+              : node.badgeColor === "emerald"
+              ? emeraldBeamTex
+              : limeBeamTex;
+          const pulseTex =
+            node.badgeColor === "cyan"
+              ? cyanPulseTex
+              : node.badgeColor === "emerald"
+              ? emeraldPulseTex
+              : limePulseTex;
+          const flareTex =
+            node.badgeColor === "cyan"
+              ? cyanFlareTex
+              : node.badgeColor === "emerald"
+              ? emeraldFlareTex
+              : limeFlareTex;
+
+          // Base static outer reticle ring on the floor at (nodeX, floorY, nodeZ)
+          const baseOuterRingGeo = new THREE.RingGeometry(38, 48, 48);
+          const baseOuterRingMat = new THREE.MeshBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            opacity: 0.28,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const baseOuterRingMesh = new THREE.Mesh(baseOuterRingGeo, baseOuterRingMat);
+          baseOuterRingMesh.rotation.x = -Math.PI / 2;
+          baseOuterRingMesh.position.set(nodeX, floorY + 0.1, nodeZ);
+          baseOuterRingMesh.renderOrder = 10;
+          floorBeaconGroup.add(baseOuterRingMesh);
+
+          // Base static inner reticle ring on the floor
+          const baseInnerRingGeo = new THREE.RingGeometry(16, 24, 32);
+          const baseInnerRingMat = new THREE.MeshBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            opacity: 0.32,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const baseInnerRingMesh = new THREE.Mesh(baseInnerRingGeo, baseInnerRingMat);
+          baseInnerRingMesh.rotation.x = -Math.PI / 2;
+          baseInnerRingMesh.position.set(nodeX, floorY + 0.15, nodeZ);
+          baseInnerRingMesh.renderOrder = 10;
+          floorBeaconGroup.add(baseInnerRingMesh);
+
+          // Core contact flare disc (blooms when string strikes ground)
+          const coreDiscGeo = new THREE.CircleGeometry(22, 32);
+          const coreDiscMat = new THREE.MeshBasicMaterial({
+            map: flareTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            opacity: 0.22,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const coreDiscMesh = new THREE.Mesh(coreDiscGeo, coreDiscMat);
+          coreDiscMesh.rotation.x = -Math.PI / 2;
+          coreDiscMesh.position.set(nodeX, floorY + 0.2, nodeZ);
+          coreDiscMesh.renderOrder = 11;
+          floorBeaconGroup.add(coreDiscMesh);
+
+          // Dynamic round contact ping ripple rings (shockwaves expanding on ground plane)
+          const pingRingGeo1 = new THREE.RingGeometry(22, 42, 48);
+          const pingRingMat1 = new THREE.MeshBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            opacity: 0.0,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const pingRingMesh1 = new THREE.Mesh(pingRingGeo1, pingRingMat1);
+          pingRingMesh1.rotation.x = -Math.PI / 2;
+          pingRingMesh1.position.set(nodeX, floorY + 0.3, nodeZ);
+          pingRingMesh1.renderOrder = 12;
+          pingRingMesh1.visible = false;
+          floorBeaconGroup.add(pingRingMesh1);
+
+          const pingRingGeo2 = new THREE.RingGeometry(22, 42, 48);
+          const pingRingMat2 = new THREE.MeshBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            opacity: 0.0,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const pingRingMesh2 = new THREE.Mesh(pingRingGeo2, pingRingMat2);
+          pingRingMesh2.rotation.x = -Math.PI / 2;
+          pingRingMesh2.position.set(nodeX, floorY + 0.35, nodeZ);
+          pingRingMesh2.renderOrder = 12;
+          pingRingMesh2.visible = false;
+          floorBeaconGroup.add(pingRingMesh2);
+
+          // Vertical luminous light conduit beam (anchored at card bottom and extending down to floor)
+          const beamHeight = Math.max(10, cardBottomY - floorY);
+          const beamGeo = new THREE.PlaneGeometry(28, beamHeight);
+          // Translate so geometry origin is at top (card emitter) for top-down extension
+          beamGeo.translate(0, -beamHeight / 2, 0);
+          const beamMat = new THREE.MeshBasicMaterial({
+            map: beamTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0.18,
+            side: THREE.DoubleSide,
+          });
+          const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+          beamMesh.position.set(nodeX, cardBottomY, nodeZ);
+          beamMesh.renderOrder = 15;
+          floorBeaconGroup.add(beamMesh);
+
+          // Central core laser filament line
+          const linePoints = [
+            new THREE.Vector3(nodeX, floorY, nodeZ),
+            new THREE.Vector3(nodeX, cardBottomY, nodeZ),
+          ];
+          const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
+          const lineMat = new THREE.LineBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            opacity: 0.15,
+            depthWrite: false,
+          });
+          const lineMesh = new THREE.Line(lineGeo, lineMat);
+          lineMesh.renderOrder = 14;
+          floorBeaconGroup.add(lineMesh);
+
+          // Card bottom emitter ingress port
+          const portGeo = new THREE.RingGeometry(3, 7, 24);
+          const portMat = new THREE.MeshBasicMaterial({
+            color: beaconColor,
+            transparent: true,
+            opacity: 0.45,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const portMesh = new THREE.Mesh(portGeo, portMat);
+          portMesh.position.set(nodeX, cardBottomY, nodeZ + 1);
+          portMesh.renderOrder = 16;
+          floorBeaconGroup.add(portMesh);
+
+          // Descending energy pulse: travels down string from card to ground on hover
+          const pulseGeo = new THREE.PlaneGeometry(38, 76);
+          const pulseMat = new THREE.MeshBasicMaterial({
+            map: pulseTex,
+            transparent: true,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            opacity: 0.0,
+          });
+          const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
+          pulseMesh.position.set(nodeX, cardBottomY, nodeZ + 2);
+          pulseMesh.renderOrder = 20;
+          pulseMesh.visible = false;
+          floorBeaconGroup.add(pulseMesh);
+
+          floorBeacons.push({
+            nodeId: node.id,
+            baseOuterRingMesh,
+            baseInnerRingMesh,
+            coreDiscMesh,
+            pingRingMesh1,
+            pingRingMesh2,
+            beamMesh,
+            lineMesh,
+            portMesh,
+            pulseMesh,
+            cardBottomY,
+            floorY,
+            isHovered: false,
+            beamExtendProgress: 1.0,
+            pulseProgress: 0.0,
+            pingProgress1: 0.0,
+            pingProgress2: 0.45,
+            pingIntensity: 0.0,
+          });
         });
-        const baseOuterRingMesh = new THREE.Mesh(baseOuterRingGeo, baseOuterRingMat);
-        baseOuterRingMesh.rotation.x = -Math.PI / 2;
-        baseOuterRingMesh.position.set(nodeX, floorY + 0.1, node.z);
-        baseOuterRingMesh.renderOrder = 10;
-        floorBeaconGroup.add(baseOuterRingMesh);
-
-        // Base static inner reticle ring on the floor
-        const baseInnerRingGeo = new THREE.RingGeometry(16, 24, 32);
-        const baseInnerRingMat = new THREE.MeshBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          opacity: 0.32,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        const baseInnerRingMesh = new THREE.Mesh(baseInnerRingGeo, baseInnerRingMat);
-        baseInnerRingMesh.rotation.x = -Math.PI / 2;
-        baseInnerRingMesh.position.set(nodeX, floorY + 0.15, node.z);
-        baseInnerRingMesh.renderOrder = 10;
-        floorBeaconGroup.add(baseInnerRingMesh);
-
-        // Core contact flare disc (blooms when string strikes ground)
-        const coreDiscGeo = new THREE.CircleGeometry(22, 32);
-        const coreDiscMat = new THREE.MeshBasicMaterial({
-          map: flareTex,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          opacity: 0.22,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        const coreDiscMesh = new THREE.Mesh(coreDiscGeo, coreDiscMat);
-        coreDiscMesh.rotation.x = -Math.PI / 2;
-        coreDiscMesh.position.set(nodeX, floorY + 0.2, node.z);
-        coreDiscMesh.renderOrder = 11;
-        floorBeaconGroup.add(coreDiscMesh);
-
-        // Dynamic round contact ping ripple rings (shockwaves expanding on ground plane)
-        const pingRingGeo1 = new THREE.RingGeometry(22, 42, 48);
-        const pingRingMat1 = new THREE.MeshBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          opacity: 0.0,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        const pingRingMesh1 = new THREE.Mesh(pingRingGeo1, pingRingMat1);
-        pingRingMesh1.rotation.x = -Math.PI / 2;
-        pingRingMesh1.position.set(nodeX, floorY + 0.3, node.z);
-        pingRingMesh1.renderOrder = 12;
-        pingRingMesh1.visible = false;
-        floorBeaconGroup.add(pingRingMesh1);
-
-        const pingRingGeo2 = new THREE.RingGeometry(22, 42, 48);
-        const pingRingMat2 = new THREE.MeshBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          opacity: 0.0,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        const pingRingMesh2 = new THREE.Mesh(pingRingGeo2, pingRingMat2);
-        pingRingMesh2.rotation.x = -Math.PI / 2;
-        pingRingMesh2.position.set(nodeX, floorY + 0.35, node.z);
-        pingRingMesh2.renderOrder = 12;
-        pingRingMesh2.visible = false;
-        floorBeaconGroup.add(pingRingMesh2);
-
-        // Vertical luminous light conduit beam (anchored at card bottom and extending down to floor)
-        const beamHeight = Math.max(10, cardBottomY - floorY);
-        const beamGeo = new THREE.PlaneGeometry(28, beamHeight);
-        // Translate so geometry origin is at top (card emitter) for top-down extension
-        beamGeo.translate(0, -beamHeight / 2, 0);
-        const beamMat = new THREE.MeshBasicMaterial({
-          map: beamTex,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          opacity: 0.18,
-          side: THREE.DoubleSide,
-        });
-        const beamMesh = new THREE.Mesh(beamGeo, beamMat);
-        beamMesh.position.set(nodeX, cardBottomY, node.z);
-        beamMesh.renderOrder = 15;
-        floorBeaconGroup.add(beamMesh);
-
-        // Central core laser filament line
-        const linePoints = [
-          new THREE.Vector3(nodeX, floorY, node.z),
-          new THREE.Vector3(nodeX, cardBottomY, node.z),
-        ];
-        const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
-        const lineMat = new THREE.LineBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          opacity: 0.15,
-          depthWrite: false,
-        });
-        const lineMesh = new THREE.Line(lineGeo, lineMat);
-        lineMesh.renderOrder = 14;
-        floorBeaconGroup.add(lineMesh);
-
-        // Card bottom emitter ingress port
-        const portGeo = new THREE.RingGeometry(3, 7, 24);
-        const portMat = new THREE.MeshBasicMaterial({
-          color: beaconColor,
-          transparent: true,
-          opacity: 0.45,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        const portMesh = new THREE.Mesh(portGeo, portMat);
-        portMesh.position.set(nodeX, cardBottomY, node.z + 1);
-        portMesh.renderOrder = 16;
-        floorBeaconGroup.add(portMesh);
-
-        // Descending energy pulse: travels down string from card to ground on hover
-        const pulseGeo = new THREE.PlaneGeometry(38, 76);
-        const pulseMat = new THREE.MeshBasicMaterial({
-          map: pulseTex,
-          transparent: true,
-          blending: THREE.AdditiveBlending,
-          depthWrite: false,
-          opacity: 0.0,
-        });
-        const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
-        pulseMesh.position.set(nodeX, cardBottomY, node.z + 2);
-        pulseMesh.renderOrder = 20;
-        pulseMesh.visible = false;
-        floorBeaconGroup.add(pulseMesh);
-
-        floorBeacons.push({
-          nodeId: node.id,
-          baseOuterRingMesh,
-          baseInnerRingMesh,
-          coreDiscMesh,
-          pingRingMesh1,
-          pingRingMesh2,
-          beamMesh,
-          lineMesh,
-          portMesh,
-          pulseMesh,
-          cardBottomY,
-          floorY,
-          isHovered: false,
-          beamExtendProgress: 1.0,
-          pulseProgress: 0.0,
-          pingProgress1: 0.0,
-          pingProgress2: 0.45,
-          pingIntensity: 0.0,
-        });
-      });
+      }
+      rebuildFloorBeacons();
 
       // Atmospheric starfield (1,800 points)
       const particleCount = 1800;
@@ -856,8 +901,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           if (node.id === "root") return;
 
           const isMobileView = width < 768;
-          const nodeX = node.x;
-          const nodeY = node.y;
+          const coords = getNodeCoordinates(node, isMobileView);
+          const nodeX = coords.x;
+          const nodeY = coords.y;
+          const nodeZ = coords.z;
 
           // Vector from avatar head center (0, 30) towards node
           const avatarCenterX = 0;
@@ -877,28 +924,28 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           // Card ingress port
           let endX = nodeX;
           let endY = nodeY;
-          let endZ = node.z;
+          let endZ = nodeZ;
 
           if (nodeX > 50) {
-            endX = nodeX - (isMobileView ? 110 : 165); // left edge of right-hand cards
+            endX = nodeX - (isMobileView ? 45 : 165); // left edge of right-hand cards
           } else if (nodeX < -50) {
-            endX = nodeX + (isMobileView ? 110 : 165); // right edge of left-hand cards
+            endX = nodeX + (isMobileView ? 45 : 165); // right edge of left-hand cards
           } else if (nodeY > avatarCenterY) {
-            endY = nodeY - (isMobileView ? 80 : 110);
+            endY = nodeY - (isMobileView ? 40 : 110);
           } else {
-            endY = nodeY + (isMobileView ? 80 : 110);
+            endY = nodeY + (isMobileView ? 40 : 110);
           }
           const end = new THREE.Vector3(endX, endY, endZ);
 
           // Smooth 3D cubic bezier control points
           const cp1 = new THREE.Vector3(
-            start.x + Math.cos(angle) * (isMobileView ? 90 : 140),
-            start.y + Math.sin(angle) * (isMobileView ? 90 : 140),
+            start.x + Math.cos(angle) * (isMobileView ? 70 : 140),
+            start.y + Math.sin(angle) * (isMobileView ? 70 : 140),
             start.z + 20
           );
           const cp2 = new THREE.Vector3(
-            end.x - (nodeX > 50 ? (isMobileView ? 60 : 100) : nodeX < -50 ? (isMobileView ? -60 : -100) : 0),
-            end.y - (Math.abs(nodeX) <= 50 ? (nodeY > avatarCenterY ? 50 : -50) : 0),
+            end.x - (nodeX > 50 ? (isMobileView ? 30 : 100) : nodeX < -50 ? (isMobileView ? -30 : -100) : 0),
+            end.y - (Math.abs(nodeX) <= 50 ? (nodeY > avatarCenterY ? 30 : -30) : 0),
             end.z + 15
           );
 
@@ -982,6 +1029,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         heroAuraMesh.position.set(0, HERO_Y, -80);
 
         rebuildCurves();
+        rebuildFloorBeacons();
       }
 
       video.addEventListener("loadedmetadata", calibrateVideoDimensions);
@@ -1348,7 +1396,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         radarCtx.lineWidth = 1;
         NODE_GRAPH.forEach((n) => {
           if (n.id === "root") return;
-          const { rx, ry } = worldToRadar(n.x, n.y, rw, rh);
+          const coords = getNodeCoordinates(n, isMobile);
+          const { rx, ry } = worldToRadar(coords.x, coords.y, rw, rh);
           radarCtx.beginPath();
           radarCtx.moveTo(rootRadar.rx, rootRadar.ry);
           radarCtx.lineTo(rx, ry);
@@ -1357,7 +1406,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         // Node blips
         NODE_GRAPH.forEach((n) => {
-          const { rx, ry } = worldToRadar(n.x, n.y, rw, rh);
+          const coords = getNodeCoordinates(n, isMobile);
+          const { rx, ry } = worldToRadar(coords.x, coords.y, rw, rh);
           const isActive = n.id === activeNodeIdRef.current;
           if (isActive) {
             radarCtx.fillStyle = "rgba(204, 255, 0, 0.35)";
@@ -1710,12 +1760,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         // Perspective-project all spatial node cards with Compositor-Only 120 FPS standard
         if (nodeRefs.current) {
+          const isMobileView = width < 768;
           NODE_GRAPH.forEach((node) => {
             if (node.id === "root") return;
             const el = nodeRefs.current?.get(node.id);
             if (!el) return;
 
-            const proj = projectToScreen(node.x, node.y, node.z);
+            const coords = getNodeCoordinates(node, isMobileView);
+            const proj = projectToScreen(coords.x, coords.y, coords.z);
             el._screenX = proj.screenX;
             el._screenY = proj.screenY;
             el._scale = proj.scale;
@@ -1764,7 +1816,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
                 el.style.zIndex = "50";
               } else {
-                el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${proj.scale.toFixed(3)}, ${proj.scale.toFixed(3)}, 1)`;
+                const cardScale = isMobileView ? proj.scale * 0.40 : proj.scale;
+                el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
               }
             } else {
               el.style.opacity = "0";
