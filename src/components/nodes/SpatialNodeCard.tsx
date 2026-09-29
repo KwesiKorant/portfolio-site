@@ -490,7 +490,7 @@ export const SpatialNodeCard = forwardRef<
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
-          : "w-[310px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
+          : "w-[195px] xs:w-[215px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
       onClick={handleClick}
@@ -505,7 +505,7 @@ export const SpatialNodeCard = forwardRef<
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
             ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
-            : "p-4 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
+            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
         }`}
         style={isActive ? { transform: "none" } : undefined}
       >
@@ -527,22 +527,22 @@ export const SpatialNodeCard = forwardRef<
         />
 
         {/* Header Bar */}
-        <div className={`flex items-center justify-between gap-2 sm:gap-3 font-mono text-[9px] sm:text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
-          isActive ? "pb-2.5 sm:pb-3 mb-2.5 sm:mb-3 border-b border-white/10" : "mb-2 sm:mb-2.5"
+        <div className={`flex items-center justify-between gap-1.5 sm:gap-3 font-mono text-[7.5px] sm:text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
+          isActive ? "pb-2.5 sm:pb-3 mb-2.5 sm:mb-3 border-b border-white/10" : "mb-1.5 sm:mb-2.5"
         }`}>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <span className="font-semibold text-zinc-300">{node.category}</span>
+          <div className="flex items-center gap-1 sm:gap-2 truncate">
+            <span className="font-semibold text-zinc-300 truncate">{node.category}</span>
             {isActive && (
               <span className="text-zinc-500 font-mono text-[8.5px] sm:text-[9px] hidden sm:inline">
                 {node.subsystemType === "skills" ? "// VERIFIED CAPABILITIES" : "// SYSTEM DEEP DIVE"}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <span
-              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 border rounded-md font-mono font-medium text-[9px] sm:text-[10px] shadow-sm ${badgeColorClass}`}
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-0.5 sm:py-1 border rounded-md font-mono font-medium text-[7.5px] sm:text-[10px] shadow-sm ${badgeColorClass}`}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
+              <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
               {node.badge}
             </span>
             {isActive && (
@@ -848,37 +848,39 @@ export const SpatialNodeCard = forwardRef<
             {node.subsystemType === "skills" ? (
               /* Dedicated Minimalist Layout for SKILLS Card (Distinct from project cards) */
               <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="font-display text-[17px] font-bold text-white tracking-tight group-hover:text-accent-lime transition-colors duration-150">
+                <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                  <div className="font-display text-[12.5px] sm:text-[17px] font-bold text-white tracking-tight group-hover:text-accent-lime transition-colors duration-150">
                     {node.title}
                   </div>
-                  <span className="font-mono text-[8.5px] px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-bold shrink-0">
+                  <span className="font-mono text-[7px] sm:text-[8.5px] px-1.5 sm:px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-bold shrink-0">
                     12 STACK
                   </span>
                 </div>
 
-                <p className="font-sans text-[11px] leading-relaxed text-zinc-400 mb-2.5">
+                <p className="font-sans text-[9px] sm:text-[11px] leading-relaxed text-zinc-400 mb-1.5 sm:mb-2.5 line-clamp-2">
                   Core engineering capabilities across spatial 3D, mobile, and full-stack architecture.
                 </p>
 
-                {/* Minimalist 2-column skills pill grid */}
-                <div className="grid grid-cols-2 gap-1.5 mb-2.5 font-mono text-[9px]">
-                  {CORE_SKILLS.map((s) => (
+                {/* Minimalist 2-column skills pill grid: top 4 on mobile, all 12 on desktop */}
+                <div className="grid grid-cols-2 gap-1 sm:gap-1.5 mb-1.5 sm:mb-2.5 font-mono text-[7.5px] sm:text-[9px]">
+                  {CORE_SKILLS.map((s, idx) => (
                     <div
                       key={s.name}
-                      className="px-2 py-1 rounded-md bg-white/[0.04] border border-white/10 group-hover:border-white/20 flex items-center justify-between text-zinc-300"
+                      className={`${
+                        idx >= 4 ? "hidden sm:flex" : "flex"
+                      } px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-white/[0.04] border border-white/10 group-hover:border-white/20 items-center justify-between text-zinc-300`}
                     >
                       <span className="font-medium text-white truncate">{s.name}</span>
-                      <span className="text-[7.5px] text-zinc-500 shrink-0 font-sans">{s.category}</span>
+                      <span className="text-[6.5px] sm:text-[7.5px] text-zinc-500 shrink-0 font-sans hidden xs:inline">{s.category}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Minimalist Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] text-zinc-400">
-                  <span className="text-zinc-500">12 VERIFIED SKILLS</span>
+                <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/10 font-mono text-[7.5px] sm:text-[9px] text-zinc-400">
+                  <span className="text-zinc-500">12 SKILLS</span>
                   <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150 flex items-center gap-1">
-                    View Skills &rarr;
+                    View &rarr;
                   </span>
                 </div>
               </div>
@@ -886,7 +888,7 @@ export const SpatialNodeCard = forwardRef<
               /* Compact Layout for cards WITH image preview */
               <div>
                 {/* High-impact image preview */}
-                <div className="relative mb-2.5 rounded-xl overflow-hidden border border-white/15 bg-black/60 aspect-[16/9] group-hover:border-accent-lime/60 transition-all duration-200 shadow-md">
+                <div className="relative mb-1.5 sm:mb-2.5 rounded-lg sm:rounded-xl overflow-hidden border border-white/15 bg-black/60 aspect-[16/9] group-hover:border-accent-lime/60 transition-all duration-200 shadow-md">
                   <img
                     src={node.screenshots[0].url}
                     alt={node.screenshots[0].title || node.title}
@@ -894,12 +896,12 @@ export const SpatialNodeCard = forwardRef<
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0c0d14]/85 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-1.5 left-2 right-2 flex items-center justify-between font-mono text-[8.5px] pointer-events-none">
-                    <span className="px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-accent-lime font-bold shadow-sm">
+                  <div className="absolute bottom-1 sm:bottom-1.5 left-1.5 sm:left-2 right-1.5 sm:right-2 flex items-center justify-between font-mono text-[7px] sm:text-[8.5px] pointer-events-none">
+                    <span className="px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-accent-lime font-bold shadow-sm">
                       {node.screenshots[0].badge || "SHIPPED UI"}
                     </span>
                     {node.screenshots.length > 1 && (
-                      <span className="px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-zinc-300 font-medium shadow-sm">
+                      <span className="px-1 sm:px-1.5 py-0.5 rounded bg-black/85 border border-white/20 text-zinc-300 font-medium shadow-sm hidden xs:inline">
                         +{node.screenshots.length - 1} MORE
                       </span>
                     )}
@@ -907,12 +909,12 @@ export const SpatialNodeCard = forwardRef<
                 </div>
 
                 {/* Title */}
-                <div className="font-display text-[16px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
+                <div className="font-display text-[12px] sm:text-[16px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
                   {node.title}
                 </div>
 
                 {/* Role & Key Metric */}
-                <div className="flex items-center justify-between gap-2 font-mono text-[9px] mb-2">
+                <div className="flex items-center justify-between gap-1 sm:gap-2 font-mono text-[7.5px] sm:text-[9px] mb-1.5 sm:mb-2">
                   {node.role && (
                     <span className="text-accent-lime font-medium truncate flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-accent-lime" />
@@ -920,15 +922,15 @@ export const SpatialNodeCard = forwardRef<
                     </span>
                   )}
                   {node.metrics && node.metrics[0] && (
-                    <span className="text-zinc-400 font-mono px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/10 shrink-0">
-                      {node.metrics[0].label}: <strong className="text-white font-medium">{node.metrics[0].val}</strong>
+                    <span className="text-zinc-400 font-mono px-1 sm:px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/10 shrink-0">
+                      <strong className="text-white font-medium">{node.metrics[0].val}</strong>
                     </span>
                   )}
                 </div>
 
-                {/* 2 Key Tags */}
+                {/* 2 Key Tags (Desktop only when idle) */}
                 {node.tags && node.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1 mb-2.5">
+                  <div className="hidden sm:flex flex-wrap gap-1 mb-2.5">
                     {node.tags.slice(0, 2).map((t) => (
                       <span
                         key={t}
@@ -941,37 +943,39 @@ export const SpatialNodeCard = forwardRef<
                 )}
 
                 {/* Compact Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] text-zinc-400">
+                <div className="flex items-center justify-between pt-1.5 sm:pt-2 border-t border-white/10 font-mono text-[7.5px] sm:text-[9px] text-zinc-400">
                   <span className="text-zinc-500">LIVE MVP</span>
                   <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150 flex items-center gap-1">
-                    Inspect Node &rarr;
+                    Inspect &rarr;
                   </span>
                 </div>
               </div>
             ) : (
               /* Standard Layout for cards WITHOUT image preview */
               <div>
-                <div className="font-display text-[19px] font-bold text-white mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150">
+                <div className="font-display text-[13px] sm:text-[19px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
                   {node.title}
                 </div>
 
                 {node.role && (
-                  <div className="font-mono text-[9.5px] text-accent-lime font-medium mb-2 uppercase tracking-wider flex items-center gap-1.5">
+                  <div className="font-mono text-[7.5px] sm:text-[9.5px] text-accent-lime font-medium mb-1 sm:mb-2 uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
                     <span className="w-1 h-1 rounded-full bg-accent-lime" />
-                    <span>{node.role}</span>
+                    <span className="truncate">{node.role}</span>
                   </div>
                 )}
 
                 {node.desc && (
-                  <div className="font-sans text-[12.5px] leading-relaxed text-zinc-300 mb-3 line-clamp-2">
+                  <div className="font-sans text-[9px] sm:text-[12.5px] leading-relaxed text-zinc-300 mb-1.5 sm:mb-3 line-clamp-2">
                     {node.desc}
                   </div>
                 )}
 
-                <SubsystemWidget type={node.subsystemType} />
+                <div className="scale-90 sm:scale-100 origin-left">
+                  <SubsystemWidget type={node.subsystemType} />
+                </div>
 
                 {node.tags && node.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2.5 mb-3">
+                  <div className="hidden sm:flex flex-wrap gap-1.5 mt-2.5 mb-3">
                     {node.tags.slice(0, 3).map((t) => (
                       <span
                         key={t}
@@ -988,10 +992,10 @@ export const SpatialNodeCard = forwardRef<
                   </div>
                 )}
 
-                <div className="flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9.5px] text-zinc-400">
+                <div className="flex items-center justify-between pt-1.5 sm:pt-2.5 border-t border-white/10 font-mono text-[7.5px] sm:text-[9.5px] text-zinc-400">
                   <span>ONLINE</span>
                   <span className="text-accent-lime font-semibold group-hover:translate-x-1 transition-transform duration-150">
-                    Inspect Node &rarr;
+                    Inspect &rarr;
                   </span>
                 </div>
               </div>

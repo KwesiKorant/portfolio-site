@@ -103,7 +103,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         playWarpSound();
 
         const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-        const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
+        const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
 
         if (nodeId === "root") {
           targetOrbitAngleRef.current.yaw = 0;
@@ -176,7 +176,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         resetCamera: () => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
@@ -193,7 +193,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         triggerDimensionalBreach: (direction: "enter" | "exit" = "enter") => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
           if (direction === "enter") {
             // Camera swoops forward from hyperspace depth into elevated perspective
             currentCamRef.current.z = 2100;
@@ -227,7 +227,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let width = window.innerWidth;
       let height = window.innerHeight;
       const isMobile = width < 768;
-      const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
+      const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -766,7 +766,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let currentAspect = 1080 / 608;
       const isMobileInit = window.innerWidth < 768;
       let cardWidth = isMobileInit
-        ? Math.min(window.innerWidth * 0.64, 920)
+        ? Math.min(Math.max(window.innerWidth * 1.35, 520), 920)
         : Math.min(window.innerWidth * 0.82, 920);
       let cardHeight = cardWidth / currentAspect;
 
@@ -867,8 +867,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const angle = Math.atan2(dirY, dirX);
 
           // Visible avatar outer boundary in 3D world units (silhouette perimeter)
-          const avatarRadX = isMobileView ? 115 : 185;
-          const avatarRadY = isMobileView ? 140 : 220;
+          const avatarRadX = isMobileView ? 165 : 185;
+          const avatarRadY = isMobileView ? 195 : 220;
           const startX = avatarCenterX + Math.cos(angle) * avatarRadX;
           const startY = avatarCenterY + Math.sin(angle) * avatarRadY;
           const startZ = -10;
@@ -967,7 +967,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
         const isMobileNow = window.innerWidth < 768;
         cardWidth = isMobileNow
-          ? Math.min(window.innerWidth * 0.64, 920)
+          ? Math.min(Math.max(window.innerWidth * 1.35, 520), 920)
           : Math.min(window.innerWidth * 0.82, 920);
         cardHeight = cardWidth / currentAspect;
 
@@ -1053,9 +1053,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         tempNodeVec.set(wx, wy, wz);
         const dist = camera.position.distanceTo(tempNodeVec);
-        const effectiveBaseZ = width < 768 ? 2280 : DEFAULT_CAMERA_Z;
+        const effectiveBaseZ = width < 768 ? 1800 : DEFAULT_CAMERA_Z;
         const rawScale = effectiveBaseZ / Math.max(dist, 100);
-        const minScale = width < 768 ? 0.50 : 0.45;
+        const minScale = width < 768 ? 0.35 : 0.45;
         const scale = Math.max(minScale, Math.min(rawScale, 1.0));
 
         return { screenX, screenY, scale, isVisible };
@@ -1681,7 +1681,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Perspective-project DOM statement: Anchored above top of video at Z = 75
         const stmtEl = statementRef.current;
         if (stmtEl) {
-          const statementWorldY = HERO_Y + cardHeight * 0.5 + (width < 768 ? 260 : 130);
+          const statementWorldY = HERO_Y + cardHeight * 0.5 + (width < 768 ? 195 : 130);
           const stmtProj = projectToScreen(0, statementWorldY, 75);
           if (stmtProj.isVisible && !isNodeFocused) {
             stmtEl.style.opacity = "1";
