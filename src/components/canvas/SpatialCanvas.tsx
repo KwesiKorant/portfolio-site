@@ -70,17 +70,17 @@ export function getNodeCoordinates(
   if (!isMobile) return { x: node.x, y: node.y, z: node.z };
   switch (node.id) {
     case "edge-gateway": // Nayak ERP (Upper Left Flank)
-      return { x: -430, y: 20, z: node.z };
+      return { x: -540, y: 70, z: node.z };
     case "infra-compute": // Technical Skills (Lower Left Flank)
-      return { x: -430, y: -310, z: node.z };
+      return { x: -540, y: -480, z: node.z };
     case "event-stream": // Spatial Dimension (Outer Left Orbit)
-      return { x: -720, y: -145, z: node.z };
+      return { x: -860, y: -180, z: node.z };
     case "hyperscale": // Arcfield Discover (Upper Right Flank)
-      return { x: 430, y: 20, z: node.z };
+      return { x: 540, y: 70, z: node.z };
     case "omnisync": // CareSync (Lower Right Flank)
-      return { x: 430, y: -310, z: node.z };
+      return { x: 540, y: -480, z: node.z };
     case "kerneltrace": // Arcfield Eats (Outer Right Orbit)
-      return { x: 720, y: -145, z: node.z };
+      return { x: 860, y: -180, z: node.z };
     default:
       return { x: node.x, y: node.y, z: node.z };
   }
@@ -927,25 +927,25 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           let endZ = nodeZ;
 
           if (nodeX > 50) {
-            endX = nodeX - (isMobileView ? 45 : 165); // left edge of right-hand cards
+            endX = nodeX - (isMobileView ? 75 : 165); // left edge of right-hand cards
           } else if (nodeX < -50) {
-            endX = nodeX + (isMobileView ? 45 : 165); // right edge of left-hand cards
+            endX = nodeX + (isMobileView ? 75 : 165); // right edge of left-hand cards
           } else if (nodeY > avatarCenterY) {
-            endY = nodeY - (isMobileView ? 40 : 110);
+            endY = nodeY - (isMobileView ? 65 : 110);
           } else {
-            endY = nodeY + (isMobileView ? 40 : 110);
+            endY = nodeY + (isMobileView ? 65 : 110);
           }
           const end = new THREE.Vector3(endX, endY, endZ);
 
           // Smooth 3D cubic bezier control points
           const cp1 = new THREE.Vector3(
-            start.x + Math.cos(angle) * (isMobileView ? 70 : 140),
-            start.y + Math.sin(angle) * (isMobileView ? 70 : 140),
+            start.x + Math.cos(angle) * (isMobileView ? 90 : 140),
+            start.y + Math.sin(angle) * (isMobileView ? 90 : 140),
             start.z + 20
           );
           const cp2 = new THREE.Vector3(
-            end.x - (nodeX > 50 ? (isMobileView ? 30 : 100) : nodeX < -50 ? (isMobileView ? -30 : -100) : 0),
-            end.y - (Math.abs(nodeX) <= 50 ? (nodeY > avatarCenterY ? 30 : -30) : 0),
+            end.x - (nodeX > 50 ? (isMobileView ? 50 : 100) : nodeX < -50 ? (isMobileView ? -50 : -100) : 0),
+            end.y - (Math.abs(nodeX) <= 50 ? (nodeY > avatarCenterY ? 40 : -40) : 0),
             end.z + 15
           );
 
@@ -1816,7 +1816,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
                 el.style.zIndex = "50";
               } else {
-                const cardScale = isMobileView ? proj.scale * 0.40 : proj.scale;
+                const cardScale = isMobileView ? proj.scale * 0.80 : proj.scale;
                 el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
               }
             } else {
