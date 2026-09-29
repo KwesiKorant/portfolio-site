@@ -29,14 +29,6 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
     const isWarpingRef = useRef(false);
     const reverseRafRef = useRef<number | null>(null);
 
-    // Preload video on mount
-    useEffect(() => {
-      const video = videoRef.current;
-      if (video) {
-        video.load();
-      }
-    }, []);
-
     // Forward warp sequence: 1.5s All-Intra cinematic flight into Stage 03
     const triggerForward = useCallback(() => {
       const video = videoRef.current;
@@ -155,7 +147,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           ref={videoRef}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           className="w-full h-full object-cover pointer-events-none"
         >
           <source src="/portal_warp.mp4" type="video/mp4" />

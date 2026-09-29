@@ -20,6 +20,12 @@ export interface SpatialNodeElement extends HTMLDivElement {
   _screenX?: number;
   _screenY?: number;
   _scale?: number;
+  _lastX?: number;
+  _lastY?: number;
+  _lastS?: number;
+  _lastOpacity?: string;
+  _lastPointerEvents?: string;
+  _lastZIndex?: string;
 }
 
 function HighlightedCode({ code }: { code: string }) {
@@ -487,7 +493,7 @@ export const SpatialNodeCard = forwardRef<
     <div
       ref={ref}
       id={`node-${node.id}`}
-      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
+      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style_paint] ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
           : "w-[185px] xs:w-[205px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
@@ -499,13 +505,13 @@ export const SpatialNodeCard = forwardRef<
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Inner Card: 3D tilt when idle, crisp 2D flat rendering when active */}
+      {/* Inner Card: 3D tilt when idle on desktop, crisp 2D flat rendering when active or on mobile */}
       <div
         ref={innerCardRef}
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
-            ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
-            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
+            ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16]/98 sm:backdrop-blur-xl backdrop-blur-none border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
+            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] sm:[transform-style:preserve-3d] [transform-style:flat] overflow-hidden"
         }`}
         style={isActive ? { transform: "none" } : undefined}
       >

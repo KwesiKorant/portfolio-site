@@ -449,7 +449,7 @@ export const MouseScrubSection: React.FC = () => {
         ref={videoRef}
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         className="absolute inset-0 w-full h-full object-cover object-[50%_25%] lg:object-center pointer-events-none z-0"
       >
         <source src="/turntable_scrub.mp4" type="video/mp4" />

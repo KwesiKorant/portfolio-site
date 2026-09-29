@@ -140,6 +140,11 @@ export const FinaleSection: React.FC = () => {
           0% { transform: translate3d(0, 0, 0); }
           100% { transform: translate3d(64px, -64px, 0); }
         }
+        @media (max-width: 768px) {
+          .anim-wave-sw, .anim-wave-nw, .anim-wave-ne {
+            display: none !important;
+          }
+        }
         @media (prefers-reduced-motion: reduce) {
           .anim-wave-se, .anim-wave-sw, .anim-wave-nw, .anim-wave-ne {
             animation: none !important;

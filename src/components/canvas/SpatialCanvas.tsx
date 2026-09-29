@@ -251,7 +251,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     useEffect(() => {
       const canvas = canvasRef.current;
       const video = videoRef.current;
-      if (!canvas || !video) return;
+      if (!canvas) return;
 
       let width = window.innerWidth;
       let height = window.innerHeight;
@@ -274,11 +274,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: true,
+        antialias: !isMobile,
         powerPreference: "high-performance",
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : 2));
 
       // Cybernetic Ground Floor Plane (Perspective floor on X-Z axis at Y_FLOOR = -500)
       const Y_FLOOR = -500;
@@ -307,9 +307,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           vec2 p = vWorldPos.xz;
           float dist = length(p);
 
+          // Fast early return for pixels beyond visible floor radius (prevents procedural math across empty void)
+          if (dist > 950.0) {
+            gl_FragColor = vec4(0.0);
+            return;
+          }
+
           // Radial falloff: dissolve cleanly into the void without hard borders
-          float alpha = smoothstep(1950.0, 320.0, dist);
-          if (alpha <= 0.001) discard;
+          float alpha = smoothstep(950.0, 320.0, dist);
 
           // Dual-scale perspective cyber-grid
           float fineGrid = getGrid(p, 50.0, 0.8) * 0.24;
@@ -359,7 +364,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         depthWrite: false,
       });
 
-      const floorGeo = new THREE.PlaneGeometry(3800, 3800, 1, 1);
+      const floorSize = isMobile ? 1200 : 3800;
+      const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize, 1, 1);
       const floorMesh = new THREE.Mesh(floorGeo, floorMat);
       floorMesh.rotation.x = -Math.PI / 2;
       floorMesh.position.set(0, Y_FLOOR, 0);
@@ -474,6 +480,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         cardBottomY: number;
         floorY: number;
         isHovered: boolean;
+        settledIdle?: boolean;
         beamExtendProgress: number; // 0.0 to 1.0 (shooting down from card on hover)
         pulseProgress: number; // 0.0 to 1.0 (traveling downwards from card to floor)
         pingProgress1: number; // 0.0 to 1.0 (ground shockwave ripple)
@@ -738,21 +745,31 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const starField = new THREE.Points(starGeo, starMat);
       scene.add(starField);
 
-      // Video texture and shader material
-      video.play().catch((err) => {
-        console.warn("Autoplay blocked, waiting for user gesture:", err);
-        const playOnGesture = () => {
-          video.play().catch(() => {});
-          window.removeEventListener("click", playOnGesture);
-          window.removeEventListener("keydown", playOnGesture);
-        };
-        window.addEventListener("click", playOnGesture, { once: true });
-        window.addEventListener("keydown", playOnGesture, { once: true });
-      });
+      // Hero avatar texture: on mobile, load optimized static texture to eliminate severe WebGL texImage2D video buffer stalls
+      let heroTexture: THREE.Texture;
+      if (isMobile) {
+        heroTexture = new THREE.TextureLoader().load("/hero-front.webp");
+        heroTexture.minFilter = THREE.LinearFilter;
+        heroTexture.magFilter = THREE.LinearFilter;
+      } else if (video) {
+        video.play().catch((err) => {
+          console.warn("Autoplay blocked, waiting for user gesture:", err);
+          const playOnGesture = () => {
+            video.play().catch(() => {});
+            window.removeEventListener("click", playOnGesture);
+            window.removeEventListener("keydown", playOnGesture);
+          };
+          window.addEventListener("click", playOnGesture, { once: true });
+          window.addEventListener("keydown", playOnGesture, { once: true });
+        });
 
-      const videoTexture = new THREE.VideoTexture(video);
-      videoTexture.minFilter = THREE.LinearFilter;
-      videoTexture.magFilter = THREE.LinearFilter;
+        const vTex = new THREE.VideoTexture(video);
+        vTex.minFilter = THREE.LinearFilter;
+        vTex.magFilter = THREE.LinearFilter;
+        heroTexture = vTex;
+      } else {
+        heroTexture = new THREE.TextureLoader().load("/hero-front.webp");
+      }
 
       const nodeVertexShader = `
         varying vec2 vUv;
@@ -800,7 +817,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         vertexShader: nodeVertexShader,
         fragmentShader: nodeFragmentShader,
         uniforms: {
-          uTexture: { value: videoTexture },
+          uTexture: { value: heroTexture },
           uDist: { value: DEFAULT_CAMERA_Z },
           uTime: { value: 0.0 },
         },
@@ -1032,7 +1049,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         rebuildFloorBeacons();
       }
 
-      video.addEventListener("loadedmetadata", calibrateVideoDimensions);
+      if (video) {
+        video.addEventListener("loadedmetadata", calibrateVideoDimensions);
+      }
       calibrateVideoDimensions();
 
       // Highlight connection & depth-peeking trigger
@@ -1483,7 +1502,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         camera.fov = aspect < 1.0 ? Math.min(74, (50 / aspect) * 0.68) : 50;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 768 ? 1.5 : 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 768 ? 1.0 : 2));
         calibrateVideoDimensions();
         cachedActiveDims = null;
       };
@@ -1499,6 +1518,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let fps = 120;
       let radarFrameCounter = 0;
       let cachedActiveDims: { id: string; w: number; h: number } | null = null;
+      let lastTelUpdate = 0;
+      let lastStmtX = -999, lastStmtY = -999, lastStmtS = -999, lastStmtVis = false;
+      let lastBadgeX = -999, lastBadgeY = -999, lastBadgeS = -999, lastBadgeVis = false;
 
       const animate = () => {
         if (!isVisible) {
@@ -1610,6 +1632,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Animate dynamic floor beacons & descending contact pings on hover
         floorBeacons.forEach((b) => {
           if (b.isHovered) {
+            b.settledIdle = false;
             // 1. String shoot-down & extension animation (moves down from card)
             b.beamExtendProgress = Math.min(1.0, b.beamExtendProgress + 0.08);
             b.beamMesh.scale.y = b.beamExtendProgress;
@@ -1683,44 +1706,21 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               0.15
             );
             (b.portMesh.material as THREE.MeshBasicMaterial).opacity = 0.95;
-          } else {
-            // Idle state: subtle resting plumb line and ground marker
+          } else if (!b.settledIdle) {
+            // Settle once into resting plumb line and ground marker (Zero per-frame mutations when idle)
             b.pulseMesh.visible = false;
             b.pingRingMesh1.visible = false;
             b.pingRingMesh2.visible = false;
-            b.beamMesh.scale.y = THREE.MathUtils.lerp(b.beamMesh.scale.y, 1.0, 0.1);
-            b.beamMesh.scale.x = THREE.MathUtils.lerp(b.beamMesh.scale.x, 0.75, 0.08);
-            (b.beamMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.beamMesh.material as THREE.MeshBasicMaterial).opacity,
-              0.18,
-              0.08
-            );
-            (b.lineMesh.material as THREE.LineBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.lineMesh.material as THREE.LineBasicMaterial).opacity,
-              0.12,
-              0.08
-            );
-            (b.portMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.portMesh.material as THREE.MeshBasicMaterial).opacity,
-              0.35,
-              0.08
-            );
-            (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity,
-              0.26,
-              0.08
-            );
-            (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity,
-              0.22,
-              0.08
-            );
-            (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity = THREE.MathUtils.lerp(
-              (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity,
-              0.15,
-              0.08
-            );
+            b.beamMesh.scale.y = 1.0;
+            b.beamMesh.scale.x = 0.75;
+            (b.beamMesh.material as THREE.MeshBasicMaterial).opacity = 0.18;
+            (b.lineMesh.material as THREE.LineBasicMaterial).opacity = 0.12;
+            (b.portMesh.material as THREE.MeshBasicMaterial).opacity = 0.35;
+            (b.baseOuterRingMesh.material as THREE.MeshBasicMaterial).opacity = 0.26;
+            (b.baseInnerRingMesh.material as THREE.MeshBasicMaterial).opacity = 0.22;
+            (b.coreDiscMesh.material as THREE.MeshBasicMaterial).opacity = 0.15;
             b.coreDiscMesh.scale.set(1, 1, 1);
+            b.settledIdle = true;
           }
         });
 
@@ -1729,13 +1729,22 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         if (stmtEl) {
           const statementWorldY = HERO_Y + cardHeight * 0.5 + (width < 768 ? 195 : 130);
           const stmtProj = projectToScreen(0, statementWorldY, 75);
-          if (stmtProj.isVisible && !isNodeFocused) {
-            stmtEl.style.opacity = "1";
-            stmtEl.style.pointerEvents = "auto";
-            stmtEl.style.transform = `translate3d(calc(${stmtProj.screenX.toFixed(1)}px - 50%), calc(${stmtProj.screenY.toFixed(1)}px - 50%), 0) scale3d(${stmtProj.scale.toFixed(3)}, ${stmtProj.scale.toFixed(3)}, 1)`;
-          } else {
-            stmtEl.style.opacity = "0";
-            stmtEl.style.pointerEvents = "none";
+          const shouldBeVis = stmtProj.isVisible && !isNodeFocused;
+          if (shouldBeVis !== lastStmtVis) {
+            stmtEl.style.opacity = shouldBeVis ? "1" : "0";
+            stmtEl.style.pointerEvents = shouldBeVis ? "auto" : "none";
+            lastStmtVis = shouldBeVis;
+          }
+          if (shouldBeVis) {
+            const dx = Math.abs(stmtProj.screenX - lastStmtX);
+            const dy = Math.abs(stmtProj.screenY - lastStmtY);
+            const ds = Math.abs(stmtProj.scale - lastStmtS);
+            if (dx > 0.08 || dy > 0.08 || ds > 0.001) {
+              stmtEl.style.transform = `translate3d(${stmtProj.screenX.toFixed(1)}px, ${stmtProj.screenY.toFixed(1)}px, 0) translate(-50%, -50%) scale3d(${stmtProj.scale.toFixed(3)}, ${stmtProj.scale.toFixed(3)}, 1)`;
+              lastStmtX = stmtProj.screenX;
+              lastStmtY = stmtProj.screenY;
+              lastStmtS = stmtProj.scale;
+            }
           }
         }
 
@@ -1744,13 +1753,22 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         if (badgeEl) {
           const badgeWorldY = HERO_Y - cardHeight * 0.5 - 28;
           const badgeProj = projectToScreen(0, badgeWorldY, 45);
-          if (badgeProj.isVisible && !isNodeFocused) {
-            badgeEl.style.opacity = "1";
-            badgeEl.style.pointerEvents = "auto";
-            badgeEl.style.transform = `translate3d(calc(${badgeProj.screenX.toFixed(1)}px - 50%), calc(${badgeProj.screenY.toFixed(1)}px - 50%), 0) scale3d(${badgeProj.scale.toFixed(3)}, ${badgeProj.scale.toFixed(3)}, 1)`;
-          } else {
-            badgeEl.style.opacity = "0";
-            badgeEl.style.pointerEvents = "none";
+          const shouldBeVis = badgeProj.isVisible && !isNodeFocused;
+          if (shouldBeVis !== lastBadgeVis) {
+            badgeEl.style.opacity = shouldBeVis ? "1" : "0";
+            badgeEl.style.pointerEvents = shouldBeVis ? "auto" : "none";
+            lastBadgeVis = shouldBeVis;
+          }
+          if (shouldBeVis) {
+            const dx = Math.abs(badgeProj.screenX - lastBadgeX);
+            const dy = Math.abs(badgeProj.screenY - lastBadgeY);
+            const ds = Math.abs(badgeProj.scale - lastBadgeS);
+            if (dx > 0.08 || dy > 0.08 || ds > 0.001) {
+              badgeEl.style.transform = `translate3d(${badgeProj.screenX.toFixed(1)}px, ${badgeProj.screenY.toFixed(1)}px, 0) translate(-50%, -50%) scale3d(${badgeProj.scale.toFixed(3)}, ${badgeProj.scale.toFixed(3)}, 1)`;
+              lastBadgeX = badgeProj.screenX;
+              lastBadgeY = badgeProj.screenY;
+              lastBadgeS = badgeProj.scale;
+            }
           }
         }
 
@@ -1773,28 +1791,40 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               const isThisNodeHovered = hoveredNodeIdRef.current === node.id;
               const isAnyNodeHovered = hoveredNodeIdRef.current !== null;
 
+              let targetOpacity = "1";
+              let targetPointerEvents = "auto";
+              let targetZIndex = isNodeFocused
+                ? isThisNodeActive
+                  ? "100"
+                  : "10"
+                : Math.round(25 + coords.z).toString();
+
               if (isNodeFocused) {
-                el.style.opacity = isThisNodeActive ? "1" : "0";
-                el.style.pointerEvents =
-                  isThisNodeActive ? "auto" : "none";
-                el.style.zIndex = isThisNodeActive ? "100" : "10";
+                targetOpacity = isThisNodeActive ? "1" : "0";
+                targetPointerEvents = isThisNodeActive ? "auto" : "none";
               } else {
-                const depthZIndex = Math.round(25 + coords.z);
                 if (isThisNodeHovered) {
-                  el.style.opacity = "1";
-                  el.style.zIndex = "60"; // Float in front of obstructed siblings
+                  targetOpacity = "1";
+                  targetZIndex = "60";
                 } else if (isAnyNodeHovered) {
-                  el.style.opacity = "0.35"; // Subtly dim siblings for clarity
-                  el.style.zIndex = depthZIndex.toString();
-                } else {
-                  el.style.opacity = "1";
-                  el.style.zIndex = depthZIndex.toString();
+                  targetOpacity = "0.35";
                 }
-                el.style.pointerEvents = "auto";
+              }
+
+              if (el._lastOpacity !== targetOpacity) {
+                el.style.opacity = targetOpacity;
+                el._lastOpacity = targetOpacity;
+              }
+              if (el._lastPointerEvents !== targetPointerEvents) {
+                el.style.pointerEvents = targetPointerEvents;
+                el._lastPointerEvents = targetPointerEvents;
+              }
+              if (el._lastZIndex !== targetZIndex) {
+                el.style.zIndex = targetZIndex;
+                el._lastZIndex = targetZIndex;
               }
 
               if (isThisNodeActive) {
-                // Eliminate Layout Thrashing: Cache active node card dimensions outside per-frame rAF reads
                 if (!cachedActiveDims || cachedActiveDims.id !== node.id) {
                   cachedActiveDims = {
                     id: node.id,
@@ -1810,28 +1840,52 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 const posY = Math.round(proj.screenY) - halfH;
                 const clampedX = Math.max(12, Math.min(window.innerWidth - cardW - 12, posX));
                 const clampedY = Math.max(12, Math.min(window.innerHeight - cardH - 12, posY));
-                el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
-                el.style.zIndex = "50";
+                const dx = Math.abs(clampedX - (el._lastX ?? -999));
+                const dy = Math.abs(clampedY - (el._lastY ?? -999));
+                if (dx > 0.08 || dy > 0.08) {
+                  el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
+                  el._lastX = clampedX;
+                  el._lastY = clampedY;
+                }
+                if (el._lastZIndex !== "50") {
+                  el.style.zIndex = "50";
+                  el._lastZIndex = "50";
+                }
               } else {
                 const cardScale = isMobileView ? proj.scale * 0.80 : proj.scale;
-                el.style.transform = `translate3d(calc(${proj.screenX.toFixed(1)}px - 50%), calc(${proj.screenY.toFixed(1)}px - 50%), 0) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
+                const dx = Math.abs(proj.screenX - (el._lastX ?? -999));
+                const dy = Math.abs(proj.screenY - (el._lastY ?? -999));
+                const ds = Math.abs(cardScale - (el._lastS ?? -999));
+                if (dx > 0.08 || dy > 0.08 || ds > 0.001) {
+                  el.style.transform = `translate3d(${proj.screenX.toFixed(1)}px, ${proj.screenY.toFixed(1)}px, 0) translate(-50%, -50%) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
+                  el._lastX = proj.screenX;
+                  el._lastY = proj.screenY;
+                  el._lastS = cardScale;
+                }
               }
             } else {
-              el.style.opacity = "0";
-              el.style.pointerEvents = "none";
+              if (el._lastOpacity !== "0") {
+                el.style.opacity = "0";
+                el.style.pointerEvents = "none";
+                el._lastOpacity = "0";
+                el._lastPointerEvents = "none";
+              }
             }
           });
         }
 
-        // Update telemetry
-        const telEl = telemetryRef.current;
-        if (telEl) {
-          const yawDeg = Math.round((currentOrbitAngleRef.current.yaw * 180) / Math.PI);
-          const pitchDeg = Math.round((currentOrbitAngleRef.current.pitch * 180) / Math.PI);
-          if (width < 640) {
-            telEl.textContent = `${fps} FPS`;
-          } else {
-            telEl.textContent = `POS: [${camera.position.x.toFixed(0)}, ${camera.position.y.toFixed(0)}, ${camera.position.z.toFixed(0)}] | ROT: [${yawDeg}°, ${pitchDeg}°] | ${fps} FPS`;
+        // Update telemetry throttled to 10 FPS (100ms) - Never write DOM text on every 120 FPS frame!
+        if (now - lastTelUpdate > 100) {
+          lastTelUpdate = now;
+          const telEl = telemetryRef.current;
+          if (telEl) {
+            const yawDeg = Math.round((currentOrbitAngleRef.current.yaw * 180) / Math.PI);
+            const pitchDeg = Math.round((currentOrbitAngleRef.current.pitch * 180) / Math.PI);
+            if (width < 640) {
+              telEl.textContent = `${fps} FPS`;
+            } else {
+              telEl.textContent = `POS: [${camera.position.x.toFixed(0)}, ${camera.position.y.toFixed(0)}, ${camera.position.z.toFixed(0)}] | ROT: [${yawDeg}°, ${pitchDeg}°] | ${fps} FPS`;
+            }
           }
         }
 
@@ -1890,8 +1944,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         window.removeEventListener("touchmove", handleTouchMove);
         window.removeEventListener("touchend", handleTouchEnd);
         window.removeEventListener("resize", handleResize);
-        window.removeEventListener("mousemove", handlePointerMoveAmbient);
-        video.removeEventListener("loadedmetadata", calibrateVideoDimensions);
+        if (video) {
+          video.removeEventListener("loadedmetadata", calibrateVideoDimensions);
+        }
 
         // Dispose Three.js objects
         heroMeshGeometry.dispose();
@@ -1901,7 +1956,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         clusterNebulaGeos.forEach((g) => g.dispose());
         clusterNebulaMats.forEach((m) => m.dispose());
         videoMaterial.dispose();
-        videoTexture.dispose();
+        heroTexture.dispose();
         starGeo.dispose();
         starMat.dispose();
         floorGeo.dispose();
@@ -1952,14 +2007,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
     return (
       <>
-        {/* Hidden video source element for Three.js texture */}
+        {/* Hidden video source element for Three.js texture (loaded on demand for desktop) */}
         <video
           ref={videoRef}
           id="hero-video"
           loop
           muted
           playsInline
-          autoPlay
+          preload="none"
           crossOrigin="anonymous"
           style={{ display: "none" }}
         >

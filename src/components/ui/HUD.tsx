@@ -259,7 +259,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
           <div className="flex items-center gap-2">
             {onReturnToHero && (
               <button
-                className="flex items-center gap-1.5 sm:gap-2 font-mono text-[10px] sm:text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white hover:border-accent-lime/50 bg-[#0c0d14]/90 hover:bg-[#0c0d14] backdrop-blur-md border border-white/15 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl pointer-events-auto cursor-pointer select-none transition-all shadow-md active:scale-95"
+                className="flex items-center gap-1.5 sm:gap-2 font-mono text-[10px] sm:text-[11px] tracking-widest uppercase font-semibold text-zinc-200 hover:text-white hover:border-accent-lime/50 bg-[#0c0d14]/96 hover:bg-[#0c0d14] border border-white/15 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl pointer-events-auto cursor-pointer select-none transition-all shadow-md active:scale-95"
                 onClick={() => {
                   playKeyClick();
                   onReturnToHero();
@@ -300,7 +300,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
               <kbd className="hidden sm:inline-block">?</kbd>
             </button>
             <div
-              className="font-mono text-[10px] sm:text-[11px] tracking-wider text-zinc-300 text-right bg-[#0c0d14]/90 border border-white/15 px-2.5 sm:px-3.5 py-1.5 rounded-xl backdrop-blur-md shadow-sm"
+              className="font-mono text-[10px] sm:text-[11px] tracking-wider text-zinc-300 text-right bg-[#0c0d14]/96 border border-white/15 px-2.5 sm:px-3.5 py-1.5 rounded-xl shadow-sm"
               ref={telemetryRef}
               id="telemetry"
             >
@@ -322,7 +322,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
             {!isMobilePodOpen && (
               <button
                 onClick={() => setIsMobilePodOpen(true)}
-                className="md:hidden flex items-center gap-2 font-mono text-[10px] tracking-wider uppercase font-semibold text-accent-lime bg-[#0a0c16]/95 backdrop-blur-xl border border-accent-lime/45 hover:border-accent-lime px-3.5 py-2 rounded-xl pointer-events-auto cursor-pointer shadow-lg active:scale-95"
+                className="md:hidden flex items-center gap-2 font-mono text-[10px] tracking-wider uppercase font-semibold text-accent-lime bg-[#0a0c16]/98 border border-accent-lime/45 hover:border-accent-lime px-3.5 py-2 rounded-xl pointer-events-auto cursor-pointer shadow-lg active:scale-95"
                 aria-label="Open 3D Cockpit"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
@@ -335,7 +335,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
             <div
               className={`${
                 isMobilePodOpen ? "flex" : "hidden md:flex"
-              } flex-col items-end gap-2 bg-[#0a0c16]/95 backdrop-blur-xl border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group`}
+              } flex-col items-end gap-2 bg-[#0a0c16]/98 border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group`}
             >
               {/* Mobile-only Close Header inside Cockpit */}
               {isMobilePodOpen && (
