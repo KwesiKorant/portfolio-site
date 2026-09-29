@@ -70,17 +70,17 @@ export function getNodeCoordinates(
   if (!isMobile) return { x: node.x, y: node.y, z: node.z };
   switch (node.id) {
     case "edge-gateway": // Nayak ERP (Upper Left Flank)
-      return { x: -540, y: 70, z: node.z };
-    case "infra-compute": // Technical Skills (Lower Left Flank)
-      return { x: -540, y: -480, z: node.z };
+      return { x: -520, y: 150, z: 20 };
+    case "infra-compute": // Technical Skills (Elevated cleanly 400+ units above ground plane)
+      return { x: -640, y: -110, z: -20 };
     case "event-stream": // Spatial Dimension (Outer Left Orbit)
-      return { x: -860, y: -180, z: node.z };
+      return { x: -920, y: 40, z: 20 };
     case "hyperscale": // Arcfield Discover (Upper Right Flank)
-      return { x: 540, y: 70, z: node.z };
-    case "omnisync": // CareSync (Lower Right Flank)
-      return { x: 540, y: -480, z: node.z };
+      return { x: 520, y: 150, z: 20 };
+    case "omnisync": // CareSync (Elevated cleanly 400+ units above ground plane)
+      return { x: 640, y: -110, z: -20 };
     case "kerneltrace": // Arcfield Eats (Outer Right Orbit)
-      return { x: 860, y: -180, z: node.z };
+      return { x: 920, y: 40, z: 20 };
     default:
       return { x: node.x, y: node.y, z: node.z };
   }
@@ -501,9 +501,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const nodeY = coords.y;
           const nodeZ = coords.z;
 
-          // Exact physical bottom edge of each card
+          // Exact physical bottom edge of each card for vertical conduit beam
           const cardHalfHeight = isMobileView
-            ? (node.id === "edge-gateway" || node.id === "event-stream" ? 85 : 75)
+            ? 115
             : (node.id === "edge-gateway" || node.id === "event-stream" ? 175 : 165);
           const cardBottomY = nodeY - cardHalfHeight;
           const floorY = Y_FLOOR + 1;
@@ -1781,17 +1781,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 el.style.opacity = isThisNodeActive ? "1" : "0";
                 el.style.pointerEvents =
                   isThisNodeActive ? "auto" : "none";
-                el.style.zIndex = isThisNodeActive ? "50" : "20";
+                el.style.zIndex = isThisNodeActive ? "100" : "10";
               } else {
+                const depthZIndex = Math.round(25 + coords.z);
                 if (isThisNodeHovered) {
                   el.style.opacity = "1";
-                  el.style.zIndex = "45"; // Float in front of obstructed siblings
+                  el.style.zIndex = "60"; // Float in front of obstructed siblings
                 } else if (isAnyNodeHovered) {
                   el.style.opacity = "0.35"; // Subtly dim siblings for clarity
-                  el.style.zIndex = "20";
+                  el.style.zIndex = depthZIndex.toString();
                 } else {
                   el.style.opacity = "1";
-                  el.style.zIndex = "20";
+                  el.style.zIndex = depthZIndex.toString();
                 }
                 el.style.pointerEvents = "auto";
               }

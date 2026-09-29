@@ -953,24 +953,31 @@ export const SpatialNodeCard = forwardRef<
             ) : (
               /* Standard Layout for cards WITHOUT image preview */
               <div>
-                <div className="font-display text-[13px] sm:text-[19px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
+                <div className="font-display text-[12px] sm:text-[19px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
                   {node.title}
                 </div>
 
                 {node.role && (
-                  <div className="font-mono text-[7.5px] sm:text-[9.5px] text-accent-lime font-medium mb-1 sm:mb-2 uppercase tracking-wider flex items-center gap-1 sm:gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-accent-lime" />
-                    <span className="truncate">{node.role}</span>
+                  <div className="font-mono text-[7.5px] sm:text-[9.5px] text-accent-lime font-medium mb-1 sm:mb-2 uppercase tracking-wider flex items-center justify-between gap-1 sm:gap-1.5">
+                    <span className="truncate flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-accent-lime" />
+                      {node.role}
+                    </span>
+                    {node.metrics && node.metrics[0] && (
+                      <span className="text-zinc-400 font-mono text-[7px] sm:text-[8.5px] px-1 sm:px-1.5 py-0.5 rounded bg-white/[0.04] border border-white/10 shrink-0">
+                        <strong className="text-white font-medium">{node.metrics[0].val}</strong>
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {node.desc && (
-                  <div className="font-sans text-[9px] sm:text-[12.5px] leading-relaxed text-zinc-300 mb-1.5 sm:mb-3 line-clamp-2">
+                  <div className="font-sans text-[8.5px] sm:text-[12.5px] leading-relaxed text-zinc-300 mb-1.5 sm:mb-3 line-clamp-2">
                     {node.desc}
                   </div>
                 )}
 
-                <div className="scale-90 sm:scale-100 origin-left">
+                <div className="hidden sm:block scale-90 sm:scale-100 origin-left">
                   <SubsystemWidget type={node.subsystemType} />
                 </div>
 
