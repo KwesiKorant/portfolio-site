@@ -278,7 +278,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         powerPreference: "high-performance",
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
       // Cybernetic Ground Floor Plane (Perspective floor on X-Z axis at Y_FLOOR = -500)
       const Y_FLOOR = -500;
@@ -1483,6 +1483,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         camera.fov = aspect < 1.0 ? Math.min(74, (50 / aspect) * 0.68) : 50;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 768 ? 1.5 : 2));
         calibrateVideoDimensions();
         cachedActiveDims = null;
       };
@@ -1580,16 +1581,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           currentLookAtRef.current.z
         );
 
-        // Drifting starfield through 3D space
-        const posAttr = starGeo.attributes.position as THREE.BufferAttribute;
-        const posArray = posAttr.array as Float32Array;
-        for (let i = 0; i < particleCount; i++) {
-          posArray[i * 3 + 2] += 0.45;
-          if (posArray[i * 3 + 2] > 800) {
-            posArray[i * 3 + 2] = -1200;
-          }
+        // Drifting starfield through 3D space (Zero CPU allocation & zero GPU buffer re-upload)
+        starField.position.z += 0.45;
+        if (starField.position.z > 1000) {
+          starField.position.z = -1000;
         }
-        posAttr.needsUpdate = true;
 
         // Update shader uniforms
         videoMaterial.uniforms.uDist.value = currentCamRef.current.z;
