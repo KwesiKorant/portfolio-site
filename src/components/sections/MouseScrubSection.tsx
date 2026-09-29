@@ -469,63 +469,63 @@ export const MouseScrubSection: React.FC = () => {
       </div>
 
       {/* Main Dual-Console View: Left Constructor Console + Center Active Model + Right Concept Panel */}
-      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-6 lg:gap-8 w-full my-auto py-4 sm:py-6">
+      <div className="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-5 lg:gap-8 w-full my-auto py-3 sm:py-6">
         {/* Left: AI-Augmented Engineering Workflow Console */}
-        <div className="w-full max-w-lg lg:max-w-xl p-5 sm:p-6 md:p-8 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-lg lg:max-w-xl p-4 sm:p-6 md:p-8 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[8.5px] sm:text-[10px] tracking-widest uppercase mb-2.5 sm:mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
             <span>ENGINEERING PHILOSOPHY // AI-AUGMENTED WORKFLOW</span>
           </div>
 
           {/* Title */}
-          <h2 className="font-display text-2xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
+          <h2 className="font-display text-xl sm:text-3xl font-bold text-white tracking-tight leading-tight mb-2 drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
             The AI-Augmented Engineering Workflow
           </h2>
 
           {/* Narrative Thesis */}
-          <p className="font-sans text-xs sm:text-sm text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+          <p className="font-sans text-[11.5px] sm:text-sm text-zinc-200 leading-relaxed mb-3 sm:mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
             As a startup CTO and design engineer, I don't write software in isolation. I harness autonomous AI agents as an engineering force-multiplier to rapidly scaffold systems, audit edge cases, and test prototypes enabling a solo builder to deliver enterprise-grade software at 10x velocity.
           </p>
 
           {/* 4-Step Engineering Pipeline Grid */}
-          <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+          <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3.5 sm:mb-4 font-mono text-[9px] sm:text-[10px]">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-accent-lime uppercase block text-[8px] sm:text-[9px] mb-0.5 font-semibold">
                 01 &bull; AI SCAFFOLDING
               </span>
-              <span className="text-zinc-200">
+              <span className="text-zinc-200 text-[9.5px] sm:text-[10px] leading-tight block">
                 Rapid prototype generation &amp; boilerplate reduction
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-accent-lime uppercase block text-[8px] sm:text-[9px] mb-0.5 font-semibold">
                 02 &bull; ARCHITECTURAL RIGOR
               </span>
-              <span className="text-zinc-200">
+              <span className="text-zinc-200 text-[9.5px] sm:text-[10px] leading-tight block">
                 Human ownership of schema, domain &amp; financial math
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-accent-lime uppercase block text-[8px] sm:text-[9px] mb-0.5 font-semibold">
                 03 &bull; FRONTEND POLISH
               </span>
-              <span className="text-zinc-200">
+              <span className="text-zinc-200 text-[9.5px] sm:text-[10px] leading-tight block">
                 120 FPS compositor budgets &amp; zero DOM reflows
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <span className="text-accent-lime uppercase block text-[8px] sm:text-[9px] mb-0.5 font-semibold">
                 04 &bull; MECHANICAL SYMPATHY
               </span>
-              <span className="text-zinc-200">
+              <span className="text-zinc-200 text-[9.5px] sm:text-[10px] leading-tight block">
                 Hardware All-Intra seek &amp; directional cursor filter
               </span>
             </div>
           </div>
 
           {/* Real-time scrub gauge */}
-          <div className="space-y-1.5 font-mono text-[10px] mb-5">
+          <div className="space-y-1.5 font-mono text-[9.5px] sm:text-[10px] mb-4 sm:mb-5">
             <div className="flex justify-between text-zinc-300">
               <span className="font-medium">WORKFLOW SCRUB PROGRESS:</span>
               <span ref={progressTextRef} className="text-accent-lime font-bold">
@@ -539,7 +539,7 @@ export const MouseScrubSection: React.FC = () => {
                 style={{ transform: "scaleX(0)" }}
               />
             </div>
-            <div className="flex justify-between text-[9px] text-zinc-400 pt-0.5 font-medium">
+            <div className="flex justify-between text-[8.5px] sm:text-[9px] text-zinc-400 pt-0.5 font-medium">
               <span>0.00s</span>
               <span ref={durationTextRef}>
                 {duration ? `${duration.toFixed(2)}s` : "4.00s"}
@@ -551,7 +551,7 @@ export const MouseScrubSection: React.FC = () => {
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2 border-t border-white/10">
             <button
               onClick={() => setIsAutoOrbit((prev) => !prev)}
-              className={`font-mono text-[10px] sm:text-[10.5px] px-3.5 sm:px-4 py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`font-mono text-[9.5px] sm:text-[10.5px] px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 ${
                 isAutoOrbit
                   ? "bg-accent-lime/25 border-accent-lime text-accent-lime font-bold shadow-[0_0_15px_rgba(204,255,0,0.3)]"
                   : "bg-white/[0.06] hover:bg-white/[0.12] border-white/20 text-white font-medium"
@@ -562,7 +562,7 @@ export const MouseScrubSection: React.FC = () => {
 
             <button
               onClick={() => handleStep(-0.05)}
-              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
+              className="font-mono text-[9.5px] sm:text-[10.5px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
               title="Step back 5%"
             >
               &larr; STEP
@@ -570,7 +570,7 @@ export const MouseScrubSection: React.FC = () => {
 
             <button
               onClick={() => handleStep(0.05)}
-              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
+              className="font-mono text-[9.5px] sm:text-[10.5px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-200 hover:text-white transition-all cursor-pointer active:scale-95"
               title="Step forward 5%"
             >
               STEP &rarr;
@@ -578,7 +578,7 @@ export const MouseScrubSection: React.FC = () => {
 
             <button
               onClick={handleReset}
-              className="font-mono text-[10px] sm:text-[10.5px] px-2.5 sm:px-3 py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ml-auto active:scale-95"
+              className="font-mono text-[9.5px] sm:text-[10.5px] px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/15 text-zinc-400 hover:text-zinc-200 transition-all cursor-pointer ml-auto active:scale-95"
               title="Reset rotation to 0°"
             >
               RESET 0&deg;
@@ -587,45 +587,45 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Right: Real-World Leverage & Shipped Production Panel */}
-        <div className="w-full max-w-lg lg:max-w-sm p-5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-lg lg:max-w-sm p-4 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[8.5px] sm:text-[9.5px] tracking-widest uppercase mb-2.5 sm:mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
             <span>REAL-WORLD LEVERAGE // SHIPPED SYSTEMS</span>
           </div>
 
-          <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight leading-snug mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+          <h3 className="font-display text-[17px] sm:text-xl font-bold text-white tracking-tight leading-snug mb-1.5 sm:mb-2 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
             From Concept to Shipped Production
           </h3>
 
-          <p className="font-sans text-xs text-zinc-200 leading-relaxed mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
+          <p className="font-sans text-[11px] sm:text-xs text-zinc-200 leading-relaxed mb-3 sm:mb-4 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
             How AI-augmented engineering translates into tangible, shipped software across startups, enterprise applications, and high-performance interfaces:
           </p>
 
-          <div className="space-y-2.5 font-sans text-xs">
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+          <div className="space-y-2 sm:space-y-2.5 font-sans text-xs">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[8.5px] sm:text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 01 &bull; ARCFIELD DISCOVER
               </div>
-              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+              <p className="text-zinc-200 text-[11px] sm:text-[11.5px] leading-relaxed">
                 Co-founded Arcfield Systems (CTO) - prototyped, designed, and launched a live business and service discovery MVP, enabling local enterprises to list services and users to discover them seamlessly.
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[8.5px] sm:text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 02 &bull; NAYAK FURNITURE ERP
               </div>
-              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+              <p className="text-zinc-200 text-[11px] sm:text-[11.5px] leading-relaxed">
                 Solo engineer delivering full factory inventory, point-of-sale cataloging, and automated P&amp;L financial reports in Ghanaian Cedis (GH₵).
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
-              <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+              <div className="font-mono text-[8.5px] sm:text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 03 &bull; 120 FPS KINETIC COMPOSITOR
               </div>
-              <p className="text-zinc-200 text-[11.5px] leading-relaxed">
+              <p className="text-zinc-200 text-[11px] sm:text-[11.5px] leading-relaxed">
                 Zero-reflow All-Intra scrubbing engine with directional tremor filtering, spring haptics, and sub-8ms input response.
               </p>
             </div>
@@ -634,10 +634,10 @@ export const MouseScrubSection: React.FC = () => {
       </div>
 
       {/* Footer Navigation Bar: Clean right-aligned scroll cue without bottom-left descriptions */}
-      <div className="relative z-20 flex justify-end items-center w-full font-mono text-[10px] text-zinc-400 pt-6">
+      <div className="relative z-20 flex justify-end items-center w-full font-mono text-[9.5px] sm:text-[10px] text-zinc-400 pt-4 sm:pt-6">
         <button
           onClick={handleToFinale}
-          className="group cursor-pointer flex items-center gap-2 text-accent-lime/90 hover:text-accent-lime px-4 py-2 rounded-xl border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.06] hover:bg-accent-lime/[0.12] transition-all backdrop-blur-sm shadow-md"
+          className="group cursor-pointer flex items-center gap-1.5 sm:gap-2 text-accent-lime/90 hover:text-accent-lime px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.06] hover:bg-accent-lime/[0.12] transition-all backdrop-blur-sm shadow-md active:scale-95"
         >
           <span>SCROLL DOWN FOR FINALE</span>
           <span className="text-xs group-hover:translate-y-0.5 transition-transform">

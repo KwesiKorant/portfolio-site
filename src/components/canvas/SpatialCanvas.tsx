@@ -1028,7 +1028,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         tempNodeVec.set(wx, wy, wz);
         const dist = camera.position.distanceTo(tempNodeVec);
         const rawScale = DEFAULT_CAMERA_Z / Math.max(dist, 100);
-        const scale = Math.max(0.45, Math.min(rawScale, 1.0));
+        const minScale = width < 768 ? 0.65 : 0.45;
+        const scale = Math.max(minScale, Math.min(rawScale, 1.0));
 
         return { screenX, screenY, scale, isVisible };
       }
@@ -1750,7 +1751,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         if (telEl) {
           const yawDeg = Math.round((currentOrbitAngleRef.current.yaw * 180) / Math.PI);
           const pitchDeg = Math.round((currentOrbitAngleRef.current.pitch * 180) / Math.PI);
-          telEl.textContent = `POS: [${camera.position.x.toFixed(0)}, ${camera.position.y.toFixed(0)}, ${camera.position.z.toFixed(0)}] | ROT: [${yawDeg}°, ${pitchDeg}°] | ${fps} FPS`;
+          if (width < 640) {
+            telEl.textContent = `${fps} FPS`;
+          } else {
+            telEl.textContent = `POS: [${camera.position.x.toFixed(0)}, ${camera.position.y.toFixed(0)}, ${camera.position.z.toFixed(0)}] | ROT: [${yawDeg}°, ${pitchDeg}°] | ${fps} FPS`;
+          }
         }
 
         // Throttle radar render to 40 FPS

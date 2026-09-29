@@ -158,24 +158,24 @@ function PipelineDiagram({ type }: { type?: SubsystemType }) {
   ];
 
   return (
-    <div className="mb-3.5 p-3 bg-[#0d101a] border border-white/20 rounded-xl">
-      <div className="flex items-center justify-between text-[10.5px] font-mono text-zinc-300 mb-2">
+    <div className="mb-2.5 sm:mb-3.5 p-2.5 sm:p-3 bg-[#0d101a] border border-white/20 rounded-xl">
+      <div className="flex items-center justify-between text-[9.5px] sm:text-[10.5px] font-mono text-zinc-300 mb-1.5 sm:mb-2">
         <span className="text-accent-lime font-bold flex items-center gap-1.5 tracking-wider">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
           SYSTEM PIPELINE FLOW
         </span>
-        <span className="text-zinc-400 font-mono text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10">
+        <span className="text-zinc-400 font-mono text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/10">
           ZERO-COPY DIRECT
         </span>
       </div>
-      <div className="grid grid-cols-4 gap-1.5 font-mono text-[9.5px]">
+      <div className="grid grid-cols-4 gap-1 sm:gap-1.5 font-mono text-[8px] sm:text-[9.5px]">
         {steps.map((step, idx) => (
           <div
             key={idx}
-            className="flex flex-col items-center justify-center p-2 rounded-lg bg-[#141724] border border-white/18 text-center relative shadow-sm"
+            className="flex flex-col items-center justify-center p-1.5 sm:p-2 rounded-lg bg-[#141724] border border-white/18 text-center relative shadow-sm"
           >
-            <span className="text-[8.5px] text-accent-lime font-bold mb-0.5">0{idx + 1}</span>
-            <span className="text-zinc-100 font-semibold leading-tight">
+            <span className="text-[7.5px] sm:text-[8.5px] text-accent-lime font-bold mb-0.5">0{idx + 1}</span>
+            <span className="text-zinc-100 font-semibold leading-tight line-clamp-2 sm:line-clamp-none">
               {step}
             </span>
             {idx < 3 && (
@@ -489,8 +489,8 @@ export const SpatialNodeCard = forwardRef<
       id={`node-${node.id}`}
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none transition-opacity duration-200 ease-out ${
         isActive
-          ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[85dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
-          : "w-[330px] max-w-[90vw] z-20 cursor-pointer"
+          ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
+          : "w-[310px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
       onClick={handleClick}
@@ -504,8 +504,8 @@ export const SpatialNodeCard = forwardRef<
         ref={innerCardRef}
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
-            ? "max-h-[85dvh] sm:max-h-[86vh] flex flex-col p-4 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
-            : "p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
+            ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16]/95 backdrop-blur-xl border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
+            : "p-4 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] [transform-style:preserve-3d] overflow-hidden"
         }`}
         style={isActive ? { transform: "none" } : undefined}
       >
@@ -527,20 +527,20 @@ export const SpatialNodeCard = forwardRef<
         />
 
         {/* Header Bar */}
-        <div className={`flex items-center justify-between gap-3 font-mono text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
-          isActive ? "pb-3 mb-3 border-b border-white/10" : "mb-2.5"
+        <div className={`flex items-center justify-between gap-2 sm:gap-3 font-mono text-[9px] sm:text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
+          isActive ? "pb-2.5 sm:pb-3 mb-2.5 sm:mb-3 border-b border-white/10" : "mb-2 sm:mb-2.5"
         }`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="font-semibold text-zinc-300">{node.category}</span>
             {isActive && (
-              <span className="text-zinc-500 font-mono text-[9px] hidden sm:inline">
+              <span className="text-zinc-500 font-mono text-[8.5px] sm:text-[9px] hidden sm:inline">
                 {node.subsystemType === "skills" ? "// VERIFIED CAPABILITIES" : "// SYSTEM DEEP DIVE"}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 border rounded-md font-mono font-medium text-[10px] shadow-sm ${badgeColorClass}`}
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 sm:py-1 border rounded-md font-mono font-medium text-[9px] sm:text-[10px] shadow-sm ${badgeColorClass}`}
             >
               <span className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]" />
               {node.badge}
@@ -548,7 +548,7 @@ export const SpatialNodeCard = forwardRef<
             {isActive && (
               <button
                 onClick={handleCloseZoom}
-                className="px-2.5 sm:px-3 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-200 hover:text-white flex items-center gap-1 font-mono text-[10px] cursor-pointer transition-colors active:scale-95"
+                className="px-2.5 sm:px-3 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.18] border border-white/20 text-zinc-200 hover:text-white flex items-center gap-1 font-mono text-[9.5px] sm:text-[10px] cursor-pointer transition-colors active:scale-95"
                 title="Zoom Out / Overview (ESC)"
                 aria-label="Zoom Out"
               >
@@ -568,34 +568,34 @@ export const SpatialNodeCard = forwardRef<
               <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y">
                 {/* Header Info */}
                 <div>
-                  <h2 className="font-display text-[22px] sm:text-[26px] font-bold text-white tracking-tight mb-1">
+                  <h2 className="font-display text-[18px] sm:text-[26px] font-bold text-white tracking-tight mb-1">
                     Technical Skills & Proficiencies
                   </h2>
-                  <p className="font-sans text-[12.5px] text-zinc-400 leading-relaxed max-w-2xl">
+                  <p className="font-sans text-[11px] sm:text-[12.5px] text-zinc-400 leading-relaxed max-w-2xl">
                     Core engineering stack across spatial 3D graphics, mobile applications, backend services, and relational databases.
                   </p>
                 </div>
 
                 {/* Minimalist 3-Column / 2-Column Grid of All 12 Skills with Short Descriptions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-2.5">
                   {CORE_SKILLS.map((skill) => (
                     <div
                       key={skill.name}
-                      className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-accent-lime/40 transition-all duration-150 flex flex-col justify-between"
+                      className="p-2.5 sm:p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-accent-lime/40 transition-all duration-150 flex flex-col justify-between"
                     >
                       <div>
-                        <div className="flex items-center justify-between gap-2 mb-1.5">
-                          <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00]" />
-                            <span className="font-display text-[15px] font-bold text-white tracking-tight">
+                            <span className="font-display text-[13.5px] sm:text-[15px] font-bold text-white tracking-tight">
                               {skill.name}
                             </span>
                           </div>
-                          <span className="font-mono text-[8.5px] px-2 py-0.5 rounded bg-white/[0.05] border border-white/10 text-zinc-400 font-medium">
+                          <span className="font-mono text-[8px] sm:text-[8.5px] px-1.5 sm:px-2 py-0.5 rounded bg-white/[0.05] border border-white/10 text-zinc-400 font-medium">
                             {skill.category}
                           </span>
                         </div>
-                        <p className="font-sans text-[12px] text-zinc-300 leading-relaxed pl-3.5">
+                        <p className="font-sans text-[11px] sm:text-[12px] text-zinc-300 leading-relaxed pl-3 sm:pl-3.5">
                           {skill.desc}
                         </p>
                       </div>
@@ -608,48 +608,48 @@ export const SpatialNodeCard = forwardRef<
             /* Standard Project Case Study Layout */
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {/* Scrollable Content Area without visible scrollbar */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-3 sm:space-y-4 touch-pan-y">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 lg:gap-5">
                 {/* Left Column: Specs, Metrics, Description */}
-                <div className="lg:col-span-5 flex flex-col justify-between space-y-3.5">
+                <div className="lg:col-span-5 flex flex-col justify-between space-y-2.5 sm:space-y-3.5">
                   <div>
-                    <div className="font-display text-[22px] font-bold text-white mb-1.5 tracking-tight">
+                    <div className="font-display text-[18px] sm:text-[22px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight leading-snug">
                       {node.title}
                     </div>
                     {node.role && (
-                      <div className="inline-flex items-center gap-1.5 mb-2 font-mono text-[10px] text-zinc-300 bg-white/[0.04] border border-white/10 px-2.5 py-1 rounded-md">
+                      <div className="inline-flex items-center gap-1.5 mb-1.5 sm:mb-2 font-mono text-[9px] sm:text-[10px] text-zinc-300 bg-white/[0.04] border border-white/10 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md">
                         <span className="text-zinc-500 font-semibold">ROLE //</span>
                         <span className="text-accent-lime font-medium">{node.role}</span>
                       </div>
                     )}
                     {node.desc && (
-                      <div className="font-sans text-[13px] leading-relaxed text-zinc-200 mb-3 font-normal">
+                      <div className="font-sans text-[11.5px] sm:text-[13px] leading-relaxed text-zinc-200 mb-2.5 sm:mb-3 font-normal">
                         {node.desc}
                       </div>
                     )}
 
                     {/* Structured Case Study Highlights */}
                     {(node.problem || node.solution || node.impact) && (
-                      <div className="space-y-2 mb-3 font-sans text-[11px] leading-relaxed">
+                      <div className="space-y-1.5 sm:space-y-2 mb-2.5 sm:mb-3 font-sans text-[10.5px] sm:text-[11px] leading-relaxed">
                         {node.problem && (
-                          <div className="p-2.5 rounded-lg bg-red-950/25 border border-red-500/20 text-zinc-300">
-                            <span className="font-mono text-[9px] text-red-400 font-semibold uppercase tracking-wider block mb-0.5">
+                          <div className="p-2 sm:p-2.5 rounded-lg bg-red-950/25 border border-red-500/20 text-zinc-300">
+                            <span className="font-mono text-[8px] sm:text-[9px] text-red-400 font-semibold uppercase tracking-wider block mb-0.5">
                               PROBLEM &bull;
                             </span>
                             {node.problem}
                           </div>
                         )}
                         {node.solution && (
-                          <div className="p-2.5 rounded-lg bg-emerald-950/25 border border-emerald-500/20 text-zinc-300">
-                            <span className="font-mono text-[9px] text-emerald-400 font-semibold uppercase tracking-wider block mb-0.5">
+                          <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-950/25 border border-emerald-500/20 text-zinc-300">
+                            <span className="font-mono text-[8px] sm:text-[9px] text-emerald-400 font-semibold uppercase tracking-wider block mb-0.5">
                               SOLUTION &bull;
                             </span>
                             {node.solution}
                           </div>
                         )}
                         {node.impact && (
-                          <div className="p-2.5 rounded-lg bg-accent-lime/10 border border-accent-lime/20 text-zinc-200">
-                            <span className="font-mono text-[9px] text-accent-lime font-semibold uppercase tracking-wider block mb-0.5">
+                          <div className="p-2 sm:p-2.5 rounded-lg bg-accent-lime/10 border border-accent-lime/20 text-zinc-200">
+                            <span className="font-mono text-[8px] sm:text-[9px] text-accent-lime font-semibold uppercase tracking-wider block mb-0.5">
                               IMPACT &bull;
                             </span>
                             {node.impact}
@@ -665,19 +665,19 @@ export const SpatialNodeCard = forwardRef<
                   {/* Architecture Metrics Grid */}
                   {node.metrics && node.metrics.length > 0 && (
                     <div>
-                      <div className="text-[10.5px] font-mono text-zinc-300 mb-1.5 uppercase tracking-wider font-bold">
+                      <div className="text-[9.5px] sm:text-[10.5px] font-mono text-zinc-300 mb-1 sm:mb-1.5 uppercase tracking-wider font-bold">
                         LIVE TELEMETRY METRICS
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                         {node.metrics.map((m, idx) => (
                           <div
                             key={idx}
-                            className="bg-[#131624] border border-white/18 rounded-lg p-2 text-center shadow-sm"
+                            className="bg-[#131624] border border-white/18 rounded-lg p-1.5 sm:p-2 text-center shadow-sm"
                           >
-                            <div className="font-mono text-[9px] text-zinc-400 mb-0.5 uppercase tracking-wider font-semibold">
+                            <div className="font-mono text-[8px] sm:text-[9px] text-zinc-400 mb-0.5 uppercase tracking-wider font-semibold">
                               {m.label}
                             </div>
-                            <div className="font-mono text-[13px] text-white font-bold tracking-tight">
+                            <div className="font-mono text-[11.5px] sm:text-[13px] text-white font-bold tracking-tight">
                               {m.val}
                             </div>
                           </div>
@@ -688,11 +688,11 @@ export const SpatialNodeCard = forwardRef<
 
                   {/* Tags */}
                   {node.tags && node.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 pt-1">
+                    <div className="flex flex-wrap gap-1 sm:gap-1.5 pt-0.5 sm:pt-1">
                       {node.tags.map((t) => (
                         <span
                           key={t}
-                          className="font-mono text-[10px] px-2.5 py-0.5 rounded-md bg-white/[0.08] border border-white/20 text-zinc-100 font-medium"
+                          className="font-mono text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 rounded-md bg-white/[0.08] border border-white/20 text-zinc-100 font-medium"
                         >
                           {t}
                         </span>
@@ -820,18 +820,18 @@ export const SpatialNodeCard = forwardRef<
                     /* Case 2: Standard Code Blueprint */
                     node.code && (
                       <div className="flex-1 flex flex-col">
-                        <div className="flex justify-between items-center mb-1.5 font-mono text-[10.5px]">
+                        <div className="flex justify-between items-center mb-1.5 font-mono text-[9.5px] sm:text-[10.5px]">
                           <span className="text-zinc-300 uppercase tracking-wider font-bold">
                             ARCHITECTURE BLUEPRINT
                           </span>
                           <button
                             onClick={handleCopyCode}
-                            className="cursor-pointer text-accent-lime hover:underline font-mono text-[10.5px] font-bold flex items-center gap-1"
+                            className="cursor-pointer text-accent-lime hover:underline font-mono text-[9.5px] sm:text-[10.5px] font-bold flex items-center gap-1"
                           >
                             <span>{copied ? "✓ COPIED" : "COPY BLUEPRINT"}</span>
                           </button>
                         </div>
-                        <pre className="p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-52 flex-1 font-medium shadow-inner">
+                        <pre className="p-3 sm:p-4 rounded-xl bg-[#06070c] border border-white/20 font-mono text-[10px] sm:text-[11.5px] text-zinc-100 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden leading-relaxed max-h-48 sm:max-h-52 flex-1 font-medium shadow-inner">
                           <HighlightedCode code={node.code} />
                         </pre>
                       </div>

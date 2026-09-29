@@ -324,111 +324,111 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       </div>
 
       {/* Captivating Editorial Hero Content */}
-      <div className="relative z-10 my-auto py-6 sm:py-10 md:py-12 max-w-2xl lg:max-w-3xl pointer-events-none">
+      <div className="relative z-10 my-auto py-4 sm:py-10 md:py-12 w-full max-w-full lg:max-w-3xl pointer-events-none">
         {/* Role tag pill */}
-        <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-3.5 sm:mb-5 text-accent-lime font-mono text-[10px] sm:text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
+        <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-2.5 sm:mb-5 text-accent-lime font-mono text-[9px] sm:text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
           <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
         </div>
 
         {/* Captivating Bold Header */}
-        <h1 className="font-display text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.96] sm:leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-3 sm:mb-4 break-words">
+        <h1 className="font-display text-[28px] xs:text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.98] sm:leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-2.5 sm:mb-4 break-words">
           KWESI ANKOMAH-KORANTENG
         </h1>
 
         {/* Punchy Subtitle */}
-        <p className="font-sans text-sm sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-3 sm:mb-4">
+        <p className="font-sans text-[13px] sm:text-lg md:text-xl text-zinc-100 font-medium leading-snug sm:leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-2.5 sm:mb-4">
           Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
         </p>
 
         {/* Engaging Contextual Narrative */}
-        <p className="font-sans text-[11.5px] sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-4 sm:mb-5">
+        <p className="font-sans text-[11px] sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-5">
           Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
-        {/* Venture & Capabilities Highlight Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-4 sm:mb-5">
+        {/* Venture & Capabilities Highlight Strip: Sleek horizontal flick cards on mobile, 3-column grid on desktop */}
+        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-3.5 sm:mb-5 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain touch-pan-x">
           <div
             onClick={() => onSelectProject && onSelectProject("hyperscale")}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
             }`}
             title="Inspect Arcfield Discover in 3D Dimension"
           >
-            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               STARTUP // CTO
             </div>
-            <div className="font-sans text-xs font-semibold text-white">
+            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
               Arcfield Discover
             </div>
-            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
               Business &amp; Service Discovery MVP
             </div>
           </div>
 
           <div
             onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
             }`}
             title="Inspect Nayak Furniture ERP Screenshots & Specs"
           >
-            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               ENTERPRISE POS
             </div>
-            <div className="font-sans text-xs font-semibold text-white">
+            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
               Nayak Furniture ERP
             </div>
-            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
               Inventory &amp; P&amp;L Engine
             </div>
           </div>
 
           <div
             onClick={() => onSelectProject && onSelectProject("event-stream")}
-            className={`px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all ${
+            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
             }`}
             title="Inspect 120 FPS Compositor Architecture"
           >
-            <div className="font-mono text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
+            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
               CORE SPECIALTY
             </div>
-            <div className="font-sans text-xs font-semibold text-white">
+            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
               120 FPS Compositor
             </div>
-            <div className="font-sans text-[10px] sm:text-[10.5px] text-zinc-400">
+            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
               Zero-Reflow Spatial UI
             </div>
           </div>
         </div>
 
         {/* Focus Badges */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px]">
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
-            120 FPS COMPOSITOR MANDATE
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 font-mono text-[8.5px] sm:text-[10px] max-w-full">
+          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+            120 FPS COMPOSITOR
           </span>
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
-            THREE.JS // WEBGL SPATIAL
+          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+            THREE.JS // WEBGL
           </span>
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
-            ACCRA, GHANA // REMOTE
+          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
+            ACCRA // REMOTE
           </span>
         </div>
       </div>
 
       {/* Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="relative z-10 flex justify-between sm:justify-end items-center w-full pt-4 sm:pt-8">
+      <div className="relative z-10 flex justify-between sm:justify-end items-center w-full pt-3 sm:pt-8">
         {/* Mobile touch guidance cue */}
-        <div className="flex sm:hidden items-center gap-1.5 text-zinc-400 font-mono text-[9px]">
+        <div className="flex sm:hidden items-center gap-1.5 text-zinc-400 font-mono text-[8.5px]">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime/80 shadow-[0_0_6px_#ccff00] animate-pulse" />
-          <span>TOUCH TO SCAN // SWIPE &uarr;</span>
+          <span>SWIPE CARDS &bull; TAP PORTAL &darr;</span>
         </div>
 
         <button
@@ -442,10 +442,10 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               el?.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm"
+          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm active:scale-95"
           aria-label="Scroll to Portal Section"
         >
-          <span className="font-mono text-[11px] sm:text-xs tracking-wider font-semibold">
+          <span className="font-mono text-[10px] sm:text-xs tracking-wider font-semibold">
             ENTER PORTAL GATE
           </span>
           <span className="text-accent-lime text-xs sm:text-sm group-hover:translate-y-1 transition-transform">
