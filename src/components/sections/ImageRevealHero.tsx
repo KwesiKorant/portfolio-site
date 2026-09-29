@@ -241,7 +241,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
     <section
       ref={containerRef}
       id="section-hero"
-      className="relative w-full min-h-[100dvh] flex flex-col justify-between p-4 sm:p-8 md:p-12 overflow-y-auto md:overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
+      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-between p-3 xs:p-4 sm:p-8 md:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
@@ -260,7 +260,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               <img
                 src="/hero-reveal.jpg"
                 alt="Kwesi Digital Twin"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-[50%_16%] lg:object-center"
                 loading="eager"
                 decoding="async"
               />
@@ -298,7 +298,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               <img
                 src="/hero-front.jpg"
                 alt="Kwesi Portrait"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-[50%_16%] lg:object-center"
                 loading="eager"
                 decoding="async"
               />
@@ -323,8 +323,96 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </div>
       </div>
 
-      {/* Captivating Editorial Hero Content */}
-      <div className="relative z-10 my-auto py-4 sm:py-10 md:py-12 w-full max-w-full lg:max-w-3xl pointer-events-none">
+      {/* Atmospheric Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/60 pointer-events-none z-[1]" />
+
+      {/* MOBILE VIEW (< lg): Unobstructed Portrait Chamber + Docked Editorial Console */}
+      <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20 pointer-events-none">
+        {/* Top Chamber: Clean, unobstructed x-ray reveal area with floating prompt */}
+        <div className="relative flex-1 w-full flex flex-col justify-start items-center pt-2 min-h-0 pointer-events-none">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12]/85 border border-white/15 backdrop-blur-md font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
+            <span>TOUCH &amp; DRAG TO SCAN // X-RAY LENS</span>
+          </div>
+        </div>
+
+        {/* Lower Console: Docked Editorial Telemetry Sheet */}
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/92 border border-white/15 backdrop-blur-md p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+          {/* Header row: Role tag + 120 FPS spec */}
+          <div className="flex items-center justify-between gap-2 mb-1.5 font-mono text-[8px] xs:text-[8.5px]">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
+              <span>DESIGN ENGINEER // CTO</span>
+            </div>
+            <span className="text-zinc-400 px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/10 font-medium">
+              120 FPS ENGINE
+            </span>
+          </div>
+
+          {/* Name */}
+          <h1 className="font-display text-[17px] xs:text-[19px] font-black tracking-tight text-white leading-tight mb-1">
+            KWESI ANKOMAH-KORANTENG
+          </h1>
+
+          {/* Subtitle */}
+          <p className="font-sans text-[9.5px] xs:text-[10px] text-zinc-200 leading-snug line-clamp-2 mb-2">
+            Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
+          </p>
+
+          {/* Venture Highlights Strip */}
+          <div className="grid grid-cols-3 gap-1 mb-2 font-mono text-[7.5px]">
+            <div
+              onClick={() => onSelectProject && onSelectProject("hyperscale")}
+              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              title="Inspect Arcfield Discover in 3D Dimension"
+            >
+              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">01 • CTO MVP</div>
+              <div className="text-white font-sans font-medium text-[8px] truncate">Arcfield Discover</div>
+            </div>
+            <div
+              onClick={() => onSelectProject && onSelectProject("edge-gateway")}
+              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              title="Inspect Nayak Furniture ERP"
+            >
+              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">02 • ENTERPRISE</div>
+              <div className="text-white font-sans font-medium text-[8px] truncate">Nayak POS ERP</div>
+            </div>
+            <div
+              onClick={() => onSelectProject && onSelectProject("event-stream")}
+              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              title="Inspect 120 FPS Compositor Architecture"
+            >
+              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">03 • FLAGSHIP</div>
+              <div className="text-white font-sans font-medium text-[8px] truncate">120 FPS Engine</div>
+            </div>
+          </div>
+
+          {/* Bottom Action & CTA Row */}
+          <div className="flex items-center justify-between pt-1.5 border-t border-white/10 font-mono text-[8.5px]">
+            <span className="text-zinc-400">STAGE 01 OF 05</span>
+            <button
+              onClick={() => {
+                if (onEnterPortal) {
+                  onEnterPortal();
+                } else if (onScrollNext) {
+                  onScrollNext();
+                } else {
+                  const el = document.getElementById("section-spatial");
+                  el?.scrollIntoView({ behavior: "smooth" });
+                }
+              }}
+              className="group cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-lime/15 hover:bg-accent-lime/25 border border-accent-lime/40 text-accent-lime font-bold shadow-[0_0_12px_rgba(204,255,0,0.2)] transition-all active:scale-95"
+              aria-label="Scroll to Portal Section"
+            >
+              <span>ENTER PORTAL GATE</span>
+              <span className="text-xs group-hover:translate-y-0.5 transition-transform">&darr;</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* DESKTOP VIEW (>= lg): Canonical Editorial Hero - 100% Preserved */}
+      <div className="hidden lg:flex flex-col justify-between flex-1 w-full my-auto py-4 sm:py-10 md:py-12 max-w-full lg:max-w-3xl pointer-events-none relative z-10">
         {/* Role tag pill */}
         <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-2.5 sm:mb-5 text-accent-lime font-mono text-[9px] sm:text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -346,7 +434,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
-        {/* Venture & Capabilities Highlight Strip: Sleek horizontal flick cards on mobile, 3-column grid on desktop */}
+        {/* Venture & Capabilities Highlight Strip: 3-column grid on desktop */}
         <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-3.5 sm:mb-5 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain touch-pan-x">
           <div
             onClick={() => onSelectProject && onSelectProject("hyperscale")}
@@ -423,14 +511,8 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </div>
       </div>
 
-      {/* Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="relative z-10 flex justify-between sm:justify-end items-center w-full pt-3 sm:pt-8">
-        {/* Mobile touch guidance cue */}
-        <div className="flex sm:hidden items-center gap-1.5 text-zinc-400 font-mono text-[8.5px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime/80 shadow-[0_0_6px_#ccff00] animate-pulse" />
-          <span>SWIPE CARDS &bull; TAP PORTAL &darr;</span>
-        </div>
-
+      {/* Desktop Hero Bottom Bar & Downward Scroll Cue */}
+      <div className="hidden lg:flex relative z-10 justify-end items-center w-full pt-3 sm:pt-8">
         <button
           onClick={() => {
             if (onEnterPortal) {
@@ -454,8 +536,8 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </button>
       </div>
 
-      {/* Seamless bottom fade handoff into Stage 02 */}
-      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-10" />
+      {/* Seamless bottom fade handoff into Stage 02 (Desktop only - mobile console is docked) */}
+      <div className="hidden lg:block absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#050508] to-transparent pointer-events-none z-10" />
     </section>
   );
 };
