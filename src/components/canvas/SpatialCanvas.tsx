@@ -102,12 +102,15 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         onNodeActivated(nodeId);
         playWarpSound();
 
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+        const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
+
         if (nodeId === "root") {
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
-          targetCamRef.current.y = 75;
-          targetCamRef.current.z = DEFAULT_CAMERA_Z;
+          targetCamRef.current.y = isMobile ? 55 : 75;
+          targetCamRef.current.z = defaultZ;
           targetLookAtRef.current.x = 0;
           targetLookAtRef.current.y = -60;
           targetLookAtRef.current.z = 0;
@@ -172,11 +175,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           );
         },
         resetCamera: () => {
+          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+          const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
-          targetCamRef.current.y = 75;
-          targetCamRef.current.z = DEFAULT_CAMERA_Z;
+          targetCamRef.current.y = isMobile ? 55 : 75;
+          targetCamRef.current.z = defaultZ;
           targetLookAtRef.current.x = 0;
           targetLookAtRef.current.y = -60;
           targetLookAtRef.current.z = 0;
@@ -187,14 +192,16 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             highlightConnRef.current(nodeId, isHovered);
         },
         triggerDimensionalBreach: (direction: "enter" | "exit" = "enter") => {
+          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+          const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
           if (direction === "enter") {
             // Camera swoops forward from hyperspace depth into elevated perspective
             currentCamRef.current.z = 2100;
             currentCamRef.current.x = 0;
-            currentCamRef.current.y = 75;
+            currentCamRef.current.y = isMobile ? 55 : 75;
             targetCamRef.current.x = 0;
-            targetCamRef.current.y = 75;
-            targetCamRef.current.z = DEFAULT_CAMERA_Z;
+            targetCamRef.current.y = isMobile ? 55 : 75;
+            targetCamRef.current.z = defaultZ;
             targetLookAtRef.current.x = 0;
             targetLookAtRef.current.y = -60;
             targetLookAtRef.current.z = 0;
@@ -219,6 +226,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       let width = window.innerWidth;
       let height = window.innerHeight;
+      const isMobile = width < 768;
+      const defaultZ = isMobile ? 2280 : DEFAULT_CAMERA_Z;
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -227,8 +236,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const initialAspect = width / height;
       const initialFov = initialAspect < 1.0 ? Math.min(74, (50 / initialAspect) * 0.68) : 50;
       const camera = new THREE.PerspectiveCamera(initialFov, initialAspect, 1, 6000);
-      camera.position.set(0, 180, DEFAULT_CAMERA_Z);
+      camera.position.set(0, isMobile ? 130 : 180, defaultZ);
       camera.lookAt(0, -70, 0);
+      currentCamRef.current.z = defaultZ;
+      targetCamRef.current.z = defaultZ;
+      currentCamRef.current.y = isMobile ? 55 : 75;
+      targetCamRef.current.y = isMobile ? 55 : 75;
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -443,10 +456,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       NODE_GRAPH.forEach((node) => {
         if (node.id === "root") return;
 
+        const nodeX = node.x;
+        const nodeY = node.y;
+
         // Exact physical bottom edge of each card
         const cardHalfHeight =
           node.id === "edge-gateway" || node.id === "event-stream" ? 175 : 165;
-        const cardBottomY = node.y - cardHalfHeight;
+        const cardBottomY = nodeY - cardHalfHeight;
         const floorY = Y_FLOOR + 1;
         const beaconColor =
           node.badgeColor === "cyan"
@@ -473,7 +489,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             ? emeraldFlareTex
             : limeFlareTex;
 
-        // Base static outer reticle ring on the floor at (node.x, floorY, node.z)
+        // Base static outer reticle ring on the floor at (nodeX, floorY, node.z)
         const baseOuterRingGeo = new THREE.RingGeometry(38, 48, 48);
         const baseOuterRingMat = new THREE.MeshBasicMaterial({
           color: beaconColor,
@@ -484,7 +500,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const baseOuterRingMesh = new THREE.Mesh(baseOuterRingGeo, baseOuterRingMat);
         baseOuterRingMesh.rotation.x = -Math.PI / 2;
-        baseOuterRingMesh.position.set(node.x, floorY + 0.1, node.z);
+        baseOuterRingMesh.position.set(nodeX, floorY + 0.1, node.z);
         baseOuterRingMesh.renderOrder = 10;
         floorBeaconGroup.add(baseOuterRingMesh);
 
@@ -499,7 +515,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const baseInnerRingMesh = new THREE.Mesh(baseInnerRingGeo, baseInnerRingMat);
         baseInnerRingMesh.rotation.x = -Math.PI / 2;
-        baseInnerRingMesh.position.set(node.x, floorY + 0.15, node.z);
+        baseInnerRingMesh.position.set(nodeX, floorY + 0.15, node.z);
         baseInnerRingMesh.renderOrder = 10;
         floorBeaconGroup.add(baseInnerRingMesh);
 
@@ -515,7 +531,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const coreDiscMesh = new THREE.Mesh(coreDiscGeo, coreDiscMat);
         coreDiscMesh.rotation.x = -Math.PI / 2;
-        coreDiscMesh.position.set(node.x, floorY + 0.2, node.z);
+        coreDiscMesh.position.set(nodeX, floorY + 0.2, node.z);
         coreDiscMesh.renderOrder = 11;
         floorBeaconGroup.add(coreDiscMesh);
 
@@ -531,7 +547,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const pingRingMesh1 = new THREE.Mesh(pingRingGeo1, pingRingMat1);
         pingRingMesh1.rotation.x = -Math.PI / 2;
-        pingRingMesh1.position.set(node.x, floorY + 0.3, node.z);
+        pingRingMesh1.position.set(nodeX, floorY + 0.3, node.z);
         pingRingMesh1.renderOrder = 12;
         pingRingMesh1.visible = false;
         floorBeaconGroup.add(pingRingMesh1);
@@ -547,7 +563,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         });
         const pingRingMesh2 = new THREE.Mesh(pingRingGeo2, pingRingMat2);
         pingRingMesh2.rotation.x = -Math.PI / 2;
-        pingRingMesh2.position.set(node.x, floorY + 0.35, node.z);
+        pingRingMesh2.position.set(nodeX, floorY + 0.35, node.z);
         pingRingMesh2.renderOrder = 12;
         pingRingMesh2.visible = false;
         floorBeaconGroup.add(pingRingMesh2);
@@ -566,14 +582,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           side: THREE.DoubleSide,
         });
         const beamMesh = new THREE.Mesh(beamGeo, beamMat);
-        beamMesh.position.set(node.x, cardBottomY, node.z);
+        beamMesh.position.set(nodeX, cardBottomY, node.z);
         beamMesh.renderOrder = 15;
         floorBeaconGroup.add(beamMesh);
 
         // Central core laser filament line
         const linePoints = [
-          new THREE.Vector3(node.x, floorY, node.z),
-          new THREE.Vector3(node.x, cardBottomY, node.z),
+          new THREE.Vector3(nodeX, floorY, node.z),
+          new THREE.Vector3(nodeX, cardBottomY, node.z),
         ];
         const lineGeo = new THREE.BufferGeometry().setFromPoints(linePoints);
         const lineMat = new THREE.LineBasicMaterial({
@@ -596,7 +612,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           depthWrite: false,
         });
         const portMesh = new THREE.Mesh(portGeo, portMat);
-        portMesh.position.set(node.x, cardBottomY, node.z + 1);
+        portMesh.position.set(nodeX, cardBottomY, node.z + 1);
         portMesh.renderOrder = 16;
         floorBeaconGroup.add(portMesh);
 
@@ -610,7 +626,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           opacity: 0.0,
         });
         const pulseMesh = new THREE.Mesh(pulseGeo, pulseMat);
-        pulseMesh.position.set(node.x, cardBottomY, node.z + 2);
+        pulseMesh.position.set(nodeX, cardBottomY, node.z + 2);
         pulseMesh.renderOrder = 20;
         pulseMesh.visible = false;
         floorBeaconGroup.add(pulseMesh);
@@ -748,7 +764,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       });
 
       let currentAspect = 1080 / 608;
-      let cardWidth = Math.min(window.innerWidth * 0.82, 920);
+      const isMobileInit = window.innerWidth < 768;
+      let cardWidth = isMobileInit
+        ? Math.min(window.innerWidth * 0.64, 920)
+        : Math.min(window.innerWidth * 0.82, 920);
       let cardHeight = cardWidth / currentAspect;
 
       let heroMeshGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
@@ -836,46 +855,50 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         NODE_GRAPH.forEach((node) => {
           if (node.id === "root") return;
 
+          const isMobileView = width < 768;
+          const nodeX = node.x;
+          const nodeY = node.y;
+
           // Vector from avatar head center (0, 30) towards node
           const avatarCenterX = 0;
           const avatarCenterY = 30;
-          const dirX = node.x - avatarCenterX;
-          const dirY = node.y - avatarCenterY;
+          const dirX = nodeX - avatarCenterX;
+          const dirY = nodeY - avatarCenterY;
           const angle = Math.atan2(dirY, dirX);
 
           // Visible avatar outer boundary in 3D world units (silhouette perimeter)
-          const avatarRadX = 185;
-          const avatarRadY = 220;
+          const avatarRadX = isMobileView ? 115 : 185;
+          const avatarRadY = isMobileView ? 140 : 220;
           const startX = avatarCenterX + Math.cos(angle) * avatarRadX;
           const startY = avatarCenterY + Math.sin(angle) * avatarRadY;
           const startZ = -10;
           const start = new THREE.Vector3(startX, startY, startZ);
 
           // Card ingress port
-          let endX = node.x;
-          let endY = node.y;
+          let endX = nodeX;
+          let endY = nodeY;
           let endZ = node.z;
 
-          if (node.x > 100) {
-            endX = node.x - 165; // left edge of right-hand cards
-          } else if (node.x < -100) {
-            endX = node.x + 165; // right edge of left-hand cards
-          } else if (node.y > avatarCenterY) {
-            endY = node.y - 110;
+          if (nodeX > 50) {
+            endX = nodeX - (isMobileView ? 110 : 165); // left edge of right-hand cards
+          } else if (nodeX < -50) {
+            endX = nodeX + (isMobileView ? 110 : 165); // right edge of left-hand cards
+          } else if (nodeY > avatarCenterY) {
+            endY = nodeY - (isMobileView ? 80 : 110);
           } else {
-            endY = node.y + 110;
+            endY = nodeY + (isMobileView ? 80 : 110);
           }
           const end = new THREE.Vector3(endX, endY, endZ);
 
           // Smooth 3D cubic bezier control points
           const cp1 = new THREE.Vector3(
-            start.x + Math.cos(angle) * 140,
-            start.y + Math.sin(angle) * 140,
+            start.x + Math.cos(angle) * (isMobileView ? 90 : 140),
+            start.y + Math.sin(angle) * (isMobileView ? 90 : 140),
             start.z + 20
           );
           const cp2 = new THREE.Vector3(
-            end.x - (node.x > 100 ? 100 : node.x < -100 ? -100 : 0),
-            end.y - (Math.abs(node.x) <= 100 ? (node.y > avatarCenterY ? 70 : -70) : 0),
+            end.x - (nodeX > 50 ? (isMobileView ? 60 : 100) : nodeX < -50 ? (isMobileView ? -60 : -100) : 0),
+            end.y - (Math.abs(nodeX) <= 50 ? (nodeY > avatarCenterY ? 50 : -50) : 0),
             end.z + 15
           );
 
@@ -942,7 +965,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         } else {
           currentAspect = 1080 / 608;
         }
-        cardWidth = Math.min(window.innerWidth * 0.82, 920);
+        const isMobileNow = window.innerWidth < 768;
+        cardWidth = isMobileNow
+          ? Math.min(window.innerWidth * 0.64, 920)
+          : Math.min(window.innerWidth * 0.82, 920);
         cardHeight = cardWidth / currentAspect;
 
         heroMeshGeometry.dispose();
@@ -1027,8 +1053,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         tempNodeVec.set(wx, wy, wz);
         const dist = camera.position.distanceTo(tempNodeVec);
-        const rawScale = DEFAULT_CAMERA_Z / Math.max(dist, 100);
-        const minScale = width < 768 ? 0.65 : 0.45;
+        const effectiveBaseZ = width < 768 ? 2280 : DEFAULT_CAMERA_Z;
+        const rawScale = effectiveBaseZ / Math.max(dist, 100);
+        const minScale = width < 768 ? 0.50 : 0.45;
         const scale = Math.max(minScale, Math.min(rawScale, 1.0));
 
         return { screenX, screenY, scale, isVisible };
@@ -1654,7 +1681,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Perspective-project DOM statement: Anchored above top of video at Z = 75
         const stmtEl = statementRef.current;
         if (stmtEl) {
-          const statementWorldY = HERO_Y + cardHeight * 0.5 + 130;
+          const statementWorldY = HERO_Y + cardHeight * 0.5 + (width < 768 ? 260 : 130);
           const stmtProj = projectToScreen(0, statementWorldY, 75);
           if (stmtProj.isVisible && !isNodeFocused) {
             stmtEl.style.opacity = "1";
