@@ -12,6 +12,7 @@ import React, {
 export interface PortalGatewayHandle {
   triggerForward: () => void;
   triggerReverse: () => void;
+  preloadVideo: () => void;
   isWarping: () => boolean;
 }
 
@@ -116,15 +117,48 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       reverseRafRef.current = requestAnimationFrame(step);
     }, [onArriveStage1]);
 
+    const preloadVideo = useCallback(() => {
+      const video = videoRef.current;
+      if (video && video.preload !== "auto") {
+        video.preload = "auto";
+        video.load();
+      }
+    }, []);
+
     useImperativeHandle(
       ref,
       () => ({
         triggerForward,
         triggerReverse,
+        preloadVideo,
         isWarping: () => isWarpingRef.current,
       }),
-      [triggerForward, triggerReverse]
+      [triggerForward, triggerReverse, preloadVideo]
     );
+
+    // Warm up video during browser idle time (after initial critical hero paint)
+    useEffect(() => {
+      if (typeof window === "undefined") return;
+
+      const warmUp = () => {
+        if (videoRef.current && videoRef.current.preload !== "auto") {
+          videoRef.current.preload = "auto";
+          videoRef.current.load();
+        }
+      };
+
+      if ("requestIdleCallback" in window) {
+        const idleId = (window as unknown as { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(warmUp, { timeout: 2200 });
+        return () => {
+          if ("cancelIdleCallback" in window) {
+            (window as unknown as { cancelIdleCallback: (id: number) => void }).cancelIdleCallback(idleId);
+          }
+        };
+      } else {
+        const timerId = setTimeout(warmUp, 1800);
+        return () => clearTimeout(timerId);
+      }
+    }, []);
 
     useEffect(() => {
       return () => {
@@ -147,7 +181,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           ref={videoRef}
           muted
           playsInline
-          preload="metadata"
+          preload="none"
           className="w-full h-full object-cover pointer-events-none"
         >
           <source src="/portal_warp.mp4" type="video/mp4" />

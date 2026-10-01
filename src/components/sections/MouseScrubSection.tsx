@@ -89,6 +89,29 @@ export const MouseScrubSection: React.FC = () => {
     return () => observer.disconnect();
   }, [updateCachedBounds]);
 
+  // Anticipatory background pre-buffering: start buffering turntable video when user approaches within 800px (e.g. Stage 3)
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof window === "undefined") return;
+
+    const preloadObserver = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          const video = videoRef.current;
+          if (video && video.preload !== "auto") {
+            video.preload = "auto";
+            video.load();
+          }
+          preloadObserver.disconnect();
+        }
+      },
+      { rootMargin: "800px 0px 800px 0px" }
+    );
+
+    preloadObserver.observe(el);
+    return () => preloadObserver.disconnect();
+  }, []);
+
   // Wait for loadedmetadata before calculating targetTime
   useEffect(() => {
     const video = videoRef.current;
@@ -449,7 +472,7 @@ export const MouseScrubSection: React.FC = () => {
         ref={videoRef}
         muted
         playsInline
-        preload="metadata"
+        preload="none"
         className="absolute inset-0 w-full h-full object-cover object-[50%_25%] lg:object-center pointer-events-none z-0"
       >
         <source src="/turntable_scrub.mp4" type="video/mp4" />

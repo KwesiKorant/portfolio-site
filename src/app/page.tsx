@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import { NODE_GRAPH } from "@/data/nodeGraph";
 import { ClusterType } from "@/types/graph";
 import { HeroStatement } from "@/components/ui/HeroStatement";
@@ -10,7 +11,6 @@ import {
 } from "@/components/nodes/SpatialNodeCard";
 import { HUD } from "@/components/ui/HUD";
 import { ProHintsBanner } from "@/components/ui/ProHintsBanner";
-import { ShortcutsModal } from "@/components/ui/ShortcutsModal";
 import {
   SpatialCanvas,
   type SpatialCanvasHandle,
@@ -20,8 +20,27 @@ import {
   PortalGateway,
   type PortalGatewayHandle,
 } from "@/components/sections/PortalGateway";
-import { MouseScrubSection } from "@/components/sections/MouseScrubSection";
-import { FinaleSection } from "@/components/sections/FinaleSection";
+
+// Offscreen sections dynamically imported for ultra-lean initial bundle (Vercel React Best Practices)
+const MouseScrubSection = dynamic(
+  () =>
+    import("@/components/sections/MouseScrubSection").then(
+      (m) => m.MouseScrubSection
+    ),
+  { ssr: false }
+);
+
+const FinaleSection = dynamic(
+  () =>
+    import("@/components/sections/FinaleSection").then((m) => m.FinaleSection),
+  { ssr: false }
+);
+
+const ShortcutsModal = dynamic(
+  () =>
+    import("@/components/ui/ShortcutsModal").then((m) => m.ShortcutsModal),
+  { ssr: false }
+);
 
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
@@ -62,6 +81,10 @@ export default function SpatialPortfolioPage() {
     setTimeout(() => {
       setIsWarping(false);
     }, 200);
+  }, []);
+
+  const handleWarmupPortal = useCallback(() => {
+    portalGatewayRef.current?.preloadVideo();
   }, []);
 
   // Lock scroll propagation during cinematic portal warp (Stage 02) to prevent momentum leakage
@@ -223,6 +246,7 @@ export default function SpatialPortfolioPage() {
       {/* STAGE 01: Image Reveal Hero (Cursor Spotlight Mask) */}
       <ImageRevealHero
         onEnterPortal={handleEnterPortal}
+        onWarmupPortal={handleWarmupPortal}
         onSelectProject={handleSelectProjectFromHero}
       />
 

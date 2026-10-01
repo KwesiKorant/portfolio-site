@@ -5,12 +5,14 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 interface ImageRevealHeroProps {
   onScrollNext?: () => void;
   onEnterPortal?: () => void;
+  onWarmupPortal?: () => void;
   onSelectProject?: (projectId: string) => void;
 }
 
 export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
   onScrollNext,
   onEnterPortal,
+  onWarmupPortal,
   onSelectProject,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -391,6 +393,8 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           <div className="flex items-center justify-between pt-1.5 border-t border-white/10 font-mono text-[8.5px]">
             <span className="text-zinc-400">STAGE 01 OF 05</span>
             <button
+              onPointerEnter={onWarmupPortal}
+              onTouchStart={onWarmupPortal}
               onClick={() => {
                 if (onEnterPortal) {
                   onEnterPortal();
@@ -514,6 +518,8 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       {/* Desktop Hero Bottom Bar & Downward Scroll Cue */}
       <div className="hidden lg:flex relative z-10 justify-end items-center w-full pt-4">
         <button
+          onPointerEnter={onWarmupPortal}
+          onFocus={onWarmupPortal}
           onClick={() => {
             if (onEnterPortal) {
               onEnterPortal();
