@@ -194,7 +194,7 @@ export const ScrollVideoGate: React.FC<ScrollVideoGateProps> = ({ onComplete }) 
         <button
           onClick={playReverseAndTransition}
           disabled={isWarpingRef.current}
-          className="cursor-pointer px-4 py-2.5 rounded-xl bg-black/60 hover:bg-white/[0.1] border border-white/15 text-zinc-300 font-mono text-xs tracking-wider backdrop-blur-md active:scale-95 transition-all disabled:opacity-50"
+          className="cursor-pointer px-4 py-2.5 rounded-xl bg-[#0a0c14]/95 hover:bg-white/[0.1] border border-white/15 text-zinc-300 font-mono text-xs tracking-wider active:scale-95 transition-all disabled:opacity-50"
         >
           &uarr; RETURN TO PORTRAIT
         </button>

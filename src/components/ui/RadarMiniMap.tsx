@@ -19,8 +19,8 @@ export const RadarMiniMap = forwardRef<HTMLCanvasElement, RadarMiniMapProps>(
         const clickX = clientX - (rect.left + 8);
         const clickY = clientY - (rect.top + 22);
 
-        const canvasW = 135;
-        const canvasH = 86;
+        const canvasW = Math.max(10, container.clientWidth - 16);
+        const canvasH = Math.max(10, container.clientHeight - 36);
 
         const clampedX = Math.max(0, Math.min(clickX, canvasW));
         const clampedY = Math.max(0, Math.min(clickY, canvasH));
@@ -75,7 +75,7 @@ export const RadarMiniMap = forwardRef<HTMLCanvasElement, RadarMiniMapProps>(
     return (
       <div
         ref={containerRef}
-        className="relative w-[155px] h-[122px] bg-[#070912]/90 border border-white/18 hover:border-accent-lime/60 rounded-xl p-2 cursor-crosshair transition-all select-none group touch-none"
+        className="relative w-[124px] xs:w-[136px] sm:w-[155px] h-[116px] sm:h-[122px] bg-[#070912]/90 border border-white/18 hover:border-accent-lime/60 rounded-xl p-1.5 sm:p-2 cursor-crosshair transition-all select-none group touch-none"
         id="radar-container"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

@@ -292,7 +292,35 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
       `;
 
-      const floorFragmentShader = `
+      // Mobile: stripped shader (no fine grid, no rings, no wave pulse, 750 radius) strictly isolated for mobile GPU performance
+      const floorFragmentShader = isMobile ? `
+        varying vec3 vWorldPos;
+        uniform float uTime;
+
+        float getGrid(vec2 coord, float stepSize, float lineWidth) {
+          vec2 grid = abs(fract(coord / stepSize - 0.5) - 0.5) / fwidth(coord / stepSize);
+          float line = min(grid.x, grid.y);
+          return 1.0 - min(line / lineWidth, 1.0);
+        }
+
+        void main() {
+          vec2 p = vWorldPos.xz;
+          float dist = length(p);
+          if (dist > 750.0) { gl_FragColor = vec4(0.0); return; }
+          float alpha = smoothstep(750.0, 200.0, dist);
+          float majorGrid = getGrid(p, 250.0, 1.2) * 0.7;
+          float axisX = 1.0 - min(abs(p.y) / (fwidth(p.y) * 1.5), 1.0);
+          float axisZ = 1.0 - min(abs(p.x) / (fwidth(p.x) * 1.5), 1.0);
+          float axes = max(axisX, axisZ) * 0.4;
+          float centerSpot = smoothstep(350.0, 40.0, dist) * 0.1;
+          vec3 col = vec3(0.02, 0.04, 0.06);
+          col += vec3(0.8, 1.0, 0.0) * (majorGrid * 0.4);
+          col += vec3(0.06, 0.75, 0.85) * axes;
+          col += vec3(0.8, 1.0, 0.0) * centerSpot;
+          float finalAlpha = clamp((majorGrid + axes + centerSpot) * alpha, 0.0, 0.88);
+          gl_FragColor = vec4(col, finalAlpha);
+        }
+      ` : `
         varying vec3 vWorldPos;
         uniform float uTime;
 
@@ -307,18 +335,25 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           vec2 p = vWorldPos.xz;
           float dist = length(p);
 
-          // Fast early return for pixels beyond visible floor radius (prevents procedural math across empty void)
-          if (dist > 950.0) {
+          // Fast early return for pixels beyond visible floor radius
+          if (dist > 1950.0) {
             gl_FragColor = vec4(0.0);
             return;
           }
 
           // Radial falloff: dissolve cleanly into the void without hard borders
-          float alpha = smoothstep(950.0, 320.0, dist);
+          float alpha = smoothstep(1950.0, 320.0, dist);
+          if (alpha <= 0.001) {
+            gl_FragColor = vec4(0.0);
+            return;
+          }
 
-          // Dual-scale perspective cyber-grid
-          float fineGrid = getGrid(p, 50.0, 0.8) * 0.24;
+          // Major perspective cyber-grid (250 unit step)
           float majorGrid = getGrid(p, 250.0, 1.2) * 0.7;
+
+          // High-performance optimization: evaluate fineGrid (50 unit step) ONLY within 800 units,
+          // smoothly fading out to eliminate sub-pixel moiré and save 80% fill-rate math
+          float fineGrid = dist < 800.0 ? getGrid(p, 50.0, 0.8) * 0.24 * smoothstep(800.0, 400.0, dist) : 0.0;
           float grid = fineGrid + majorGrid;
 
           // Glowing coordinate axes
@@ -326,22 +361,28 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           float axisZ = 1.0 - min(abs(p.x) / (fwidth(p.x) * 1.5), 1.0);
           float axes = max(axisX, axisZ) * 0.45;
 
-          // Central holographic dais concentric rings beneath Kwesi's portrait (0, 0)
-          float r1 = abs(dist - 140.0);
-          float r2 = abs(dist - 260.0);
-          float r3 = abs(dist - 380.0);
-          float rings = (
-            smoothstep(3.0, 0.0, r1) * 0.6 +
-            smoothstep(2.5, 0.0, r2) * 0.45 +
-            smoothstep(2.0, 0.0, r3) * 0.35
-          );
+          // High-performance optimization: rings only calculated within active radius (dist < 400.0)
+          float rings = 0.0;
+          if (dist < 400.0) {
+            float r1 = abs(dist - 140.0);
+            float r2 = abs(dist - 260.0);
+            float r3 = abs(dist - 380.0);
+            rings = (
+              smoothstep(3.0, 0.0, r1) * 0.6 +
+              smoothstep(2.5, 0.0, r2) * 0.45 +
+              smoothstep(2.0, 0.0, r3) * 0.35
+            );
+          }
 
-          // Subtle outward radiating energy pulse
-          float wave = sin(dist * 0.035 - uTime * 2.2);
-          float waveGlow = smoothstep(0.92, 1.0, wave) * smoothstep(550.0, 50.0, dist) * 0.25;
+          // High-performance optimization: outward radiating energy pulse only evaluated when dist < 550.0
+          float waveGlow = 0.0;
+          if (dist < 550.0) {
+            float wave = sin(dist * 0.035 - uTime * 2.2);
+            waveGlow = smoothstep(0.92, 1.0, wave) * smoothstep(550.0, 50.0, dist) * 0.25;
+          }
 
-          // Soft spotlight pool under the center stage
-          float centerSpot = smoothstep(450.0, 40.0, dist) * 0.14;
+          // Soft spotlight pool under the center stage (dist < 450.0)
+          float centerSpot = dist < 450.0 ? smoothstep(450.0, 40.0, dist) * 0.14 : 0.0;
 
           vec3 col = vec3(0.02, 0.04, 0.06);
           col += vec3(0.04, 0.15, 0.22) * fineGrid;
@@ -364,7 +405,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         depthWrite: false,
       });
 
-      const floorSize = isMobile ? 1200 : 3800;
+      const floorSize = isMobile ? 1200 : 3900;
       const floorGeo = new THREE.PlaneGeometry(floorSize, floorSize, 1, 1);
       const floorMesh = new THREE.Mesh(floorGeo, floorMat);
       floorMesh.rotation.x = -Math.PI / 2;
@@ -705,8 +746,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       }
       rebuildFloorBeacons();
 
-      // Atmospheric starfield (1,800 points)
-      const particleCount = 1800;
+      // Atmospheric starfield (desktop: 1,800 points, mobile: 400 to reduce fill-rate pressure from additive blending)
+      const particleCount = isMobile ? 400 : 1800;
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(particleCount * 3);
       const starColors = new Float32Array(particleCount * 3);
@@ -1627,7 +1668,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         const isNodeFocused = activeNodeIdRef.current !== "root";
         connectionGroup.visible = !isNodeFocused;
-        floorBeaconGroup.visible = !isNodeFocused;
+        // Hide floor beacons entirely on mobile to save ~54 draw calls
+        floorBeaconGroup.visible = isMobile ? false : !isNodeFocused;
 
         // Animate dynamic floor beacons & descending contact pings on hover
         floorBeacons.forEach((b) => {
@@ -1889,9 +1931,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           }
         }
 
-        // Throttle radar render to 40 FPS
+        // Throttle radar render (desktop: ~40 FPS, mobile: ~10 FPS to reduce 2D canvas shadow rasterization)
         radarFrameCounter++;
-        if (radarFrameCounter % 3 === 0) {
+        const radarInterval = isMobile ? 6 : 3;
+        if (radarFrameCounter % radarInterval === 0) {
           drawRadar();
         }
 

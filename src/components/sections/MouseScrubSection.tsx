@@ -463,7 +463,7 @@ export const MouseScrubSection: React.FC = () => {
       <div className="relative z-20 flex justify-between items-center w-full font-mono text-[9px] sm:text-[10px] text-zinc-400 shrink-0">
         <button
           onClick={handleToSpatial}
-          className="group cursor-pointer flex items-center gap-1.5 sm:gap-2 text-zinc-300 hover:text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12]/80 hover:bg-[#080a12] transition-all backdrop-blur-md shadow-md pointer-events-auto active:scale-95"
+          className="group cursor-pointer flex items-center gap-1.5 sm:gap-2 text-zinc-300 hover:text-white px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12] hover:bg-[#0c0e18] transition-all shadow-md pointer-events-auto active:scale-95"
           title="Return to Stage 03 3D Spatial Deck"
         >
           <span className="text-accent-lime text-xs group-hover:-translate-y-0.5 transition-transform font-bold">&uarr;</span>
@@ -471,7 +471,7 @@ export const MouseScrubSection: React.FC = () => {
         </button>
 
         {/* Interactive scrubber cue */}
-        <div className="flex items-center gap-1.5 text-zinc-400 text-[8.5px] sm:text-[9.5px] font-mono bg-black/40 border border-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[8.5px] sm:text-[9.5px] font-mono bg-[#080a12] border border-white/10 px-2.5 py-1 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
           <span className="hidden sm:inline">KINETIC 360° TURNTABLE //</span>
           <span>SWIPE &harr; TO SCRUB</span>
@@ -483,7 +483,7 @@ export const MouseScrubSection: React.FC = () => {
         {/* Upper Robot Chamber: Clear, unobstructed viewport with floating HUD pill */}
         <div className="relative flex-1 w-full flex flex-col justify-end items-center pb-2 min-h-0">
           {/* Floating High-Tech Scrubbing HUD */}
-          <div className="w-full max-w-sm px-3 py-1.5 rounded-xl bg-[#080a12]/85 border border-white/15 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.7)] flex items-center justify-between gap-2.5 text-zinc-300 font-mono text-[9px] pointer-events-auto">
+          <div className="w-full max-w-sm px-3 py-1.5 rounded-xl bg-[#080a12] border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.7)] flex items-center justify-between gap-2.5 text-zinc-300 font-mono text-[9px] pointer-events-auto">
             <button
               onClick={() => setIsAutoOrbit((prev) => !prev)}
               className={`px-2 py-1 rounded-md border text-[8px] font-bold tracking-wider flex items-center gap-1 transition-all cursor-pointer active:scale-95 ${
@@ -523,7 +523,7 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Lower Console: Segmented Telemetry Dock */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/95 border border-white/15 backdrop-blur-md p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12] border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
           {/* Segmented Controller Tab Switcher */}
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 mb-2 font-mono text-[8.5px]">
             <button
@@ -642,7 +642,7 @@ export const MouseScrubSection: React.FC = () => {
       {/* DESKTOP VIEW (>= lg): Canonical Dual-Console View - 100% Preserved */}
       <div className="hidden lg:flex flex-row justify-between items-center gap-8 w-full my-auto py-6 relative z-10 pointer-events-none">
         {/* Left: AI-Augmented Engineering Workflow Console */}
-        <div className="w-full max-w-xl p-8 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-xl p-8 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -661,7 +661,7 @@ export const MouseScrubSection: React.FC = () => {
 
           {/* 4-Step Engineering Pipeline Grid */}
           <div className="grid grid-cols-2 gap-2 mb-4 font-mono text-[10px]">
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/10">
               <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
                 01 &bull; AI SCAFFOLDING
               </span>
@@ -669,7 +669,7 @@ export const MouseScrubSection: React.FC = () => {
                 Rapid prototype generation &amp; boilerplate reduction
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/10">
               <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
                 02 &bull; ARCHITECTURAL RIGOR
               </span>
@@ -677,7 +677,7 @@ export const MouseScrubSection: React.FC = () => {
                 Human ownership of schema, domain &amp; financial math
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/10">
               <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
                 03 &bull; FRONTEND POLISH
               </span>
@@ -685,7 +685,7 @@ export const MouseScrubSection: React.FC = () => {
                 120 FPS compositor budgets &amp; zero DOM reflows
               </span>
             </div>
-            <div className="p-2.5 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-2.5 rounded-xl bg-[#0a0c14] border border-white/10">
               <span className="text-accent-lime uppercase block text-[9px] mb-0.5 font-semibold">
                 04 &bull; MECHANICAL SYMPATHY
               </span>
@@ -758,7 +758,7 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Right: Real-World Leverage & Shipped Production Panel */}
-        <div className="w-full max-w-sm p-7 rounded-2xl bg-[#080a12]/75 border border-white/15 backdrop-blur-md shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-sm p-7 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -774,7 +774,7 @@ export const MouseScrubSection: React.FC = () => {
           </p>
 
           <div className="space-y-2.5 font-sans text-xs">
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/10">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 01 &bull; ARCFIELD DISCOVER
               </div>
@@ -783,7 +783,7 @@ export const MouseScrubSection: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/10">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 02 &bull; NAYAK FURNITURE ERP
               </div>
@@ -792,7 +792,7 @@ export const MouseScrubSection: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-3 rounded-xl bg-black/45 border border-white/10 backdrop-blur-sm">
+            <div className="p-3 rounded-xl bg-[#0a0c14] border border-white/10">
               <div className="font-mono text-[9.5px] text-accent-lime font-semibold uppercase tracking-wider mb-0.5">
                 03 &bull; 120 FPS KINETIC COMPOSITOR
               </div>
@@ -808,7 +808,7 @@ export const MouseScrubSection: React.FC = () => {
       <div className="hidden lg:flex justify-end items-center w-full font-mono text-[9.5px] sm:text-[10px] text-zinc-400 pt-4 sm:pt-6 relative z-20">
         <button
           onClick={handleToFinale}
-          className="group cursor-pointer flex items-center gap-1.5 sm:gap-2 text-accent-lime/90 hover:text-accent-lime px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.06] hover:bg-accent-lime/[0.12] transition-all backdrop-blur-sm shadow-md active:scale-95"
+          className="group cursor-pointer flex items-center gap-1.5 sm:gap-2 text-accent-lime/90 hover:text-accent-lime px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.06] hover:bg-accent-lime/[0.12] transition-all shadow-md active:scale-95"
         >
           <span>SCROLL DOWN FOR FINALE</span>
           <span className="text-xs group-hover:translate-y-0.5 transition-transform">

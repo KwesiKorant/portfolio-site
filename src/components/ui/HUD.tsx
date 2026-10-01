@@ -335,7 +335,7 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
             <div
               className={`${
                 isMobilePodOpen ? "flex" : "hidden md:flex"
-              } flex-col items-end gap-2 bg-[#0a0c16]/98 border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group`}
+              } flex-col items-end gap-2 bg-[#0a0c16] border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group max-h-[70dvh] md:max-h-none overflow-hidden`}
             >
               {/* Mobile-only Close Header inside Cockpit */}
               {isMobilePodOpen && (

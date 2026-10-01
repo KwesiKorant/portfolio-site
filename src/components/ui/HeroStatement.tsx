@@ -8,7 +8,7 @@ export const HeroStatement = forwardRef<HTMLDivElement>((props, ref) => {
       style={{ opacity: 0 }}
       {...props}
     >
-      <div className="inline-flex items-center gap-1.5 sm:gap-2 font-mono text-[7.5px] sm:text-[10.5px] tracking-[0.14em] uppercase text-accent-lime mb-1.5 sm:mb-2.5 px-2.5 sm:px-3.5 py-0.5 sm:py-1 bg-[#0a0c16]/95 border border-accent-lime/45 rounded-full shadow-[0_0_20px_rgba(204,255,0,0.18)]">
+      <div className="inline-flex items-center gap-1.5 sm:gap-2 font-mono text-[7.5px] sm:text-[10.5px] tracking-[0.14em] uppercase text-accent-lime mb-1.5 sm:mb-2.5 px-2.5 sm:px-3.5 py-0.5 sm:py-1 bg-[#0a0c16]/90 border border-accent-lime/45 rounded-full shadow-[0_0_20px_rgba(204,255,0,0.18)]">
         <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_10px_#ccff00] animate-pulse" />
         <span className="font-medium">DESIGN ENGINEER &bull; CREATIVE TECHNOLOGIST</span>
       </div>

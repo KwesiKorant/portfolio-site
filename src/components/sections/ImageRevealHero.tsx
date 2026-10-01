@@ -330,14 +330,14 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20 pointer-events-none">
         {/* Top Chamber: Clean, unobstructed x-ray reveal area with floating prompt */}
         <div className="relative flex-1 w-full flex flex-col justify-start items-center pt-2 min-h-0 pointer-events-none">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12]/85 border border-white/15 backdrop-blur-md font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12] border border-white/15 font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
             <span>TOUCH &amp; DRAG TO SCAN // X-RAY LENS</span>
           </div>
         </div>
 
         {/* Lower Console: Docked Editorial Telemetry Sheet */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/92 border border-white/15 backdrop-blur-md p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12] border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
           {/* Header row: Role tag + 120 FPS spec */}
           <div className="flex items-center justify-between gap-2 mb-1.5 font-mono text-[8px] xs:text-[8.5px]">
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
@@ -412,33 +412,33 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       </div>
 
       {/* DESKTOP VIEW (>= lg): Canonical Editorial Hero - 100% Preserved */}
-      <div className="hidden lg:flex flex-col justify-between flex-1 w-full my-auto py-4 sm:py-10 md:py-12 max-w-full lg:max-w-3xl pointer-events-none relative z-10">
+      <div className="hidden lg:flex flex-col justify-center my-auto py-6 sm:py-10 w-full max-w-2xl lg:max-w-3xl pointer-events-none relative z-10">
         {/* Role tag pill */}
-        <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full bg-black/70 border border-accent-lime/40 backdrop-blur-md mb-2.5 sm:mb-5 text-accent-lime font-mono text-[9px] sm:text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)]">
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#080a12] border border-accent-lime/40 mb-4 sm:mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)] self-start">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
           <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
         </div>
 
         {/* Captivating Bold Header */}
-        <h1 className="font-display text-[28px] xs:text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.98] sm:leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-2.5 sm:mb-4 break-words">
+        <h1 className="font-display text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-4 break-words">
           KWESI ANKOMAH-KORANTENG
         </h1>
 
         {/* Punchy Subtitle */}
-        <p className="font-sans text-[13px] sm:text-lg md:text-xl text-zinc-100 font-medium leading-snug sm:leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-2.5 sm:mb-4">
+        <p className="font-sans text-sm sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-4">
           Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
         </p>
 
         {/* Engaging Contextual Narrative */}
-        <p className="font-sans text-[11px] sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-5">
+        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-4 sm:mb-5">
           Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
         </p>
 
         {/* Venture & Capabilities Highlight Strip: 3-column grid on desktop */}
-        <div className="flex sm:grid sm:grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-3.5 sm:mb-5 overflow-x-auto sm:overflow-x-visible pb-1 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-x-contain touch-pan-x">
+        <div className="grid grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-4 sm:mb-5">
           <div
             onClick={() => onSelectProject && onSelectProject("hyperscale")}
-            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -458,7 +458,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
           <div
             onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -478,7 +478,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
           <div
             onClick={() => onSelectProject && onSelectProject("event-stream")}
-            className={`flex-shrink-0 w-[185px] sm:w-auto p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-black/60 border border-white/12 backdrop-blur-md transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -498,21 +498,21 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </div>
 
         {/* Focus Badges */}
-        <div className="flex flex-wrap gap-1.5 sm:gap-2 font-mono text-[8.5px] sm:text-[10px] max-w-full">
-          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+        <div className="flex flex-wrap gap-2 font-mono text-[9px] sm:text-[10px] max-w-full">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-white/20 text-zinc-200 shadow-md">
             120 FPS COMPOSITOR
           </span>
-          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-white/20 text-zinc-200 backdrop-blur-md shadow-md">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-white/20 text-zinc-200 shadow-md">
             THREE.JS // WEBGL
           </span>
-          <span className="px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg bg-black/70 border border-accent-lime/30 text-accent-lime backdrop-blur-md shadow-md">
+          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-accent-lime/30 text-accent-lime shadow-md">
             ACCRA // REMOTE
           </span>
         </div>
       </div>
 
       {/* Desktop Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="hidden lg:flex relative z-10 justify-end items-center w-full pt-3 sm:pt-8">
+      <div className="hidden lg:flex relative z-10 justify-end items-center w-full pt-4">
         <button
           onClick={() => {
             if (onEnterPortal) {
@@ -524,7 +524,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
               el?.scrollIntoView({ behavior: "smooth" });
             }
           }}
-          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl bg-white/[0.04] hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg backdrop-blur-sm active:scale-95"
+          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl bg-[#0a0c14]/90 hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg active:scale-95"
           aria-label="Scroll to Portal Section"
         >
           <span className="font-mono text-[10px] sm:text-xs tracking-wider font-semibold">

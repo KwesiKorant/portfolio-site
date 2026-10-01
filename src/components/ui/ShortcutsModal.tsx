@@ -12,7 +12,7 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
   return (
     <div
       id="shortcuts-modal"
-      className={`fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center transition-opacity duration-200 ${
+      className={`fixed inset-0 bg-black/90 z-50 flex items-center justify-center transition-opacity duration-200 ${
         isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       onClick={(e) => {
