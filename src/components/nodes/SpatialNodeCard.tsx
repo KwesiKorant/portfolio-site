@@ -493,7 +493,7 @@ export const SpatialNodeCard = forwardRef<
     <div
       ref={ref}
       id={`node-${node.id}`}
-      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style_paint] ${
+      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style] ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
           : "w-[185px] xs:w-[205px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
@@ -511,7 +511,7 @@ export const SpatialNodeCard = forwardRef<
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
             ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16] border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
-            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] sm:[transform-style:preserve-3d] [transform-style:flat] overflow-hidden"
+            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] sm:[transform-style:preserve-3d] [transform-style:flat]"
         }`}
         style={isActive ? { transform: "none" } : undefined}
       >
@@ -527,7 +527,7 @@ export const SpatialNodeCard = forwardRef<
 
         {/* Ambient edge aura */}
         <div
-          className={`absolute -inset-[1px] rounded-2xl bg-gradient-to-br from-accent-lime/25 via-transparent to-accent-cyan/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 ${
+          className={`absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-lime/25 via-transparent to-accent-cyan/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-10 ${
             isActive ? "opacity-100" : ""
           }`}
         />

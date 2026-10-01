@@ -330,14 +330,14 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20 pointer-events-none">
         {/* Top Chamber: Clean, unobstructed x-ray reveal area with floating prompt */}
         <div className="relative flex-1 w-full flex flex-col justify-start items-center pt-2 min-h-0 pointer-events-none">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12] border border-white/15 font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12]/60 border border-white/15 font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
             <span>TOUCH &amp; DRAG TO SCAN // X-RAY LENS</span>
           </div>
         </div>
 
         {/* Lower Console: Docked Editorial Telemetry Sheet */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12] border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/60 border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
           {/* Header row: Role tag + 120 FPS spec */}
           <div className="flex items-center justify-between gap-2 mb-1.5 font-mono text-[8px] xs:text-[8.5px]">
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
@@ -414,7 +414,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       {/* DESKTOP VIEW (>= lg): Canonical Editorial Hero - 100% Preserved */}
       <div className="hidden lg:flex flex-col justify-center my-auto py-6 sm:py-10 w-full max-w-2xl lg:max-w-3xl pointer-events-none relative z-10">
         {/* Role tag pill */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#080a12] border border-accent-lime/40 mb-4 sm:mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)] self-start">
+        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#080a12]/60 border border-accent-lime/40 mb-4 sm:mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)] self-start">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
           <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
         </div>
@@ -438,7 +438,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         <div className="grid grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-4 sm:mb-5">
           <div
             onClick={() => onSelectProject && onSelectProject("hyperscale")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -458,7 +458,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
           <div
             onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""
@@ -478,7 +478,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
           <div
             onClick={() => onSelectProject && onSelectProject("event-stream")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14] border border-white/12 transition-all active:scale-[0.98] ${
+            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
               onSelectProject
                 ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
                 : ""

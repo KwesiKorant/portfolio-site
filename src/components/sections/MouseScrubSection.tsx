@@ -523,7 +523,7 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Lower Console: Segmented Telemetry Dock */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12] border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/60 border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
           {/* Segmented Controller Tab Switcher */}
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 mb-2 font-mono text-[8.5px]">
             <button
@@ -642,7 +642,7 @@ export const MouseScrubSection: React.FC = () => {
       {/* DESKTOP VIEW (>= lg): Canonical Dual-Console View - 100% Preserved */}
       <div className="hidden lg:flex flex-row justify-between items-center gap-8 w-full my-auto py-6 relative z-10 pointer-events-none">
         {/* Left: AI-Augmented Engineering Workflow Console */}
-        <div className="w-full max-w-xl p-8 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-xl p-8 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[10px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -758,7 +758,7 @@ export const MouseScrubSection: React.FC = () => {
         </div>
 
         {/* Right: Real-World Leverage & Shipped Production Panel */}
-        <div className="w-full max-w-sm p-7 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
+        <div className="w-full max-w-sm p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.85)] pointer-events-auto">
           {/* Pill Tag without Stage Number */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-mono text-[9.5px] tracking-widest uppercase mb-3">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />

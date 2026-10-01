@@ -1205,7 +1205,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         const distFromCenter = Math.abs(currentCamRef.current.z - DEFAULT_CAMERA_Z);
         const speedFactor = Math.min(1.0, distFromCenter / 890);
-        const dollySpeed = 110 + speedFactor * 52;
+        const dollySpeed = 165 + speedFactor * 65;
 
         // User scrolling DOWN (dollying back/out towards Stage 04)
         if (e.deltaY > 0) {
@@ -1306,8 +1306,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const handleMouseMove = (e: MouseEvent) => {
         if (!isDragging) return;
         const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
-        const dx = (e.clientX - dragStart.x) * depthFactor;
-        const dy = (e.clientY - dragStart.y) * depthFactor;
+        const dx = (e.clientX - dragStart.x) * depthFactor * 1.85;
+        const dy = (e.clientY - dragStart.y) * depthFactor * 1.85;
         targetCamRef.current.x = Math.max(
           WORLD_BOUNDS.minX,
           Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
@@ -1366,8 +1366,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const handleTouchMove = (e: TouchEvent) => {
         if (isDragging && e.touches.length === 1) {
           const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
-          const dx = (e.touches[0].clientX - dragStart.x) * depthFactor;
-          const dy = (e.touches[0].clientY - dragStart.y) * depthFactor;
+          const dx = (e.touches[0].clientX - dragStart.x) * depthFactor * 1.85;
+          const dy = (e.touches[0].clientY - dragStart.y) * depthFactor * 1.85;
           targetCamRef.current.x = Math.max(
             WORLD_BOUNDS.minX,
             Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
@@ -1583,7 +1583,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
 
         // Snappy critically damped camera & lookAt lerp (framerate-independent)
-        const lerpFactor = 1.0 - Math.exp(-9.5 * delta);
+        const lerpFactor = 1.0 - Math.exp(-15.5 * delta);
 
         const dx = targetCamRef.current.x - currentCamRef.current.x;
         const dy = targetCamRef.current.y - currentCamRef.current.y;
@@ -1645,7 +1645,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         );
 
         // Drifting starfield through 3D space (Zero CPU allocation & zero GPU buffer re-upload)
-        starField.position.z += 0.45;
+        starField.position.z += 0.85;
         if (starField.position.z > 1000) {
           starField.position.z = -1000;
         }

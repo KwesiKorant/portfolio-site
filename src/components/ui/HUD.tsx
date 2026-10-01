@@ -198,52 +198,52 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
     // Flight control continuous hold handlers
     const zoomInHold = useHoldAction(
       onZoomIn,
-      () => (onContinuousZoom ? onContinuousZoom(-16) : onZoomIn()),
+      () => (onContinuousZoom ? onContinuousZoom(-24) : onZoomIn()),
       16
     );
     const zoomOutHold = useHoldAction(
       onZoomOut,
-      () => (onContinuousZoom ? onContinuousZoom(16) : onZoomOut()),
+      () => (onContinuousZoom ? onContinuousZoom(24) : onZoomOut()),
       16
     );
     const panUpHold = useHoldAction(
-      () => onPanBy?.(0, 100),
-      () => onPanBy?.(0, 12),
+      () => onPanBy?.(0, 140),
+      () => onPanBy?.(0, 20),
       16
     );
     const panDownHold = useHoldAction(
-      () => onPanBy?.(0, -100),
-      () => onPanBy?.(0, -12),
+      () => onPanBy?.(0, -140),
+      () => onPanBy?.(0, -20),
       16
     );
     const panLeftHold = useHoldAction(
-      () => onPanBy?.(-120, 0),
-      () => onPanBy?.(-14, 0),
+      () => onPanBy?.(-160, 0),
+      () => onPanBy?.(-22, 0),
       16
     );
     const panRightHold = useHoldAction(
-      () => onPanBy?.(120, 0),
-      () => onPanBy?.(14, 0),
+      () => onPanBy?.(160, 0),
+      () => onPanBy?.(22, 0),
       16
     );
     const rotUpLeftHold = useHoldAction(
-      () => onRotateBy?.(-0.055, 0.045),
-      () => onRotateBy?.(-0.007, 0.0055),
+      () => onRotateBy?.(-0.065, 0.05),
+      () => onRotateBy?.(-0.010, 0.008),
       16
     );
     const rotUpRightHold = useHoldAction(
-      () => onRotateBy?.(0.055, 0.045),
-      () => onRotateBy?.(0.007, 0.0055),
+      () => onRotateBy?.(0.065, 0.05),
+      () => onRotateBy?.(0.010, 0.008),
       16
     );
     const rotDownLeftHold = useHoldAction(
-      () => onRotateBy?.(-0.055, -0.045),
-      () => onRotateBy?.(-0.007, -0.0055),
+      () => onRotateBy?.(-0.065, -0.05),
+      () => onRotateBy?.(-0.010, -0.008),
       16
     );
     const rotDownRightHold = useHoldAction(
-      () => onRotateBy?.(0.055, -0.045),
-      () => onRotateBy?.(0.007, -0.0055),
+      () => onRotateBy?.(0.065, -0.05),
+      () => onRotateBy?.(0.010, -0.008),
       16
     );
 

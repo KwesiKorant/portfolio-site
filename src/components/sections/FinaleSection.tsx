@@ -398,7 +398,7 @@ export const FinaleSection: React.FC = () => {
         </div>
 
         {/* Lower Console: Segmented Dossier & Uplink Dock */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12] border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
+        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/60 border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
           {/* Segmented Controller Tab Switcher */}
           <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 mb-2 font-mono text-[8.5px]">
             <button
@@ -595,7 +595,7 @@ export const FinaleSection: React.FC = () => {
           </div>
 
           {/* Technical System Footprint Grid: Applied Stage 4 Card Transparency Effect */}
-          <div className="p-3 sm:p-5 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[9px] sm:text-[10px] text-zinc-300 space-y-1.5 sm:space-y-2.5">
+          <div className="p-3 sm:p-5 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[9px] sm:text-[10px] text-zinc-300 space-y-1.5 sm:space-y-2.5">
             <div className="flex items-center justify-between pb-1.5 sm:pb-2 mb-1 border-b border-white/10">
               <div className="flex items-center gap-1.5 sm:gap-2 text-accent-lime font-mono text-[8px] sm:text-[9px] tracking-wider uppercase font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
@@ -633,7 +633,7 @@ export const FinaleSection: React.FC = () => {
 
         {/* Right Column: Contact Card with Original Brand Icons */}
         <div className="lg:col-span-5 flex flex-col">
-          <div className="p-3.5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12] border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
+          <div className="p-3.5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
             <div>
               {/* Header Stating Contact */}
               <div className="flex items-center justify-between gap-2.5 mb-2">
