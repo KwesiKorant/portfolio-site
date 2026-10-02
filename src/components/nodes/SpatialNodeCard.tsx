@@ -614,7 +614,7 @@ export const SpatialNodeCard = forwardRef<
         className={`relative rounded-2xl border text-zinc-100 group transition-[border-color,box-shadow] duration-150 ease-out antialiased ${
           isActive
             ? "max-h-[86dvh] sm:max-h-[86vh] flex flex-col p-3.5 sm:p-6 bg-[#0a0c16] border-2 border-accent-lime shadow-[0_0_60px_rgba(204,255,0,0.3),0_25px_80px_rgba(0,0,0,1)] ring-1 ring-white/20 [transform-style:flat] overflow-hidden"
-            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] sm:[transform-style:preserve-3d] [transform-style:flat]"
+            : "p-2.5 sm:p-5 bg-[#0c0d14] border-white/15 hover:border-accent-lime/60 shadow-md sm:shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_16px_50px_rgba(0,0,0,0.9)] sm:[transform-style:preserve-3d] [transform-style:flat]"
         }`}
         style={isActive ? { transform: "none" } : undefined}
       >
@@ -1071,7 +1071,7 @@ export const SpatialNodeCard = forwardRef<
                   <img
                     src={node.screenshots[0].url}
                     alt={node.screenshots[0].title || node.title}
-                    className="w-full h-full object-cover object-top filter brightness-[0.92] contrast-[1.05] group-hover:scale-105 group-hover:brightness-100 transition-all duration-300"
+                    className="w-full h-full object-cover object-top sm:filter sm:brightness-[0.92] sm:contrast-[1.05] group-hover:scale-105 group-hover:brightness-100 transition-all duration-300"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0c0d14]/85 via-transparent to-transparent pointer-events-none" />

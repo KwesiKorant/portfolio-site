@@ -1476,28 +1476,34 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             radarCtx.fill();
 
             radarCtx.fillStyle = "#ccff00";
-            radarCtx.shadowColor = "#ccff00";
-            radarCtx.shadowBlur = 8;
+            if (!isMobile) {
+              radarCtx.shadowColor = "#ccff00";
+              radarCtx.shadowBlur = 8;
+            }
             radarCtx.beginPath();
             radarCtx.arc(rx, ry, 3.5, 0, Math.PI * 2);
             radarCtx.fill();
-            radarCtx.shadowBlur = 0;
+            if (!isMobile) radarCtx.shadowBlur = 0;
           } else if (n.id === "root") {
             radarCtx.fillStyle = "#ffffff";
-            radarCtx.shadowColor = "#ffffff";
-            radarCtx.shadowBlur = 6;
+            if (!isMobile) {
+              radarCtx.shadowColor = "#ffffff";
+              radarCtx.shadowBlur = 6;
+            }
             radarCtx.beginPath();
             radarCtx.arc(rx, ry, 4, 0, Math.PI * 2);
             radarCtx.fill();
-            radarCtx.shadowBlur = 0;
+            if (!isMobile) radarCtx.shadowBlur = 0;
           } else {
             radarCtx.fillStyle = n.badgeColor === "cyan" ? "#38bdf8" : "#ccff00";
-            radarCtx.shadowColor = n.badgeColor === "cyan" ? "#38bdf8" : "#ccff00";
-            radarCtx.shadowBlur = 4;
+            if (!isMobile) {
+              radarCtx.shadowColor = n.badgeColor === "cyan" ? "#38bdf8" : "#ccff00";
+              radarCtx.shadowBlur = 4;
+            }
             radarCtx.beginPath();
             radarCtx.arc(rx, ry, 2.5, 0, Math.PI * 2);
             radarCtx.fill();
-            radarCtx.shadowBlur = 0;
+            if (!isMobile) radarCtx.shadowBlur = 0;
           }
         });
 
@@ -1528,10 +1534,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         radarCtx.strokeStyle = "#ccff00";
         radarCtx.lineWidth = 1.6;
-        radarCtx.shadowColor = "#ccff00";
-        radarCtx.shadowBlur = 6;
+        if (!isMobile) {
+          radarCtx.shadowColor = "#ccff00";
+          radarCtx.shadowBlur = 6;
+        }
         radarCtx.strokeRect(topLeft.rx, topLeft.ry, fw, fh);
-        radarCtx.shadowBlur = 0;
+        if (!isMobile) radarCtx.shadowBlur = 0;
       }
 
       // Resize listener
@@ -1562,6 +1570,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let lastTelUpdate = 0;
       let lastStmtX = -999, lastStmtY = -999, lastStmtS = -999, lastStmtVis = false;
       let lastBadgeX = -999, lastBadgeY = -999, lastBadgeS = -999, lastBadgeVis = false;
+      let cardsSettledCount = 0;
+      let lastActiveNodeForProj = "root";
 
       const animate = () => {
         if (!isVisible) {
@@ -1668,8 +1678,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         const isNodeFocused = activeNodeIdRef.current !== "root";
         connectionGroup.visible = !isNodeFocused;
-        // Hide floor beacons entirely on mobile to save ~54 draw calls
+        // Hide floor beacons and cluster nebulas on mobile to save ~54 draw calls and 1.5M fill-rate pixels
         floorBeaconGroup.visible = isMobile ? false : !isNodeFocused;
+        clusterNebulaGroup.visible = isMobile ? false : true;
 
         // Animate dynamic floor beacons & descending contact pings on hover
         floorBeacons.forEach((b) => {
@@ -1814,9 +1825,29 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           }
         }
 
+        // Snappy card sleep discipline: when camera is settled on mobile, pause DOM projections to yield 100% compositor headroom
+        const isCamMoving =
+          Math.abs(dx) > 0.04 ||
+          Math.abs(dy) > 0.04 ||
+          Math.abs(dz) > 0.04 ||
+          Math.abs(dyaw) > 0.0005 ||
+          Math.abs(dpitch) > 0.0005 ||
+          Math.abs(targetParallaxX - ambientParallaxX) > 0.02 ||
+          Math.abs(targetParallaxY - ambientParallaxY) > 0.02 ||
+          activeNodeIdRef.current !== lastActiveNodeForProj;
+
+        if (isCamMoving) {
+          cardsSettledCount = 0;
+          lastActiveNodeForProj = activeNodeIdRef.current;
+        } else {
+          cardsSettledCount = Math.min(10, cardsSettledCount + 1);
+        }
+
+        const isMobileView = width < 768;
+        const shouldProjectCards = !isMobileView || cardsSettledCount <= 2;
+
         // Perspective-project all spatial node cards with Compositor-Only 120 FPS standard
-        if (nodeRefs.current) {
-          const isMobileView = width < 768;
+        if (nodeRefs.current && shouldProjectCards) {
           NODE_GRAPH.forEach((node) => {
             if (node.id === "root") return;
             const el = nodeRefs.current?.get(node.id);

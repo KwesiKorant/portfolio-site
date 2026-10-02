@@ -4,7 +4,7 @@ export const HeroStatement = forwardRef<HTMLDivElement>((props, ref) => {
   return (
     <div
       ref={ref}
-      className="absolute top-0 left-0 pointer-events-auto w-[640px] max-w-[90vw] text-center flex flex-col items-center [contain:layout_style_paint] will-change-transform origin-center"
+      className="absolute top-0 left-0 pointer-events-auto w-[640px] max-w-[90vw] text-center flex flex-col items-center [contain:layout_style_paint] origin-center"
       style={{ opacity: 0 }}
       {...props}
     >

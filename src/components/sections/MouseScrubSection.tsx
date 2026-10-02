@@ -198,44 +198,68 @@ export const MouseScrubSection: React.FC = () => {
     }
   }, []);
 
-  // Auto-Orbit Continuous Loop: fast & fluid rotation (~2.2s for complete 360° turn)
+  // Auto-Orbit Continuous Loop: Hardware 60 FPS native playback
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
     if (!isAutoOrbit) {
+      if (!video.paused) {
+        video.pause();
+      }
       if (autoOrbitRafId.current) {
         cancelAnimationFrame(autoOrbitRafId.current);
         autoOrbitRafId.current = null;
       }
+      targetTimeRef.current = video.currentTime;
+      displayedTimeRef.current = video.currentTime;
+      lastCommittedTimeRef.current = video.currentTime;
       return;
     }
 
-    let lastTimestamp = performance.now();
+    video.loop = true;
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch((err) => {
+        console.warn("Auto-orbit playback error:", err);
+      });
+    }
 
-    const loop = (timestamp: number) => {
-      const dt = (timestamp - lastTimestamp) / 1000;
-      lastTimestamp = timestamp;
-
-      const video = videoRef.current;
-      if (video && video.duration && isInViewRef.current) {
-        // Snappy, energetic orbit: 2.2s per 360° rotation
-        const delta = (dt / 2.2) * video.duration;
-        targetTimeRef.current = (targetTimeRef.current + delta) % video.duration;
-        if (isSettled.current || !rafId.current) {
-          isSettled.current = false;
-          rafId.current = requestAnimationFrame(easeScrub);
+    // Lightweight RAF ticker to update the progress bar UI smoothly while playing
+    const updateProgressLoop = () => {
+      if (video && video.duration) {
+        const progressRatio = Math.max(
+          0,
+          Math.min(1, video.currentTime / video.duration)
+        );
+        if (progressBarRef.current) {
+          progressBarRef.current.style.transform = `scaleX(${progressRatio.toFixed(4)})`;
+        }
+        if (mobileProgressBarRef.current) {
+          mobileProgressBarRef.current.style.transform = `scaleX(${progressRatio.toFixed(4)})`;
+        }
+        if (progressTextRef.current) {
+          progressTextRef.current.textContent = `${(progressRatio * 100).toFixed(1)}%`;
+        }
+        if (mobileProgressTextRef.current) {
+          mobileProgressTextRef.current.textContent = `${(progressRatio * 100).toFixed(1)}%`;
         }
       }
-
-      autoOrbitRafId.current = requestAnimationFrame(loop);
+      autoOrbitRafId.current = requestAnimationFrame(updateProgressLoop);
     };
 
-    autoOrbitRafId.current = requestAnimationFrame(loop);
+    autoOrbitRafId.current = requestAnimationFrame(updateProgressLoop);
+
     return () => {
       if (autoOrbitRafId.current) {
         cancelAnimationFrame(autoOrbitRafId.current);
         autoOrbitRafId.current = null;
       }
+      if (!video.paused) {
+        video.pause();
+      }
     };
-  }, [isAutoOrbit, easeScrub]);
+  }, [isAutoOrbit]);
 
   // Cancel rAF loop on unmount
   useEffect(() => {
@@ -297,6 +321,16 @@ export const MouseScrubSection: React.FC = () => {
   // High-performance touch scrubbing with directional intent guard
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     if (e.touches.length !== 1) return;
+    if (isAutoOrbit) {
+      setIsAutoOrbit(false);
+    }
+    const video = videoRef.current;
+    if (video) {
+      if (!video.paused) video.pause();
+      targetTimeRef.current = video.currentTime;
+      displayedTimeRef.current = video.currentTime;
+      lastCommittedTimeRef.current = video.currentTime;
+    }
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
     touchStartTimeRef.current = targetTimeRef.current;
@@ -460,23 +494,25 @@ export const MouseScrubSection: React.FC = () => {
     <section
       ref={containerRef}
       id="section-scrub"
-      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-between p-3 xs:p-4 sm:p-6 lg:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint]"
+      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-between p-3 xs:p-4 sm:p-6 lg:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint] touch-pan-y"
       onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       aria-label="Kinetic Frame Interaction Section"
     >
-      {/* Video Element: Always Paused, Hardware Seek Only - Positioned to frame robot optics on mobile */}
-      <video
-        ref={videoRef}
-        muted
-        playsInline
-        preload="none"
-        className="absolute inset-0 w-full h-full object-cover object-[50%_25%] lg:object-center pointer-events-none z-0"
-      >
-        <source src="/turntable_scrub.mp4" type="video/mp4" />
-      </video>
+      {/* Video Element: Responsive framing for mobile (< sm: h-[54dvh] object-contain) and desktop (h-full object-cover) */}
+      <div className="absolute top-0 inset-x-0 w-full h-[54dvh] sm:h-full overflow-hidden [mask-image:linear-gradient(to_bottom,black_82%,transparent_100%)] sm:[mask-image:none] pointer-events-none z-0">
+        <video
+          ref={videoRef}
+          muted
+          playsInline
+          preload="none"
+          className="w-full h-full object-contain sm:object-cover object-center lg:object-center pointer-events-none"
+        >
+          <source src="/turntable_scrub.mp4" type="video/mp4" />
+        </video>
+      </div>
 
       {/* Atmospheric Vignette & Subtle Center Spotlight */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/80 pointer-events-none z-[1]" />
@@ -503,8 +539,8 @@ export const MouseScrubSection: React.FC = () => {
 
       {/* MOBILE VIEW (< lg): Robot Showcase Chamber + Floating Scrubber HUD + Segmented Telemetry Console */}
       <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20">
-        {/* Upper Robot Chamber: Clear, unobstructed viewport with floating HUD pill */}
-        <div className="relative flex-1 w-full flex flex-col justify-end items-center pb-2 min-h-0">
+        {/* Upper Robot Chamber: Clear, unobstructed viewport with floating HUD pill and touch-none gesture isolation */}
+        <div className="relative flex-1 w-full flex flex-col justify-end items-center pb-2 min-h-0 touch-none">
           {/* Floating High-Tech Scrubbing HUD */}
           <div className="w-full max-w-sm px-3 py-1.5 rounded-xl bg-[#080a12] border border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.7)] flex items-center justify-between gap-2.5 text-zinc-300 font-mono text-[9px] pointer-events-auto">
             <button

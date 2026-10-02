@@ -254,60 +254,61 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
     >
       {/* Visual Asset Stack: bottom = REVEAL, top = FRONT */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        {/* REVEAL LAYER (Underneath: Cybernetic / Digital Twin) */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {hasCustomAssets ? (
-            <picture className="w-full h-full block">
-              <source srcSet="/hero-reveal.webp" type="image/webp" />
-              <img
-                src="/hero-reveal.jpg"
-                alt="Kwesi Digital Twin"
-                className="w-full h-full object-cover object-[50%_16%] lg:object-center"
-                loading="eager"
-                decoding="async"
-              />
-            </picture>
-          ) : (
-            /* High-Craft Procedural Fallback */
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#06b6d4]/20 via-[#050508] to-[#ccff00]/15 relative">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ccff00_1px,transparent_1px)] [background-size:24px_24px]" />
-              <div className="text-center font-mono text-xs text-accent-lime/60 tracking-widest uppercase">
-                [REVEAL LAYER // DIGITAL SCHEMATIC & TELEMETRY ACTIVATED]
+        <div className="absolute top-0 inset-x-0 w-full h-[64dvh] sm:h-full overflow-hidden [mask-image:linear-gradient(to_bottom,black_75%,transparent_100%)] sm:[mask-image:none]">
+          {/* REVEAL LAYER (Underneath: Cybernetic / Digital Twin) */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            {hasCustomAssets ? (
+              <picture className="w-full h-full block">
+                <source srcSet="/hero-reveal.webp" type="image/webp" />
+                <img
+                  src="/hero-reveal.jpg"
+                  alt="Kwesi Digital Twin"
+                  className="w-full h-full object-cover object-[50%_12%] sm:object-center"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
+            ) : (
+              /* High-Craft Procedural Fallback */
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#06b6d4]/20 via-[#050508] to-[#ccff00]/15 relative">
+                <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#ccff00_1px,transparent_1px)] [background-size:24px_24px]" />
+                <div className="text-center font-mono text-xs text-accent-lime/60 tracking-widest uppercase">
+                  [REVEAL LAYER // DIGITAL SCHEMATIC & TELEMETRY ACTIVATED]
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* FRONT LAYER (Top: Editorial Photography with CSS Radial Gradient Mask) */}
-        <div
-          ref={frontImageRef}
-          className={`absolute inset-0 w-full h-full overflow-hidden transition-[mask-size,opacity] duration-300 ${
-            isHovered ? "mask-active" : "mask-idle"
-          }`}
-          style={{
-            /* Responsive radial mask: clamp(180px, 48vw, 280px) ensures mobile screens have a focused x-ray circle while desktop preserves the exact 280px radius */
-            WebkitMaskImage: isHovered
-              ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
-              : "none",
-            maskImage: isHovered
-              ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
-              : "none",
-          }}
-        >
-          {hasCustomAssets ? (
-            <picture className="w-full h-full block">
-              <source srcSet="/hero-front.webp" type="image/webp" />
-              <img
-                src="/hero-front.jpg"
-                alt="Kwesi Portrait"
-                className="w-full h-full object-cover object-[50%_16%] lg:object-center"
-                loading="eager"
-                decoding="async"
-              />
-            </picture>
-          ) : (
-            /* High-Craft Editorial Portrait Fallback */
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#12131c] via-[#090a0f] to-[#050508]">
+          {/* FRONT LAYER (Top: Editorial Photography with CSS Radial Gradient Mask) */}
+          <div
+            ref={frontImageRef}
+            className={`absolute inset-0 w-full h-full overflow-hidden transition-[mask-size,opacity] duration-300 ${
+              isHovered ? "mask-active" : "mask-idle"
+            }`}
+            style={{
+              /* Responsive radial mask: clamp(180px, 48vw, 280px) ensures mobile screens have a focused x-ray circle while desktop preserves the exact 280px radius */
+              WebkitMaskImage: isHovered
+                ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
+                : "none",
+              maskImage: isHovered
+                ? "radial-gradient(circle clamp(180px, 46vw, 280px) at var(--reveal-x, 50%) var(--reveal-y, 50%), transparent 0%, transparent 45%, rgba(0,0,0,0.8) 75%, black 100%)"
+                : "none",
+            }}
+          >
+            {hasCustomAssets ? (
+              <picture className="w-full h-full block">
+                <source srcSet="/hero-front.webp" type="image/webp" />
+                <img
+                  src="/hero-front.jpg"
+                  alt="Kwesi Portrait"
+                  className="w-full h-full object-cover object-[50%_12%] sm:object-center"
+                  loading="eager"
+                  decoding="async"
+                />
+              </picture>
+            ) : (
+              /* High-Craft Editorial Portrait Fallback */
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#12131c] via-[#090a0f] to-[#050508]">
               <div className="max-w-2xl px-6 text-center">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.05] border border-white/12 text-zinc-300 font-mono text-[11px] mb-6">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
@@ -324,6 +325,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           )}
         </div>
       </div>
+    </div>
 
       {/* Atmospheric Vignette */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/60 pointer-events-none z-[1]" />
