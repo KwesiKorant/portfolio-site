@@ -32,6 +32,7 @@ export interface SpatialCanvasHandle {
   resetCamera: () => void;
   highlightConnection: (nodeId: string, isHovered: boolean) => void;
   triggerDimensionalBreach: (direction?: "enter" | "exit") => void;
+  stepMobileOrbit: (step: 1 | -1) => void;
 }
 
 interface SpatialCanvasProps {
@@ -43,6 +44,8 @@ interface SpatialCanvasProps {
   radarCanvasRef: React.RefObject<HTMLCanvasElement | null>;
   nodeRefs: React.RefObject<Map<string, SpatialNodeElement>>;
   onExitToPortal?: () => void;
+  isWarping?: boolean;
+  onStepMobileOrbit?: (step: 1 | -1) => void;
 }
 
 interface PacketMesh {
@@ -63,27 +66,30 @@ interface CurveInfo {
   highlightColor: number;
 }
 
+export const MOBILE_NODE_ORDER = [
+  "edge-gateway",
+  "hyperscale",
+  "event-stream",
+  "omnisync",
+  "kerneltrace",
+  "infra-compute",
+];
+
 export function getNodeCoordinates(
   node: NodeData,
-  isMobile: boolean
+  isMobile: boolean,
+  mobileAngle: number = 0
 ): { x: number; y: number; z: number } {
   if (!isMobile) return { x: node.x, y: node.y, z: node.z };
-  switch (node.id) {
-    case "edge-gateway": // Nayak ERP (Upper Left Flank)
-      return { x: -520, y: 150, z: 20 };
-    case "infra-compute": // Technical Skills (Elevated cleanly 400+ units above ground plane)
-      return { x: -640, y: -110, z: -20 };
-    case "event-stream": // Spatial Dimension (Outer Left Orbit)
-      return { x: -920, y: 40, z: 20 };
-    case "hyperscale": // Arcfield Discover (Upper Right Flank)
-      return { x: 520, y: 150, z: 20 };
-    case "omnisync": // CareSync (Elevated cleanly 400+ units above ground plane)
-      return { x: 640, y: -110, z: -20 };
-    case "kerneltrace": // Arcfield Eats (Outer Right Orbit)
-      return { x: 920, y: 40, z: 20 };
-    default:
-      return { x: node.x, y: node.y, z: node.z };
-  }
+  const idx = MOBILE_NODE_ORDER.indexOf(node.id);
+  if (idx === -1) return { x: node.x, y: node.y, z: node.z };
+
+  // 3D cylindrical carousel arc (Radius 205, Center Y: -220)
+  const baseAngle = idx * ((2 * Math.PI) / 6) + mobileAngle;
+  const R = 205;
+  const x = Math.sin(baseAngle) * R;
+  const z = Math.cos(baseAngle) * R * 0.65;
+  return { x, y: -220, z };
 }
 
 export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>(
@@ -97,11 +103,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       radarCanvasRef,
       nodeRefs,
       onExitToPortal,
+      isWarping = false,
+      onStepMobileOrbit,
     },
     ref
   ) => {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
+    const isWarpingRef = useRef(isWarping);
+
+    useEffect(() => {
+      isWarpingRef.current = isWarping;
+    }, [isWarping]);
 
     // Camera & state refs to avoid React re-renders in RAF
     const targetCamRef = useRef({ x: 0, y: 75, z: DEFAULT_CAMERA_Z });
@@ -112,6 +125,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     const currentOrbitAngleRef = useRef({ yaw: 0, pitch: 0 });
     const activeNodeIdRef = useRef<string>("root");
     const hoveredNodeIdRef = useRef<string | null>(null);
+    const targetCarouselAngleRef = useRef(0);
+    const currentCarouselAngleRef = useRef(0);
     const highlightConnRef = useRef<
       ((nodeId: string, isHovered: boolean) => void) | null
     >(null);
@@ -127,28 +142,35 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         playWarpSound();
 
         const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-        const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
+        const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
 
         if (nodeId === "root") {
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
-          targetCamRef.current.y = isMobile ? 55 : 75;
+          targetCamRef.current.y = isMobile ? 20 : 75;
           targetCamRef.current.z = defaultZ;
           targetLookAtRef.current.x = 0;
-          targetLookAtRef.current.y = -60;
+          targetLookAtRef.current.y = isMobile ? -20 : -60;
           targetLookAtRef.current.z = 0;
         } else {
+          if (isMobile) {
+            const idx = MOBILE_NODE_ORDER.indexOf(nodeId);
+            if (idx !== -1) {
+              targetCarouselAngleRef.current = -idx * ((2 * Math.PI) / 6);
+              currentCarouselAngleRef.current = targetCarouselAngleRef.current;
+            }
+          }
           // Center camera directly on focused card with comfortable framing
-          const coords = getNodeCoordinates(node, isMobile);
-          targetCamRef.current.x = coords.x;
+          const coords = getNodeCoordinates(node, isMobile, currentCarouselAngleRef.current);
+          targetCamRef.current.x = isMobile ? 0 : coords.x;
           targetCamRef.current.y = coords.y;
           targetCamRef.current.z = isMobile
-            ? coords.z + 650
+            ? coords.z + 620
             : node.camTarget
             ? node.camTarget.z
             : node.z + 520;
-          targetLookAtRef.current.x = coords.x;
+          targetLookAtRef.current.x = isMobile ? 0 : coords.x;
           targetLookAtRef.current.y = coords.y;
           targetLookAtRef.current.z = coords.z;
         }
@@ -205,14 +227,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         resetCamera: () => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
-          targetCamRef.current.y = isMobile ? 55 : 75;
+          targetCamRef.current.y = isMobile ? 20 : 75;
           targetCamRef.current.z = defaultZ;
           targetLookAtRef.current.x = 0;
-          targetLookAtRef.current.y = -60;
+          targetLookAtRef.current.y = isMobile ? -20 : -60;
           targetLookAtRef.current.z = 0;
           focusNodeInternal("root");
         },
@@ -222,20 +244,20 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         triggerDimensionalBreach: (direction: "enter" | "exit" = "enter") => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
           if (direction === "enter") {
             // Camera swoops forward from hyperspace depth into elevated perspective
-            currentCamRef.current.z = 2100;
+            currentCamRef.current.z = isMobile ? 2000 : 2100;
             currentCamRef.current.x = 0;
-            currentCamRef.current.y = isMobile ? 55 : 75;
+            currentCamRef.current.y = isMobile ? 20 : 75;
             targetCamRef.current.x = 0;
-            targetCamRef.current.y = isMobile ? 55 : 75;
+            targetCamRef.current.y = isMobile ? 20 : 75;
             targetCamRef.current.z = defaultZ;
             targetLookAtRef.current.x = 0;
-            targetLookAtRef.current.y = -60;
+            targetLookAtRef.current.y = isMobile ? -20 : -60;
             targetLookAtRef.current.z = 0;
             currentLookAtRef.current.x = 0;
-            currentLookAtRef.current.y = -60;
+            currentLookAtRef.current.y = isMobile ? -20 : -60;
             currentLookAtRef.current.z = 0;
             activeNodeIdRef.current = "root";
             onNodeActivated("root");
@@ -243,6 +265,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             // Symmetrical reverse warp pull
             targetCamRef.current.z = 2400;
           }
+        },
+        stepMobileOrbit: (step: 1 | -1) => {
+          targetCarouselAngleRef.current -= step * ((2 * Math.PI) / 6);
+          playKeyClick();
         },
       }),
       [focusNodeInternal, onNodeActivated]
@@ -256,7 +282,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let width = window.innerWidth;
       let height = window.innerHeight;
       const isMobile = width < 768;
-      const defaultZ = isMobile ? 1800 : DEFAULT_CAMERA_Z;
+      const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -265,12 +291,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       const initialAspect = width / height;
       const initialFov = initialAspect < 1.0 ? Math.min(74, (50 / initialAspect) * 0.68) : 50;
       const camera = new THREE.PerspectiveCamera(initialFov, initialAspect, 1, 6000);
-      camera.position.set(0, isMobile ? 130 : 180, defaultZ);
-      camera.lookAt(0, -70, 0);
+      camera.position.set(0, isMobile ? 20 : 180, defaultZ);
+      camera.lookAt(0, isMobile ? -20 : -70, 0);
       currentCamRef.current.z = defaultZ;
       targetCamRef.current.z = defaultZ;
-      currentCamRef.current.y = isMobile ? 55 : 75;
-      targetCamRef.current.y = isMobile ? 55 : 75;
+      currentCamRef.current.y = isMobile ? 20 : 75;
+      targetCamRef.current.y = isMobile ? 20 : 75;
+      currentLookAtRef.current.y = isMobile ? -20 : -60;
+      targetLookAtRef.current.y = isMobile ? -20 : -60;
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -869,13 +897,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let currentAspect = 1080 / 608;
       const isMobileInit = window.innerWidth < 768;
       let cardWidth = isMobileInit
-        ? Math.min(Math.max(window.innerWidth * 1.35, 520), 920)
+        ? Math.min(Math.max(window.innerWidth * 1.15, 420), 540)
         : Math.min(window.innerWidth * 0.82, 920);
       let cardHeight = cardWidth / currentAspect;
 
       let heroMeshGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
       const heroMesh = new THREE.Mesh(heroMeshGeometry, videoMaterial);
-      heroMesh.position.set(0, HERO_Y, 0);
+      const heroMeshInitY = isMobileInit ? 260 : HERO_Y;
+      heroMesh.position.set(0, heroMeshInitY, 0);
       scene.add(heroMesh);
 
       // Volumetric aura texture helper
@@ -904,9 +933,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
-      let heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
+      let heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.4, cardHeight * 1.4);
       const heroAuraMesh = new THREE.Mesh(heroAuraGeo, heroAuraMat);
-      heroAuraMesh.position.set(0, HERO_Y, -80);
+      heroAuraMesh.position.set(0, heroMeshInitY, -80);
       scene.add(heroAuraMesh);
 
       // Volumetric cluster nebulas (ambient depth glow behind major node clusters)
@@ -1072,19 +1101,20 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
         const isMobileNow = window.innerWidth < 768;
         cardWidth = isMobileNow
-          ? Math.min(Math.max(window.innerWidth * 1.35, 520), 920)
+          ? Math.min(Math.max(window.innerWidth * 1.15, 420), 540)
           : Math.min(window.innerWidth * 0.82, 920);
         cardHeight = cardWidth / currentAspect;
 
+        const heroMeshCalibY = isMobileNow ? 260 : HERO_Y;
         heroMeshGeometry.dispose();
         heroMeshGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
         heroMesh.geometry = heroMeshGeometry;
-        heroMesh.position.set(0, HERO_Y, 0);
+        heroMesh.position.set(0, heroMeshCalibY, 0);
 
         heroAuraGeo.dispose();
-        heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.5, cardHeight * 1.5);
+        heroAuraGeo = new THREE.PlaneGeometry(cardWidth * 1.4, cardHeight * 1.4);
         heroAuraMesh.geometry = heroAuraGeo;
-        heroAuraMesh.position.set(0, HERO_Y, -80);
+        heroAuraMesh.position.set(0, heroMeshCalibY, -80);
 
         rebuildCurves();
         rebuildFloorBeacons();
@@ -1344,8 +1374,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       };
       window.addEventListener("mousemove", handlePointerMoveAmbient, { passive: true });
 
-      // Touch interactions (Pinch dolly + touch drag pan)
+      // Touch interactions (Pinch dolly + touch drag pan + swipe orbit)
       let touchStartDist = 0;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchStartTime = 0;
+
       const handleTouchStart = (e: TouchEvent) => {
         const target = e.target as HTMLElement | null;
         if (isInteractiveTarget(target)) {
@@ -1354,6 +1388,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         if (e.touches.length === 1) {
           isDragging = true;
           dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+          touchStartTime = performance.now();
         } else if (e.touches.length === 2) {
           isDragging = false;
           touchStartDist = Math.hypot(
@@ -1378,7 +1415,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           );
           if (activeNodeIdRef.current === "root") {
             targetLookAtRef.current.x = targetCamRef.current.x;
-            targetLookAtRef.current.y = targetCamRef.current.y - 135;
+            targetLookAtRef.current.y = isMobile ? targetCamRef.current.y - 80 : targetCamRef.current.y - 135;
           }
           dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         } else if (e.touches.length === 2) {
@@ -1396,7 +1433,24 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
       };
 
-      const handleTouchEnd = () => {
+      const handleTouchEnd = (e: TouchEvent) => {
+        if (isMobile && activeNodeIdRef.current === "root" && e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+          const duration = performance.now() - touchStartTime;
+          // Clean horizontal swipe within 650ms steps the 3D cylindrical carousel
+          if (Math.abs(deltaX) > 40 && deltaY < 50 && duration < 650) {
+            if (deltaX < 0) {
+              targetCarouselAngleRef.current -= (2 * Math.PI) / 6;
+              playKeyClick();
+              onStepMobileOrbit?.(1);
+            } else {
+              targetCarouselAngleRef.current += (2 * Math.PI) / 6;
+              playKeyClick();
+              onStepMobileOrbit?.(-1);
+            }
+          }
+        }
         isDragging = false;
       };
 
@@ -1451,7 +1505,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         radarCtx.stroke();
 
         // Network connection lines between root and nodes
-        const rootRadar = worldToRadar(0, HERO_Y, rw, rh);
+        const heroMeshRadarY = isMobile ? 260 : HERO_Y;
+        const rootRadar = worldToRadar(0, heroMeshRadarY, rw, rh);
         radarCtx.strokeStyle = "rgba(204, 255, 0, 0.25)";
         radarCtx.lineWidth = 1;
         NODE_GRAPH.forEach((n) => {
@@ -1580,6 +1635,11 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
         animFrameId = requestAnimationFrame(animate);
 
+        // While warp video is active in Stage 2, pause 3D render loop to yield 100% GPU to video decoder
+        if (isWarpingRef.current) {
+          return;
+        }
+
         const now = performance.now();
         const delta = Math.min((now - lastFrameTime) / 1000, 0.05);
         lastFrameTime = now;
@@ -1682,8 +1742,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         floorBeaconGroup.visible = isMobile ? false : !isNodeFocused;
         clusterNebulaGroup.visible = isMobile ? false : true;
 
-        // Animate dynamic floor beacons & descending contact pings on hover
-        floorBeacons.forEach((b) => {
+        // Animate dynamic floor beacons & descending contact pings on hover (desktop only)
+        if (!isMobile) {
+          floorBeacons.forEach((b) => {
           if (b.isHovered) {
             b.settledIdle = false;
             // 1. String shoot-down & extension animation (moves down from card)
@@ -1776,11 +1837,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             b.settledIdle = true;
           }
         });
+        }
 
-        // Perspective-project DOM statement: Anchored above top of video at Z = 75
+        // Perspective-project DOM statement: Anchored below avatar on mobile, above avatar on desktop
         const stmtEl = statementRef.current;
         if (stmtEl) {
-          const statementWorldY = HERO_Y + cardHeight * 0.5 + (width < 768 ? 195 : 130);
+          const statementWorldY = width < 768 ? 40 : HERO_Y + cardHeight * 0.5 + 130;
           const stmtProj = projectToScreen(0, statementWorldY, 75);
           const shouldBeVis = stmtProj.isVisible && !isNodeFocused;
           if (shouldBeVis !== lastStmtVis) {
@@ -1804,7 +1866,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Perspective-project Hero Status Badge: Anchored below bottom of video at Z = 45
         const badgeEl = heroBadgeRef?.current;
         if (badgeEl) {
-          const badgeWorldY = HERO_Y - cardHeight * 0.5 - 28;
+          const badgeHeroY = width < 768 ? 260 : HERO_Y;
+          const badgeWorldY = badgeHeroY - cardHeight * 0.5 - 28;
           const badgeProj = projectToScreen(0, badgeWorldY, 45);
           const shouldBeVis = badgeProj.isVisible && !isNodeFocused;
           if (shouldBeVis !== lastBadgeVis) {
@@ -1825,7 +1888,18 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           }
         }
 
+        // Smooth 3D carousel rotation interpolation on mobile
+        if (isMobile) {
+          const dAngle = targetCarouselAngleRef.current - currentCarouselAngleRef.current;
+          if (Math.abs(dAngle) > 0.001) {
+            currentCarouselAngleRef.current += dAngle * lerpFactor;
+          } else {
+            currentCarouselAngleRef.current = targetCarouselAngleRef.current;
+          }
+        }
+
         // Snappy card sleep discipline: when camera is settled on mobile, pause DOM projections to yield 100% compositor headroom
+        const isAngleMoving = isMobile && Math.abs(targetCarouselAngleRef.current - currentCarouselAngleRef.current) > 0.001;
         const isCamMoving =
           Math.abs(dx) > 0.04 ||
           Math.abs(dy) > 0.04 ||
@@ -1834,6 +1908,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           Math.abs(dpitch) > 0.0005 ||
           Math.abs(targetParallaxX - ambientParallaxX) > 0.02 ||
           Math.abs(targetParallaxY - ambientParallaxY) > 0.02 ||
+          isAngleMoving ||
           activeNodeIdRef.current !== lastActiveNodeForProj;
 
         if (isCamMoving) {
@@ -1843,8 +1918,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           cardsSettledCount = Math.min(10, cardsSettledCount + 1);
         }
 
-        const isMobileView = width < 768;
-        const shouldProjectCards = !isMobileView || cardsSettledCount <= 2;
+        const isMobileView = (typeof window !== "undefined" ? window.innerWidth : width) < 768;
+        const shouldProjectCards = true;
 
         // Perspective-project all spatial node cards with Compositor-Only 120 FPS standard
         if (nodeRefs.current && shouldProjectCards) {
@@ -1853,7 +1928,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             const el = nodeRefs.current?.get(node.id);
             if (!el) return;
 
-            const coords = getNodeCoordinates(node, isMobileView);
+            const coords = getNodeCoordinates(node, isMobileView, currentCarouselAngleRef.current);
             const proj = projectToScreen(coords.x, coords.y, coords.z);
             el._screenX = proj.screenX;
             el._screenY = proj.screenY;
@@ -1870,7 +1945,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 ? isThisNodeActive
                   ? "100"
                   : "10"
-                : Math.round(25 + coords.z).toString();
+                : Math.max(10, Math.round(25 + coords.z)).toString();
 
               if (isNodeFocused) {
                 targetOpacity = isThisNodeActive ? "1" : "0";
@@ -1881,6 +1956,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                   targetZIndex = "60";
                 } else if (isAnyNodeHovered) {
                   targetOpacity = "0.35";
+                } else if (isMobileView) {
+                  // Mobile portrait overview: ONLY the front center active card is fully visible (1.0),
+                  // flanking cards are dimmed (0.15), and rear cards are hidden (0.0).
+                  const isFrontCenter = coords.z >= 95;
+                  const isFlanking = coords.z >= 20;
+                  targetOpacity = isFrontCenter ? "1" : isFlanking ? "0.15" : "0";
+                  targetPointerEvents = isFrontCenter ? "auto" : "none";
+                  targetZIndex = isFrontCenter ? "100" : Math.max(10, Math.round(25 + coords.z)).toString();
                 }
               }
 

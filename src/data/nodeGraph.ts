@@ -134,13 +134,13 @@ function projectWorldToScreen(worldPos: Vector3, cam: PerspectiveCamera): Screen
     screenshots: [
       {
         url: "/projects/spatial/portfolio-hero-wireframe.webp",
-        title: "Stage 01: Hardware-Accelerated Interactive Hero & Wireframe",
+        title: "Hardware-Accelerated Interactive Hero & Wireframe",
         caption: "Tactile digital craft combining video scrub physics with an interactive 3D facial wireframe mesh, mouse parallax, and zero-reflow CSS compositor dynamics.",
         badge: "3D FACE MESH",
       },
       {
         url: "/projects/spatial/portfolio-spatial-deck.webp",
-        title: "Stage 03: 3D Spatial Perspective Orbit Deck & Radar",
+        title: "3D Spatial Perspective Orbit Deck & Radar",
         caption: "Dynamic 3D coordinate projection mapping project cards across continuous depth over an infinite neon green vector grid with interactive telemetry.",
         badge: "SPATIAL 3D DECK",
       },
@@ -167,7 +167,7 @@ function projectWorldToScreen(worldPos: Vector3, cam: PerspectiveCamera): Screen
     tags: ["Next.js", "TypeScript", "Startup Leadership", "Business Discovery", "Service Catalogs", "PostgreSQL", "PWA"],
     metrics: [
       { label: "Discovery Latency", val: "< 60ms" },
-      { label: "Stage", val: "Active MVP" },
+      { label: "Status", val: "Active MVP" },
       { label: "Role", val: "Co-Founder / CTO" },
       { label: "Interface", val: "Mobile-First PWA" },
     ],

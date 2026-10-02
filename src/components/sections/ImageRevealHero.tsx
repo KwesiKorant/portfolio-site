@@ -259,6 +259,16 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           <div className="absolute inset-0 w-full h-full overflow-hidden">
             {hasCustomAssets ? (
               <picture className="w-full h-full block">
+                <source
+                  media="(max-width: 640px)"
+                  srcSet="/hero-reveal-mobile.webp"
+                  type="image/webp"
+                />
+                <source
+                  media="(max-width: 640px)"
+                  srcSet="/hero-reveal-mobile.jpg"
+                  type="image/jpeg"
+                />
                 <source srcSet="/hero-reveal.webp" type="image/webp" />
                 <img
                   src="/hero-reveal.jpg"
@@ -297,6 +307,16 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           >
             {hasCustomAssets ? (
               <picture className="w-full h-full block">
+                <source
+                  media="(max-width: 640px)"
+                  srcSet="/hero-front-mobile.webp"
+                  type="image/webp"
+                />
+                <source
+                  media="(max-width: 640px)"
+                  srcSet="/hero-front-mobile.jpg"
+                  type="image/jpeg"
+                />
                 <source srcSet="/hero-front.webp" type="image/webp" />
                 <img
                   src="/hero-front.jpg"
@@ -330,90 +350,144 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
       {/* Atmospheric Vignette */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#050508] via-transparent to-[#050508]/60 pointer-events-none z-[1]" />
 
-      {/* MOBILE VIEW (< lg): Unobstructed Portrait Chamber + Docked Editorial Console */}
-      <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20 pointer-events-none">
-        {/* Top Chamber: Clean, unobstructed x-ray reveal area with floating prompt */}
-        <div className="relative flex-1 w-full flex flex-col justify-start items-center pt-2 min-h-0 pointer-events-none">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#080a12]/60 border border-white/15 font-mono text-[8.5px] text-zinc-300 shadow-[0_4px_16px_rgba(0,0,0,0.6)] pointer-events-auto">
-            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-            <span>TOUCH &amp; DRAG TO SCAN // X-RAY LENS</span>
+      {/* MOBILE VIEW (< lg): Unobstructed Portrait Chamber + Structured Editorial Canvas Docked to Bottom */}
+      <div className="flex lg:hidden flex-col justify-between w-full h-full relative z-20 pointer-events-none">
+        {/* Top Header Row: Floating Identity & Interactive X-Ray Cue */}
+        <div className="w-full flex items-center justify-between pt-1 px-1 pointer-events-auto shrink-0">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-accent-lime/30 font-mono text-[8px] xs:text-[8.5px] text-accent-lime font-semibold shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
+            <span>DESIGN ENGINEER // CTO</span>
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-white/15 font-mono text-[8px] xs:text-[8.5px] text-zinc-300 shadow-sm">
+            <span className="w-1 h-1 rounded-full bg-accent-cyan" />
+            <span>TOUCH &amp; DRAG TO SCAN</span>
           </div>
         </div>
 
-        {/* Lower Console: Docked Editorial Telemetry Sheet */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/60 border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
-          {/* Header row: Role tag + 120 FPS spec */}
-          <div className="flex items-center justify-between gap-2 mb-1.5 font-mono text-[8px] xs:text-[8.5px]">
-            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime font-semibold">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
-              <span>DESIGN ENGINEER // CTO</span>
+        {/* Upper Portrait Chamber: Holds the vertical center clear so text begins right below the middle (~38-40dvh) */}
+        <div className="w-full h-[37dvh] xs:h-[39dvh] pointer-events-none shrink-0" />
+
+        {/* Middle Text & Components: Positioned Left-Aligned Right Below Middle */}
+        <div className="w-full max-w-sm xs:max-w-md flex flex-col justify-start space-y-2.5 xs:space-y-3 items-start text-left pointer-events-auto relative z-20 px-1 shrink-0">
+          {/* Enlarged Identity & Thesis Block */}
+          <div className="w-full space-y-1">
+            <div className="flex items-center gap-2 font-mono text-[9px] xs:text-[10px]">
+              <span className="text-accent-lime font-bold tracking-wider uppercase">ARCHITECT // CTO</span>
+              <span className="text-zinc-600">&bull;</span>
+              <span className="text-zinc-300 font-mono tracking-wide">ARCFIELD SYSTEMS</span>
             </div>
-            <span className="text-zinc-400 px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/10 font-medium">
-              120 FPS ENGINE
-            </span>
+
+            {/* Enlarged Name - Prominent Editorial Display */}
+            <h1 className="font-display text-[26px] xs:text-[29px] sm:text-[33px] font-black tracking-tight text-white leading-[1.04] drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)] text-left">
+              KWESI ANKOMAH-KORANTENG
+            </h1>
+
+            {/* Enlarged Punchy Thesis */}
+            <p className="font-sans text-[11.5px] xs:text-[12.5px] text-zinc-300 leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] max-w-sm text-left">
+              Crafting tactile digital craft, hardware-accelerated compositor architecture, and resilient enterprise software.
+            </p>
           </div>
 
-          {/* Name */}
-          <h1 className="font-display text-[17px] xs:text-[19px] font-black tracking-tight text-white leading-tight mb-1">
-            KWESI ANKOMAH-KORANTENG
-          </h1>
-
-          {/* Subtitle */}
-          <p className="font-sans text-[9.5px] xs:text-[10px] text-zinc-200 leading-snug line-clamp-2 mb-2">
-            Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
-          </p>
-
-          {/* Venture Highlights Strip */}
-          <div className="grid grid-cols-3 gap-1 mb-2 font-mono text-[7.5px]">
+          {/* Shipped Systems Deck: 3 Vertically Stacked Flagship Venture Cards with Live Metrics */}
+          <div className="space-y-1.5 w-full pt-0.5">
+            {/* 01 • Arcfield Discover */}
             <div
               onClick={() => onSelectProject && onSelectProject("hyperscale")}
-              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              className="p-2.5 xs:p-3 rounded-xl bg-[#080a12]/85 hover:bg-[#0c0e18] border border-white/12 cursor-pointer active:scale-98 transition-all text-left flex items-center justify-between shadow-lg group"
               title="Inspect Arcfield Discover in 3D Dimension"
             >
-              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">01 • CTO MVP</div>
-              <div className="text-white font-sans font-medium text-[8px] truncate">Arcfield Discover</div>
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-accent-lime font-mono font-bold uppercase text-[7.5px] xs:text-[8px] tracking-wider">01 • STARTUP MVP</span>
+                  <span className="text-zinc-400 font-mono text-[7px] xs:text-[7.5px] px-1.5 py-0.2 rounded bg-white/[0.06]">&lt; 60MS LATENCY</span>
+                </div>
+                <div className="text-white font-sans font-semibold text-[11px] xs:text-[12px] mt-0.5 group-hover:text-accent-lime transition-colors truncate">
+                  Arcfield Discover
+                </div>
+                <div className="text-zinc-400 font-sans text-[8px] xs:text-[9px] mt-0.5 truncate">
+                  Hyperlocal business &amp; consumer discovery engine
+                </div>
+              </div>
+              <span className="text-accent-lime font-mono text-xs group-hover:translate-x-0.5 transition-transform shrink-0">↗</span>
             </div>
+
+            {/* 02 • Nayak Furniture ERP */}
             <div
               onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              className="p-2.5 xs:p-3 rounded-xl bg-[#080a12]/85 hover:bg-[#0c0e18] border border-white/12 cursor-pointer active:scale-98 transition-all text-left flex items-center justify-between shadow-lg group"
               title="Inspect Nayak Furniture ERP"
             >
-              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">02 • ENTERPRISE</div>
-              <div className="text-white font-sans font-medium text-[8px] truncate">Nayak POS ERP</div>
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-accent-lime font-mono font-bold uppercase text-[7.5px] xs:text-[8px] tracking-wider">02 • ENTERPRISE</span>
+                  <span className="text-zinc-400 font-mono text-[7px] xs:text-[7.5px] px-1.5 py-0.2 rounded bg-white/[0.06]">GH₵ MARGIN BOM</span>
+                </div>
+                <div className="text-white font-sans font-semibold text-[11px] xs:text-[12px] mt-0.5 group-hover:text-accent-lime transition-colors truncate">
+                  Nayak Furniture ERP
+                </div>
+                <div className="text-zinc-400 font-sans text-[8px] xs:text-[9px] mt-0.5 truncate">
+                  Showroom inventory, POS &amp; automated margin tracking
+                </div>
+              </div>
+              <span className="text-accent-lime font-mono text-xs group-hover:translate-x-0.5 transition-transform shrink-0">↗</span>
             </div>
+
+            {/* 03 • 120 FPS Compositor */}
             <div
               onClick={() => onSelectProject && onSelectProject("event-stream")}
-              className="p-1.5 rounded-lg bg-black/50 border border-white/10 cursor-pointer active:scale-95 transition-all"
+              className="p-2.5 xs:p-3 rounded-xl bg-[#080a12]/85 hover:bg-[#0c0e18] border border-white/12 cursor-pointer active:scale-98 transition-all text-left flex items-center justify-between shadow-lg group"
               title="Inspect 120 FPS Compositor Architecture"
             >
-              <div className="text-accent-lime font-semibold uppercase text-[6.5px] truncate">03 • FLAGSHIP</div>
-              <div className="text-white font-sans font-medium text-[8px] truncate">120 FPS Engine</div>
+              <div className="min-w-0 pr-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-accent-lime font-mono font-bold uppercase text-[7.5px] xs:text-[8px] tracking-wider">03 • FLAGSHIP</span>
+                  <span className="text-accent-cyan font-mono text-[7px] xs:text-[7.5px] px-1.5 py-0.2 rounded bg-accent-cyan/10">ZERO REFLOW</span>
+                </div>
+                <div className="text-white font-sans font-semibold text-[11px] xs:text-[12px] mt-0.5 group-hover:text-accent-lime transition-colors truncate">
+                  120 FPS Spatial Compositor
+                </div>
+                <div className="text-zinc-400 font-sans text-[8px] xs:text-[9px] mt-0.5 truncate">
+                  Hardware-accelerated 3D transforms &amp; sub-8ms physics
+                </div>
+              </div>
+              <span className="text-accent-lime font-mono text-xs group-hover:translate-x-0.5 transition-transform shrink-0">↗</span>
+            </div>
+
+            {/* Architecture Telemetry Banner */}
+            <div className="px-3 py-2 rounded-xl bg-[#080a12]/85 border border-white/10 flex items-center justify-between font-mono text-[8px] xs:text-[8.5px] text-zinc-300 shadow-md">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+                <span className="text-zinc-400">ENGINE:</span>
+                <span className="text-accent-lime font-semibold">120 FPS ZERO REFLOW</span>
+              </div>
+              <span className="text-zinc-400 font-mono">GHANA // REMOTE</span>
             </div>
           </div>
+        </div>
 
-          {/* Bottom Action & CTA Row */}
-          <div className="flex items-center justify-between pt-1.5 border-t border-white/10 font-mono text-[8.5px]">
-            <span className="text-zinc-400">STAGE 01 OF 05</span>
-            <button
-              onPointerEnter={onWarmupPortal}
-              onTouchStart={onWarmupPortal}
-              onClick={() => {
-                if (onEnterPortal) {
-                  onEnterPortal();
-                } else if (onScrollNext) {
-                  onScrollNext();
-                } else {
-                  const el = document.getElementById("section-spatial");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }
-              }}
-              className="group cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-lime/15 hover:bg-accent-lime/25 border border-accent-lime/40 text-accent-lime font-bold shadow-[0_0_12px_rgba(204,255,0,0.2)] transition-all active:scale-95"
-              aria-label="Scroll to Portal Section"
-            >
-              <span>ENTER PORTAL GATE</span>
-              <span className="text-xs group-hover:translate-y-0.5 transition-transform">&darr;</span>
-            </button>
-          </div>
+        {/* Bottom Bar: Positioned at the Very Bottom & Spanning Full Width on Mobile Views */}
+        <div className="w-full flex items-center justify-between pt-2.5 pb-1 xs:pb-2 border-t border-white/10 font-mono text-[9px] xs:text-[9.5px] text-zinc-300 pointer-events-auto mt-auto shrink-0">
+          <span className="text-zinc-400 font-mono tracking-wide">ACCRA // GLOBAL REMOTE</span>
+          <button
+            onPointerEnter={onWarmupPortal}
+            onTouchStart={onWarmupPortal}
+            onClick={() => {
+              if (onEnterPortal) {
+                onEnterPortal();
+              } else if (onScrollNext) {
+                onScrollNext();
+              } else {
+                const el = document.getElementById("section-spatial");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="group cursor-pointer flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-accent-lime/15 hover:bg-accent-lime/25 border border-accent-lime/40 text-accent-lime font-bold shadow-[0_0_12px_rgba(204,255,0,0.2)] transition-all active:scale-95"
+            aria-label="Scroll to Portal Section"
+          >
+            <span>ENTER PORTAL GATE</span>
+            <span className="text-xs group-hover:translate-y-0.5 transition-transform">&darr;</span>
+          </button>
         </div>
       </div>
 

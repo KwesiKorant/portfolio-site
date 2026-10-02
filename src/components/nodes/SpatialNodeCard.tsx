@@ -599,7 +599,7 @@ export const SpatialNodeCard = forwardRef<
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style] ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
-          : "w-[185px] xs:w-[205px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
+          : "w-[225px] xs:w-[245px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
       onClick={handleClick}

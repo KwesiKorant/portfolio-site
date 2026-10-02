@@ -14,6 +14,7 @@ import { ProHintsBanner } from "@/components/ui/ProHintsBanner";
 import {
   SpatialCanvas,
   type SpatialCanvasHandle,
+  MOBILE_NODE_ORDER,
 } from "@/components/canvas/SpatialCanvas";
 import { ImageRevealHero } from "@/components/sections/ImageRevealHero";
 import {
@@ -44,6 +45,7 @@ const ShortcutsModal = dynamic(
 
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
+  const [mobileOrbitIndex, setMobileOrbitIndex] = useState(0);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [temporaryHint, setTemporaryHint] = useState<string | null>(null);
   const [isWarping, setIsWarping] = useState(false);
@@ -55,6 +57,11 @@ export default function SpatialPortfolioPage() {
   const telemetryRef = useRef<HTMLDivElement | null>(null);
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const nodeRefs = useRef<Map<string, SpatialNodeElement>>(new Map());
+
+  const handleStepMobileOrbit = useCallback((step: 1 | -1) => {
+    setMobileOrbitIndex((prev) => (prev + step + 6) % 6);
+    canvasHandleRef.current?.stepMobileOrbit(step);
+  }, []);
 
   // Portal Gateway Forward & Reverse Transitions
   const handleEnterPortal = useCallback(() => {
@@ -117,6 +124,10 @@ export default function SpatialPortfolioPage() {
   // Focus node handler: dollies directly into the card in 3D (no sidebar)
   const handleFocusNode = useCallback((nodeId: string) => {
     setActiveNodeId(nodeId);
+    const idx = MOBILE_NODE_ORDER.indexOf(nodeId);
+    if (idx !== -1) {
+      setMobileOrbitIndex(idx);
+    }
     canvasHandleRef.current?.focusNode(nodeId);
   }, []);
 
@@ -276,6 +287,8 @@ export default function SpatialPortfolioPage() {
           radarCanvasRef={radarCanvasRef}
           nodeRefs={nodeRefs}
           onExitToPortal={handleExitToPortal}
+          isWarping={isWarping}
+          onStepMobileOrbit={handleStepMobileOrbit}
         />
 
         {/* Fullscreen Backdrop: Clicking outside the active card sends it back to overview */}
@@ -319,6 +332,10 @@ export default function SpatialPortfolioPage() {
         <HUD
           ref={telemetryRef}
           activeCluster={activeCluster}
+          activeNodeId={activeNodeId}
+          onFocusNode={handleFocusNode}
+          onStepMobileOrbit={handleStepMobileOrbit}
+          mobileOrbitIndex={mobileOrbitIndex}
           onSelectCluster={handleSelectCluster}
           onOpenGuide={() => setIsGuideOpen(true)}
           onZoomIn={() => canvasHandleRef.current?.dollyBy(-180)}

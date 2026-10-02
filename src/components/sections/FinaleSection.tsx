@@ -5,7 +5,6 @@ import { playCopySuccess, playKeyClick } from "@/lib/soundEngine";
 
 export const FinaleSection: React.FC = () => {
   const [copiedEmail, setCopiedEmail] = useState(false);
-  const [mobileTab, setMobileTab] = useState<"uplink" | "telemetry">("uplink");
   const containerRef = useRef<HTMLElement | null>(null);
   const [isInView, setIsInView] = useState(false);
   const email = "junykorant@gmail.com";
@@ -355,20 +354,20 @@ export const FinaleSection: React.FC = () => {
       {/* Tiny top blend: eliminates the hard line page cut at the top middle where the Vertical Tunnel Light Shaft appears */}
       <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#050508] via-[#050508]/80 to-transparent pointer-events-none z-[1]" />
 
-      {/* Top Navigation Bar: Smooth return links and stage indicator */}
+      {/* Top Navigation Bar: Smooth return links and section indicator */}
       <div className="relative z-20 flex justify-between items-center gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px] pb-2 sm:pb-4 w-full shrink-0">
         <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] sm:text-[9.5px] font-mono bg-[#080a12] border border-white/10 px-2.5 py-1 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
-          <span>STAGE 05 // DOSSIER &amp; UPLINK</span>
+          <span>DOSSIER &amp; UPLINK</span>
         </div>
 
         <div className="flex items-center gap-1.5">
           <button
             onClick={handleToScrub}
             className="text-zinc-400 hover:text-white px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg border border-white/12 hover:border-accent-lime/40 bg-[#0a0c14]/90 hover:bg-white/[0.08] transition-all cursor-pointer active:scale-95"
-            title="Return to Stage 04 AI Workflow"
+            title="Return to Kinetic Turntable"
           >
-            &uarr; <span className="hidden sm:inline">STAGE 04 //</span> SCRUB
+            &uarr; <span className="hidden sm:inline">KINETIC </span>TURNTABLE
           </button>
           <button
             onClick={handleBackToTop}
@@ -379,199 +378,188 @@ export const FinaleSection: React.FC = () => {
         </div>
       </div>
 
-      {/* MOBILE VIEW (< lg): Ambient Wavy Chamber + Segmented Dossier & Uplink Dock */}
-      <div className="flex lg:hidden flex-col justify-between items-center flex-1 w-full min-h-0 pt-1 pb-1 relative z-20">
-        {/* Upper Ambient Chamber */}
-        <div className="relative flex-1 w-full flex flex-col justify-end items-center pb-2 min-h-0 text-center px-1">
-          <div className="w-full max-w-sm">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[7.5px] xs:text-[8px] text-accent-lime tracking-widest uppercase mb-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
-              <span>DIRECT CONTACT // OPEN FOR ROLES</span>
-            </div>
-            <h2 className="font-display text-[15px] xs:text-[17px] font-bold text-white tracking-tight leading-snug drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-              Bridging tactile design engineering &amp; scalable software.
-            </h2>
-            <p className="font-sans text-[8.5px] xs:text-[9.5px] text-zinc-300 leading-tight mt-1 line-clamp-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">
-              Kwesi Ankomah-Koranteng, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences &amp; resilient systems.
-            </p>
-          </div>
-        </div>
-
-        {/* Lower Console: Segmented Dossier & Uplink Dock */}
-        <div className="w-full max-w-sm rounded-2xl bg-[#080a12]/60 border border-white/15 p-3 xs:p-3.5 mb-0.5 sm:mb-2 flex flex-col pointer-events-auto relative z-20 shrink-0 shadow-[0_15px_45px_rgba(0,0,0,0.85)]">
-          {/* Segmented Controller Tab Switcher */}
-          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/60 border border-white/10 mb-2 font-mono text-[8.5px]">
-            <button
-              onClick={() => setMobileTab("uplink")}
-              className={`py-1.5 px-2 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
-                mobileTab === "uplink"
-                  ? "bg-accent-lime/20 border border-accent-lime/60 text-accent-lime shadow-[0_0_10px_rgba(204,255,0,0.2)]"
-                  : "text-zinc-400 hover:text-zinc-200 border border-transparent"
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              <span>01 // DIRECT UPLINK</span>
-            </button>
-            <button
-              onClick={() => setMobileTab("telemetry")}
-              className={`py-1.5 px-2 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 ${
-                mobileTab === "telemetry"
-                  ? "bg-accent-lime/20 border border-accent-lime/60 text-accent-lime shadow-[0_0_10px_rgba(204,255,0,0.2)]"
-                  : "text-zinc-400 hover:text-zinc-200 border border-transparent"
-              }`}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-current" />
-              <span>02 // TELEMETRY</span>
-            </button>
+      {/* MOBILE VIEW (< lg): Natural Editorial Stage Flow */}
+      <div className="flex lg:hidden flex-col items-center justify-between flex-1 w-full max-w-sm sm:max-w-md mx-auto pt-2 pb-2 relative z-20">
+        {/* Flow Content: Overhead Badge -> Headline -> Narrative -> Telemetry Dossier -> Centered Contact Header -> Channels */}
+        <div className="w-full flex-1 min-h-0 flex flex-col items-center text-center space-y-2 pointer-events-auto">
+          {/* Direct Engagement Status Pill */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8px] xs:text-[8.5px] text-accent-lime tracking-widest uppercase">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
+            <span>DIRECT ENGAGEMENT // OPEN FOR ROLES</span>
           </div>
 
-          {/* Tab Content Container */}
-          <div className="min-h-[165px] max-h-[195px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-0.5">
-            {mobileTab === "uplink" ? (
-              <div className="space-y-1.5">
-                {/* 1. Email */}
-                <button
-                  type="button"
-                  onClick={handleCopyEmail}
-                  className={`w-full text-left p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2 group active:scale-[0.98] ${
-                    copiedEmail
-                      ? "bg-accent-lime/15 border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.2)]"
-                      : "bg-black/50 hover:bg-black/75 border-white/10 hover:border-accent-lime/50"
-                  }`}
-                  title="Click to copy email address"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <rect width="20" height="16" x="2" y="4" rx="2" />
-                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                      </svg>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-mono text-[7.5px] uppercase tracking-wider text-zinc-400">
-                        EMAIL // INBOX
-                      </div>
-                      <div className="font-mono text-[10px] text-white truncate font-medium">
-                        {email}
-                      </div>
-                    </div>
-                  </div>
-                  <span className={`font-mono text-[8px] px-2 py-0.5 rounded-md transition-colors shrink-0 ${
-                    copiedEmail
-                      ? "bg-accent-lime text-black font-bold"
-                      : "bg-white/[0.08] text-zinc-300 group-hover:text-accent-lime"
-                  }`}>
-                    {copiedEmail ? "COPIED ✓" : "COPY"}
-                  </span>
-                </button>
+          {/* Headline */}
+          <h2 className="font-display text-[19px] xs:text-[22px] sm:text-[25px] font-bold text-white tracking-tight leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-sm">
+            Bridging tactile design engineering &amp; scalable software.
+          </h2>
 
-                {/* 2. WhatsApp */}
-                <a
-                  href="https://wa.me/233204563873"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => playKeyClick()}
-                  className="w-full text-left p-2 rounded-xl border border-white/10 bg-black/50 hover:bg-emerald-500/[0.1] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2 group active:scale-[0.98]"
-                  title="Direct WhatsApp chat"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-7 h-7 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                      </svg>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-mono text-[7.5px] uppercase tracking-wider text-zinc-400">
-                        WHATSAPP // MESSAGING
-                      </div>
-                      <div className="font-mono text-[10px] text-white truncate font-medium">
-                        +233 20 456 3873
-                      </div>
-                    </div>
-                  </div>
-                  <span className="font-mono text-[8px] px-2 py-0.5 rounded-md bg-white/[0.08] text-zinc-300 group-hover:text-emerald-300 transition-colors shrink-0">
-                    CHAT ↗
-                  </span>
-                </a>
+          {/* Mission / Thesis Subtitle */}
+          <p className="font-sans text-[10.5px] xs:text-[11.5px] text-zinc-300 leading-relaxed max-w-sm drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
+            Kwesi Ankomah-Koranteng, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences &amp; resilient systems.
+          </p>
 
-                {/* 3. LinkedIn & GitHub row */}
-                <div className="grid grid-cols-2 gap-1.5 pt-0.5">
-                  <a
-                    href="https://www.linkedin.com/in/kaykorant"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => playKeyClick()}
-                    className="p-1.5 rounded-xl border border-white/10 bg-black/50 hover:bg-[#0A66C2]/[0.15] hover:border-[#0A66C2]/60 transition-all flex items-center justify-between gap-1 group active:scale-[0.98]"
-                    title="Connect on LinkedIn"
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <div className="w-5 h-5 rounded-md bg-[#0A66C2]/20 flex items-center justify-center shrink-0">
-                        <svg className="w-3 h-3 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-                        </svg>
-                      </div>
-                      <div className="font-mono text-[8px] text-white truncate font-medium">LINKEDIN</div>
-                    </div>
-                    <span className="font-mono text-[7px] text-zinc-400 group-hover:text-sky-300">↗</span>
-                  </a>
-
-                  <a
-                    href="https://github.com/KwesiKorant"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => playKeyClick()}
-                    className="p-1.5 rounded-xl border border-white/10 bg-black/50 hover:bg-white/[0.12] hover:border-white/30 transition-all flex items-center justify-between gap-1 group active:scale-[0.98]"
-                    title="Explore GitHub Repositories"
-                  >
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <div className="w-5 h-5 rounded-md bg-white/[0.1] flex items-center justify-center shrink-0">
-                        <svg className="w-3 h-3 text-zinc-100" viewBox="0 0 24 24" fill="currentColor">
-                          <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                        </svg>
-                      </div>
-                      <div className="font-mono text-[8px] text-white truncate font-medium">GITHUB</div>
-                    </div>
-                    <span className="font-mono text-[7px] text-zinc-400 group-hover:text-white">↗</span>
-                  </a>
-                </div>
+          {/* Content Scroll Flow: Dossier First, Then Centered Contact Header, Then Channels (Fills Stage Seamlessly) */}
+          <div className="w-full flex-1 min-h-0 overflow-y-auto space-y-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-0.5 text-left pt-1">
+            {/* 01 // Technical Dossier & Telemetry Profile */}
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-[7.5px] xs:text-[8px] font-mono text-zinc-400 uppercase tracking-widest px-0.5">
+                <span className="text-accent-lime font-bold">SYSTEM TELEMETRY</span>
+                <span>VERIFIED SPEC</span>
               </div>
-            ) : (
-              <div className="space-y-1 font-mono text-[8px]">
-                <div className="p-1.5 rounded-lg bg-black/45 border border-white/10 flex justify-between items-center">
+              <div className="space-y-1.5 font-mono text-[8.5px] xs:text-[9.5px]">
+                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
                   <span className="text-zinc-400 font-semibold">ENGINEER:</span>
                   <span className="text-zinc-100 font-medium">KWESI ANKOMAH-KORANTENG</span>
                 </div>
-                <div className="p-1.5 rounded-lg bg-black/45 border border-white/10 flex justify-between items-center">
+                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
                   <span className="text-zinc-400 font-semibold">TARGET ROLE:</span>
                   <span className="text-accent-lime font-medium">DESIGN ENG // CREATIVE TECH</span>
                 </div>
-                <div className="p-1.5 rounded-lg bg-black/45 border border-white/10 flex justify-between items-center">
+                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
                   <span className="text-zinc-400 font-semibold">STARTUP:</span>
                   <span className="text-zinc-200 font-medium">ARCFIELD // CO-FOUNDER &amp; CTO</span>
                 </div>
-                <div className="p-1.5 rounded-lg bg-black/45 border border-white/10 flex justify-between items-center">
+                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
                   <span className="text-zinc-400 font-semibold">COMPOSITOR:</span>
                   <span className="text-accent-lime font-medium">120 FPS ZERO REFLOW</span>
                 </div>
-                <div className="p-1.5 rounded-lg bg-black/45 border border-white/10 flex justify-between items-center">
+                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
                   <span className="text-zinc-400 font-semibold">LOCATION:</span>
                   <span className="text-zinc-200 font-medium">GHANA // WORLDWIDE REMOTE</span>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Bottom Dock Status & Back to Top */}
-          <div className="flex items-center justify-between pt-2 mt-1.5 border-t border-white/10 font-mono text-[8.5px] text-zinc-300">
-            <span className="text-zinc-400">&copy; 2026 KWESI</span>
-            <button
-              onClick={handleBackToTop}
-              className="text-accent-lime font-bold flex items-center gap-1 hover:underline cursor-pointer active:scale-95 px-2 py-0.5 rounded bg-accent-lime/10 border border-accent-lime/30 shadow-[0_0_8px_rgba(204,255,0,0.15)]"
-            >
-              <span>RETURN TO TOP</span>
-              <span className="text-xs">&uarr;</span>
-            </button>
+            {/* Centered Header Labelled CONTACT */}
+            <div className="w-full pt-3 pb-1 flex items-center justify-center gap-3">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-accent-lime/30" />
+              <h3 className="font-mono text-[10px] xs:text-[11px] font-bold tracking-[0.25em] text-accent-lime uppercase">
+                CONTACT
+              </h3>
+              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-accent-lime/30" />
+            </div>
+
+            {/* Direct Contact Channels: Positioned Below the Dossier & Centered Contact Header */}
+            <div className="space-y-2">
+              {/* 1. Email */}
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98] ${
+                  copiedEmail
+                    ? "bg-accent-lime/15 border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.2)]"
+                    : "bg-white/[0.04] hover:bg-white/[0.08] border-white/10 hover:border-accent-lime/50"
+                }`}
+                title="Click to copy email address"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect width="20" height="16" x="2" y="4" rx="2" />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[8px] xs:text-[8.5px] uppercase tracking-wider text-zinc-400">
+                      EMAIL // INBOX
+                    </div>
+                    <div className="font-mono text-[11px] xs:text-[12px] text-white truncate font-medium">
+                      {email}
+                    </div>
+                  </div>
+                </div>
+                <span className={`font-mono text-[8.5px] xs:text-[9px] px-2.5 py-1 rounded-md transition-colors shrink-0 ${
+                  copiedEmail
+                    ? "bg-accent-lime text-black font-bold"
+                    : "bg-white/[0.08] text-zinc-300 group-hover:text-accent-lime"
+                }`}>
+                  {copiedEmail ? "COPIED ✓" : "COPY"}
+                </span>
+              </button>
+
+              {/* 2. WhatsApp */}
+              <a
+                href="https://wa.me/233204563873"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => playKeyClick()}
+                className="w-full text-left p-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-emerald-500/[0.1] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
+                title="Direct WhatsApp chat"
+              >
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0">
+                    <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                    </svg>
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-mono text-[8px] xs:text-[8.5px] uppercase tracking-wider text-zinc-400">
+                      WHATSAPP // MESSAGING
+                    </div>
+                    <div className="font-mono text-[11px] xs:text-[12px] text-white truncate font-medium">
+                      +233 20 456 3873
+                    </div>
+                  </div>
+                </div>
+                <span className="font-mono text-[8.5px] xs:text-[9px] px-2.5 py-1 rounded-md bg-white/[0.08] text-zinc-300 group-hover:text-emerald-300 transition-colors shrink-0">
+                  CHAT ↗
+                </span>
+              </a>
+
+              {/* 3. LinkedIn & GitHub row */}
+              <div className="grid grid-cols-2 gap-2 pt-0.5">
+                <a
+                  href="https://www.linkedin.com/in/kaykorant"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => playKeyClick()}
+                  className="p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-[#0A66C2]/[0.15] hover:border-[#0A66C2]/60 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
+                  title="Connect on LinkedIn"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-md bg-[#0A66C2]/20 flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
+                      </svg>
+                    </div>
+                    <div className="font-mono text-[9px] xs:text-[9.5px] text-white truncate font-medium">LINKEDIN</div>
+                  </div>
+                  <span className="font-mono text-[8px] text-zinc-400 group-hover:text-sky-300">↗</span>
+                </a>
+
+                <a
+                  href="https://github.com/KwesiKorant"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => playKeyClick()}
+                  className="p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.12] hover:border-white/30 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
+                  title="Explore GitHub Repositories"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-md bg-white/[0.1] flex items-center justify-center shrink-0">
+                      <svg className="w-3.5 h-3.5 text-zinc-100" viewBox="0 0 24 24" fill="currentColor">
+                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                      </svg>
+                    </div>
+                    <div className="font-mono text-[9px] xs:text-[9.5px] text-white truncate font-medium">GITHUB</div>
+                  </div>
+                  <span className="font-mono text-[8px] text-zinc-400 group-hover:text-white">↗</span>
+                </a>
+              </div>
+            </div>
           </div>
+        </div>
+
+        {/* Bottom Dock Status & Back to Top */}
+        <div className="w-full flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9px] xs:text-[9.5px] text-zinc-300">
+          <span className="text-zinc-400 font-mono">&copy; 2026 KWESI</span>
+          <button
+            onClick={handleBackToTop}
+            className="text-accent-lime font-bold flex items-center gap-1 hover:underline cursor-pointer active:scale-95 px-3.5 py-1.5 rounded-lg bg-accent-lime/10 border border-accent-lime/30 shadow-[0_0_8px_rgba(204,255,0,0.15)]"
+          >
+            <span>RETURN TO TOP</span>
+            <span className="text-xs">&uarr;</span>
+          </button>
         </div>
       </div>
 

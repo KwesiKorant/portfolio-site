@@ -30,7 +30,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
     const isWarpingRef = useRef(false);
     const reverseRafRef = useRef<number | null>(null);
 
-    // Forward warp sequence: 1.5s All-Intra cinematic flight into Stage 03
+    // Forward warp sequence: cinematic flight into Stage 03
     const triggerForward = useCallback(() => {
       const video = videoRef.current;
       if (!video || isWarpingRef.current) return;
@@ -40,33 +40,41 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       setIsActive(true);
       setOpacity(1);
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
       video.currentTime = 0;
-      // Play 2.0s source video at 1.333x speed to achieve exact 1.5s duration
-      video.playbackRate = 2.0 / 1.5;
+      // On mobile, decode at native 1.0x to avoid hardware decoder frame drops; desktop plays at 1.33x
+      video.playbackRate = isMobile ? 1.0 : 2.0 / 1.5;
 
       video
         .play()
         .catch((err) => console.warn("Portal forward play blocked:", err));
 
-      // At ~1.24s (apex where warp tunnel explodes into deep-space starfield):
-      // Breach the 3D dimension and align Stage 03
+      const breachDelay = isMobile ? 1400 : 1240;
+      const finishDelay = isMobile ? 1750 : 1500;
+
+      // Breach 3D dimension and align Stage 03
       setTimeout(() => {
         const spatialEl = document.getElementById("section-spatial");
         if (spatialEl) {
           spatialEl.scrollIntoView({ behavior: "instant" });
         }
         if (onBreachStage3) onBreachStage3();
-      }, 1240);
+        // Immediately pause video on mobile once breach is reached to release GPU decoder bandwidth
+        if (isMobile && video) {
+          video.pause();
+        }
+      }, breachDelay);
 
-      // At 1.5s (video finish): fade out overlay to reveal active 3D world
+      // Fade out overlay to reveal active 3D world
       setTimeout(() => {
         setIsFadingOut(true);
         setOpacity(0);
         setTimeout(() => {
           setIsActive(false);
           isWarpingRef.current = false;
+          if (video) video.pause();
         }, 300);
-      }, 1500);
+      }, finishDelay);
     }, [onBreachStage3]);
 
     // Reverse warp sequence: rewinds from starfield through tunnel back to Stage 01 portrait
@@ -76,13 +84,36 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
 
       isWarpingRef.current = true;
       video.pause();
-      // Instantly prime at starfield frame matching Stage 03
-      video.currentTime = 2.0;
 
       setIsFadingOut(false);
       setIsActive(true);
       setOpacity(1);
 
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+      if (isMobile) {
+        // On mobile: avoid per-frame video.currentTime seeking which stalls mobile decoders.
+        // Use high-speed 0ms seek to mid-point, instant align Stage 01, and hardware opacity reveal.
+        video.currentTime = 0.5;
+        setTimeout(() => {
+          const heroEl = document.getElementById("section-hero");
+          if (heroEl) {
+            heroEl.scrollIntoView({ behavior: "instant" });
+          }
+          if (onArriveStage1) onArriveStage1();
+          setIsFadingOut(true);
+          setOpacity(0);
+          setTimeout(() => {
+            setIsActive(false);
+            isWarpingRef.current = false;
+            if (video) video.pause();
+          }, 250);
+        }, 350);
+        return;
+      }
+
+      // Desktop: All-Intra 60 FPS reverse seek
+      video.currentTime = 2.0;
       const startVideoTime = 2.0;
       const durationMs = 1500;
       const startTime = performance.now();
@@ -91,7 +122,6 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / durationMs);
 
-        // All-Intra H.264 enables 0ms hardware reverse seek
         video.currentTime = Math.max(0, startVideoTime * (1 - progress));
 
         if (progress < 1) {
@@ -104,12 +134,12 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           }
           if (onArriveStage1) onArriveStage1();
 
-          // Fade out overlay to reveal live hero portrait
           setIsFadingOut(true);
           setOpacity(0);
           setTimeout(() => {
             setIsActive(false);
             isWarpingRef.current = false;
+            if (video) video.pause();
           }, 250);
         }
       };
