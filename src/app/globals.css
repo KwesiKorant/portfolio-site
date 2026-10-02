@@ -54,7 +54,6 @@ body, html {
   min-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  scroll-behavior: smooth;
   background-color: var(--bg-deep);
   font-family: var(--font-sans);
   color: #f4f4f5;

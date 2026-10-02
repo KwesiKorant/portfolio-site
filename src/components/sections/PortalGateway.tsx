@@ -41,28 +41,30 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       setOpacity(1);
 
       const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const targetSrc = isMobile ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
+      if (!video.src.endsWith(targetSrc)) {
+        video.src = targetSrc;
+      }
       video.currentTime = 0;
-      // On mobile, decode at native 1.0x to avoid hardware decoder frame drops; desktop plays at 1.33x
       video.playbackRate = isMobile ? 1.0 : 2.0 / 1.5;
 
-      video
-        .play()
-        .catch((err) => console.warn("Portal forward play blocked:", err));
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => console.warn("Portal forward play blocked:", err));
+      }
 
-      const breachDelay = isMobile ? 1400 : 1240;
-      const finishDelay = isMobile ? 1750 : 1500;
+      const breachDelay = isMobile ? 1450 : 1240;
+      const finishDelay = isMobile ? 1800 : 1500;
 
       // Breach 3D dimension and align Stage 03
       setTimeout(() => {
         const spatialEl = document.getElementById("section-spatial");
         if (spatialEl) {
-          spatialEl.scrollIntoView({ behavior: "instant" });
+          const targetY = spatialEl.getBoundingClientRect().top + window.scrollY;
+          window.scrollTo({ top: targetY, behavior: "instant" });
+          spatialEl.scrollIntoView({ behavior: "instant", block: "start" });
         }
         if (onBreachStage3) onBreachStage3();
-        // Immediately pause video on mobile once breach is reached to release GPU decoder bandwidth
-        if (isMobile && video) {
-          video.pause();
-        }
       }, breachDelay);
 
       // Fade out overlay to reveal active 3D world
@@ -92,13 +94,20 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
       if (isMobile) {
-        // On mobile: avoid per-frame video.currentTime seeking which stalls mobile decoders.
-        // Use high-speed 0ms seek to mid-point, instant align Stage 01, and hardware opacity reveal.
-        video.currentTime = 0.5;
+        // Mobile: native forward playback of pre-rendered reverse warp
+        video.src = "/portal_warp_reverse_mobile.mp4";
+        video.currentTime = 0;
+        video.playbackRate = 1.0;
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch((err) => console.warn("Portal reverse play blocked:", err));
+        }
+
         setTimeout(() => {
           const heroEl = document.getElementById("section-hero");
           if (heroEl) {
-            heroEl.scrollIntoView({ behavior: "instant" });
+            heroEl.scrollIntoView({ behavior: "instant", block: "start" });
+            window.scrollTo({ top: 0, behavior: "instant" });
           }
           if (onArriveStage1) onArriveStage1();
           setIsFadingOut(true);
@@ -108,7 +117,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
             isWarpingRef.current = false;
             if (video) video.pause();
           }, 250);
-        }, 350);
+        }, 1300);
         return;
       }
 
@@ -130,7 +139,8 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           // Reached portrait frame: align Stage 01
           const heroEl = document.getElementById("section-hero");
           if (heroEl) {
-            heroEl.scrollIntoView({ behavior: "instant" });
+            heroEl.scrollIntoView({ behavior: "instant", block: "start" });
+            window.scrollTo({ top: 0, behavior: "instant" });
           }
           if (onArriveStage1) onArriveStage1();
 
@@ -149,9 +159,16 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
 
     const preloadVideo = useCallback(() => {
       const video = videoRef.current;
-      if (video && video.preload !== "auto") {
-        video.preload = "auto";
-        video.load();
+      if (video) {
+        const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+        const targetSrc = isMobile ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
+        if (!video.src.endsWith(targetSrc)) {
+          video.src = targetSrc;
+        }
+        if (video.preload !== "auto") {
+          video.preload = "auto";
+          video.load();
+        }
       }
     }, []);
 
@@ -171,9 +188,17 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       if (typeof window === "undefined") return;
 
       const warmUp = () => {
-        if (videoRef.current && videoRef.current.preload !== "auto") {
-          videoRef.current.preload = "auto";
-          videoRef.current.load();
+        const video = videoRef.current;
+        if (video) {
+          const isMobile = window.innerWidth < 768;
+          const targetSrc = isMobile ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
+          if (!video.src.endsWith(targetSrc)) {
+            video.src = targetSrc;
+          }
+          if (video.preload !== "auto") {
+            video.preload = "auto";
+            video.load();
+          }
         }
       };
 
@@ -206,7 +231,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
         onWheel={(e) => e.preventDefault()}
         onTouchMove={(e) => e.preventDefault()}
       >
-        {/* Fullscreen 1.5s All-Intra Warp Video */}
+        {/* Fullscreen 1.5s Warp Video */}
         <video
           ref={videoRef}
           muted
@@ -214,6 +239,7 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           preload="none"
           className="w-full h-full object-cover pointer-events-none"
         >
+          <source src="/portal_warp_mobile.mp4" type="video/mp4" media="(max-width: 767px)" />
           <source src="/portal_warp.mp4" type="video/mp4" />
         </video>
 

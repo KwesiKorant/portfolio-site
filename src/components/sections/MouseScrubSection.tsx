@@ -375,7 +375,21 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (touchIntent.current === "vertical" && touchStartY.current !== null && e.changedTouches.length === 1) {
+      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+      const deltaX = Math.abs((touchStartX.current ?? e.changedTouches[0].clientX) - e.changedTouches[0].clientX);
+      // Clean vertical swipe transitions between full stages on mobile
+      if (Math.abs(deltaY) > 50 && Math.abs(deltaY) > deltaX * 1.15) {
+        if (deltaY < 0) {
+          // Swipe up: advance cleanly to Stage 05 (Finale)
+          document.getElementById("section-finale")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          // Swipe down: return cleanly to Stage 03 (Spatial Matrix)
+          document.getElementById("section-spatial")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }
+    }
     isTouchDragging.current = false;
     touchIntent.current = null;
     touchStartX.current = null;

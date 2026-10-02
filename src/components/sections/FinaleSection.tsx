@@ -107,9 +107,49 @@ export const FinaleSection: React.FC = () => {
       }, 350);
     };
 
+    let touchStartY: number | null = null;
+    let touchStartX: number | null = null;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (!isInView) return;
+      const el = containerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top > window.innerHeight * 0.4) return;
+      if (e.touches.length === 1) {
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchStartY === null || !isInView) return;
+      if (e.changedTouches.length === 1) {
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        const deltaX = Math.abs((touchStartX || 0) - e.changedTouches[0].clientX);
+        // Swiping down from top of Stage 05 returns cleanly to Stage 04
+        if (deltaY > 55 && deltaY > deltaX * 1.15 && !isNavigating) {
+          isNavigating = true;
+          const scrubEl = document.getElementById("section-scrub");
+          if (scrubEl) {
+            scrubEl.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+          setTimeout(() => {
+            isNavigating = false;
+          }, 1100);
+        }
+      }
+      touchStartY = null;
+      touchStartX = null;
+    };
+
     window.addEventListener("wheel", handleWheel, { passive: false });
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
     return () => {
       window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
       if (overscrollTimer) clearTimeout(overscrollTimer);
     };
   }, [isInView]);

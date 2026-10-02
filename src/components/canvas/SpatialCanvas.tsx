@@ -66,6 +66,8 @@ interface CurveInfo {
   highlightColor: number;
 }
 
+export const MOBILE_DEFAULT_CAMERA_Z = 1620; // ~8% closer overview zoom on mobile (was 1750; 1750 / 1620 = +8.0%)
+
 export const MOBILE_NODE_ORDER = [
   "edge-gateway",
   "hyperscale",
@@ -142,7 +144,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         playWarpSound();
 
         const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-        const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
+        const defaultZ = isMobile ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
 
         if (nodeId === "root") {
           targetOrbitAngleRef.current.yaw = 0;
@@ -227,7 +229,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         resetCamera: () => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
           targetOrbitAngleRef.current.yaw = 0;
           targetOrbitAngleRef.current.pitch = 0;
           targetCamRef.current.x = 0;
@@ -244,10 +246,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         },
         triggerDimensionalBreach: (direction: "enter" | "exit" = "enter") => {
           const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-          const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
+          const defaultZ = isMobile ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
           if (direction === "enter") {
             // Camera swoops forward from hyperspace depth into elevated perspective
-            currentCamRef.current.z = isMobile ? 2000 : 2100;
+            currentCamRef.current.z = isMobile ? 1900 : 2100;
             currentCamRef.current.x = 0;
             currentCamRef.current.y = isMobile ? 20 : 75;
             targetCamRef.current.x = 0;
@@ -282,7 +284,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let width = window.innerWidth;
       let height = window.innerHeight;
       const isMobile = width < 768;
-      const defaultZ = isMobile ? 1750 : DEFAULT_CAMERA_Z;
+      const defaultZ = isMobile ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
 
       // Scene setup
       const scene = new THREE.Scene();
@@ -1191,7 +1193,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
         tempNodeVec.set(wx, wy, wz);
         const dist = camera.position.distanceTo(tempNodeVec);
-        const effectiveBaseZ = width < 768 ? 1800 : DEFAULT_CAMERA_Z;
+        const effectiveBaseZ = width < 768 ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
         const rawScale = effectiveBaseZ / Math.max(dist, 100);
         const minScale = width < 768 ? 0.35 : 0.45;
         const scale = Math.max(minScale, Math.min(rawScale, 1.0));
@@ -1323,7 +1325,19 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         );
       };
 
+      // Stage focus verification: ensures Stage 03 never intercepts interactions when the user is scrolled to other stages
+      const isSpatialInFocus = () => {
+        const spatialEl = document.getElementById("section-spatial");
+        if (!spatialEl) return false;
+        const rect = spatialEl.getBoundingClientRect();
+        return (
+          rect.top <= window.innerHeight * 0.45 &&
+          rect.bottom >= window.innerHeight * 0.55
+        );
+      };
+
       const handleMouseDown = (e: MouseEvent) => {
+        if (!isSpatialInFocus()) return;
         if (e.button !== 0) return;
         const target = e.target as HTMLElement | null;
         if (isInteractiveTarget(target)) {
@@ -1335,6 +1349,10 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       const handleMouseMove = (e: MouseEvent) => {
         if (!isDragging) return;
+        if (!isSpatialInFocus()) {
+          isDragging = false;
+          return;
+        }
         const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
         const dx = (e.clientX - dragStart.x) * depthFactor * 1.85;
         const dy = (e.clientY - dragStart.y) * depthFactor * 1.85;
@@ -1369,6 +1387,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let cameraShakeAmount = 0;
 
       const handlePointerMoveAmbient = (e: MouseEvent) => {
+        if (!isSpatialInFocus()) return;
         mouseNormX = (e.clientX / window.innerWidth) * 2.0 - 1.0;
         mouseNormY = -(e.clientY / window.innerHeight) * 2.0 + 1.0;
       };
@@ -1381,6 +1400,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       let touchStartTime = 0;
 
       const handleTouchStart = (e: TouchEvent) => {
+        if (!isSpatialInFocus()) return;
         const target = e.target as HTMLElement | null;
         if (isInteractiveTarget(target)) {
           return;
@@ -1401,23 +1421,30 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       };
 
       const handleTouchMove = (e: TouchEvent) => {
+        if (!isSpatialInFocus()) {
+          isDragging = false;
+          return;
+        }
         if (isDragging && e.touches.length === 1) {
-          const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
-          const dx = (e.touches[0].clientX - dragStart.x) * depthFactor * 1.85;
-          const dy = (e.touches[0].clientY - dragStart.y) * depthFactor * 1.85;
-          targetCamRef.current.x = Math.max(
-            WORLD_BOUNDS.minX,
-            Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
-          );
-          targetCamRef.current.y = Math.max(
-            WORLD_BOUNDS.minY,
-            Math.min(targetCamRef.current.y + dy, WORLD_BOUNDS.maxY)
-          );
-          if (activeNodeIdRef.current === "root") {
-            targetLookAtRef.current.x = targetCamRef.current.x;
-            targetLookAtRef.current.y = isMobile ? targetCamRef.current.y - 80 : targetCamRef.current.y - 135;
+          if (!isMobile) {
+            const depthFactor = currentCamRef.current.z / DEFAULT_CAMERA_Z;
+            const dx = (e.touches[0].clientX - dragStart.x) * depthFactor * 1.85;
+            const dy = (e.touches[0].clientY - dragStart.y) * depthFactor * 1.85;
+            targetCamRef.current.x = Math.max(
+              WORLD_BOUNDS.minX,
+              Math.min(targetCamRef.current.x - dx, WORLD_BOUNDS.maxX)
+            );
+            targetCamRef.current.y = Math.max(
+              WORLD_BOUNDS.minY,
+              Math.min(targetCamRef.current.y + dy, WORLD_BOUNDS.maxY)
+            );
+            if (activeNodeIdRef.current === "root") {
+              targetLookAtRef.current.x = targetCamRef.current.x;
+              targetLookAtRef.current.y = targetCamRef.current.y - 135;
+            }
+            dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
           }
-          dragStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          // On mobile: keep 3D carousel centered and stable; gesture intent evaluated cleanly on touchend
         } else if (e.touches.length === 2) {
           const dist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -1434,20 +1461,58 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       };
 
       const handleTouchEnd = (e: TouchEvent) => {
-        if (isMobile && activeNodeIdRef.current === "root" && e.changedTouches.length === 1) {
+        if (!isSpatialInFocus()) {
+          isDragging = false;
+          return;
+        }
+        if (isMobile && e.changedTouches.length === 1) {
           const deltaX = e.changedTouches[0].clientX - touchStartX;
-          const deltaY = Math.abs(e.changedTouches[0].clientY - touchStartY);
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          const absDx = Math.abs(deltaX);
+          const absDy = Math.abs(deltaY);
           const duration = performance.now() - touchStartTime;
-          // Clean horizontal swipe within 650ms steps the 3D cylindrical carousel
-          if (Math.abs(deltaX) > 40 && deltaY < 50 && duration < 650) {
-            if (deltaX < 0) {
-              targetCarouselAngleRef.current -= (2 * Math.PI) / 6;
-              playKeyClick();
-              onStepMobileOrbit?.(1);
-            } else {
-              targetCarouselAngleRef.current += (2 * Math.PI) / 6;
-              playKeyClick();
-              onStepMobileOrbit?.(-1);
+
+          if (activeNodeIdRef.current === "root") {
+            // Vertical swipe UP (finger dragged upward): Cleanly scroll down to Stage 04 (#section-scrub)
+            if (deltaY < -50 && absDy > absDx * 1.15 && duration < 750 && !isNavigatingStage) {
+              isNavigatingStage = true;
+              document
+                .getElementById("section-scrub")
+                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              setTimeout(() => {
+                isNavigatingStage = false;
+              }, 1100);
+            }
+            // Vertical swipe DOWN (finger dragged downward): Cleanly return to Stage 01 (#section-hero / Portal)
+            else if (deltaY > 50 && absDy > absDx * 1.15 && duration < 750 && !isNavigatingStage) {
+              isNavigatingStage = true;
+              if (onExitToPortal) {
+                onExitToPortal();
+              } else {
+                document
+                  .getElementById("section-hero")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }
+              setTimeout(() => {
+                isNavigatingStage = false;
+              }, 1100);
+            }
+            // Clean horizontal swipe: step 3D cylindrical carousel
+            else if (absDx > 40 && absDy < 50 && duration < 650) {
+              if (deltaX < 0) {
+                targetCarouselAngleRef.current -= (2 * Math.PI) / 6;
+                playKeyClick();
+                onStepMobileOrbit?.(1);
+              } else {
+                targetCarouselAngleRef.current += (2 * Math.PI) / 6;
+                playKeyClick();
+                onStepMobileOrbit?.(-1);
+              }
+            }
+          } else {
+            // When a node card is focused on mobile: swipe down or away returns to overview root
+            if (deltaY > 60 && absDy > absDx * 1.15 && duration < 700) {
+              focusNodeInternal("root");
             }
           }
         }
@@ -2069,11 +2134,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 }
                 // When re-entering Stage 03 from Stage 04 or Stage 01, smoothly ease camera to default overview
                 if (activeNodeIdRef.current === "root") {
+                  const isMob = window.innerWidth < 768;
                   targetCamRef.current.x = 0;
-                  targetCamRef.current.y = 75;
-                  targetCamRef.current.z = DEFAULT_CAMERA_Z;
+                  targetCamRef.current.y = isMob ? 20 : 75;
+                  targetCamRef.current.z = isMob ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
                   targetLookAtRef.current.x = 0;
-                  targetLookAtRef.current.y = -60;
+                  targetLookAtRef.current.y = isMob ? -20 : -60;
                   targetLookAtRef.current.z = 0;
                 }
               } else if (animFrameId) {
