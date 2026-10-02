@@ -986,10 +986,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         curvesList = [];
         packetMeshes = [];
 
+        const isMobileView = width < 768;
+        // On mobile, line rings and packet effects connecting central image to satellite cards
+        // are covered by the cards and text; skipping them saves draw calls and frame processing.
+        if (isMobileView) return;
+
         NODE_GRAPH.forEach((node) => {
           if (node.id === "root") return;
-
-          const isMobileView = width < 768;
           const coords = getNodeCoordinates(node, isMobileView);
           const nodeX = coords.x;
           const nodeY = coords.y;
