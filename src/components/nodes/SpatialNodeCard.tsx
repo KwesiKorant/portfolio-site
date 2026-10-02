@@ -1,6 +1,12 @@
 "use client";
 
-import React, { forwardRef, useCallback, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { NodeData, SubsystemType } from "@/types/graph";
 import {
   playCardHover,
@@ -409,6 +415,103 @@ export const SpatialNodeCard = forwardRef<
   );
   const [selectedScreenshotIdx, setSelectedScreenshotIdx] = useState(0);
 
+  // Reset screenshot index whenever a different node is focused
+  useEffect(() => {
+    setSelectedScreenshotIdx(0);
+  }, [node.id]);
+
+  // Swipe & Arrow Navigation for Project Screenshots in Deep Dive
+  const swipeStartX = useRef<number | null>(null);
+  const swipeStartY = useRef<number | null>(null);
+
+  const handlePrevScreenshot = useCallback(
+    (e?: React.MouseEvent | React.TouchEvent) => {
+      e?.stopPropagation();
+      if (!node.screenshots || node.screenshots.length <= 1) return;
+      playKeyClick();
+      setSelectedScreenshotIdx((prev) =>
+        prev === 0 ? node.screenshots!.length - 1 : prev - 1
+      );
+    },
+    [node.screenshots]
+  );
+
+  const handleNextScreenshot = useCallback(
+    (e?: React.MouseEvent | React.TouchEvent) => {
+      e?.stopPropagation();
+      if (!node.screenshots || node.screenshots.length <= 1) return;
+      playKeyClick();
+      setSelectedScreenshotIdx((prev) =>
+        prev === node.screenshots!.length - 1 ? 0 : prev + 1
+      );
+    },
+    [node.screenshots]
+  );
+
+  const handleTouchStartScreenshot = useCallback((e: React.TouchEvent) => {
+    e.stopPropagation();
+    swipeStartX.current = e.touches[0].clientX;
+    swipeStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchEndScreenshot = useCallback(
+    (e: React.TouchEvent) => {
+      e.stopPropagation();
+      if (swipeStartX.current === null || swipeStartY.current === null) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchEndX - swipeStartX.current;
+      const deltaY = touchEndY - swipeStartY.current;
+
+      // Only trigger if horizontal swipe is distinctly greater than vertical scroll
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 35) {
+        if (deltaX < 0) {
+          handleNextScreenshot();
+        } else {
+          handlePrevScreenshot();
+        }
+      }
+
+      swipeStartX.current = null;
+      swipeStartY.current = null;
+    },
+    [handleNextScreenshot, handlePrevScreenshot]
+  );
+
+  // Keyboard navigation (Left / Right Arrow) for screenshots when deep dive is active
+  useEffect(() => {
+    if (
+      !isActive ||
+      activeRightTab !== "screenshots" ||
+      !node.screenshots ||
+      node.screenshots.length <= 1
+    ) {
+      return;
+    }
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        e.stopPropagation();
+        handlePrevScreenshot();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        e.stopPropagation();
+        handleNextScreenshot();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
+  }, [
+    isActive,
+    activeRightTab,
+    node.screenshots,
+    handlePrevScreenshot,
+    handleNextScreenshot,
+  ]);
+
   const handleMouseEnter = useCallback(() => {
     if (isActive) return;
     playCardHover();
@@ -767,20 +870,90 @@ export const SpatialNodeCard = forwardRef<
                             ))}
                           </div>
 
-                          {/* Screenshot Display Card */}
+                          {/* Screenshot Display Card with Touch Swipe & Next/Prev Arrows */}
                           {(() => {
                             const currentShot =
-                              node.screenshots[selectedScreenshotIdx] || node.screenshots[0];
+                              node.screenshots[selectedScreenshotIdx] ||
+                              node.screenshots[0];
                             return (
-                              <div className="relative rounded-xl overflow-hidden border border-white/20 bg-black/60 shadow-lg">
-                                <picture className="w-full block aspect-[16/9] overflow-hidden bg-black/80">
-                                  <img
-                                    src={currentShot.url}
-                                    alt={currentShot.title}
-                                    className="w-full h-full object-contain object-center"
-                                    loading="eager"
-                                  />
-                                </picture>
+                              <div
+                                className="relative rounded-xl overflow-hidden border border-white/20 bg-black/60 shadow-lg select-none group/carousel touch-pan-y"
+                                onTouchStart={handleTouchStartScreenshot}
+                                onTouchEnd={handleTouchEndScreenshot}
+                              >
+                                {/* Media Chamber */}
+                                <div className="relative w-full aspect-[16/9] overflow-hidden bg-black/80">
+                                  <picture className="w-full h-full block">
+                                    <img
+                                      key={currentShot.url}
+                                      src={currentShot.url}
+                                      alt={currentShot.title}
+                                      className="w-full h-full object-contain object-center transition-opacity duration-200"
+                                      loading="eager"
+                                    />
+                                  </picture>
+
+                                  {/* Left Chevron Button (Previous Image) */}
+                                  {node.screenshots.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={handlePrevScreenshot}
+                                      className="absolute left-2.5 sm:left-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#080a12]/90 hover:bg-black border border-white/30 hover:border-accent-lime text-zinc-100 hover:text-accent-lime flex items-center justify-center transition-all cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.9)] active:scale-90 select-none group pointer-events-auto"
+                                      aria-label="Previous screenshot"
+                                      title="Previous image (←)"
+                                    >
+                                      <svg
+                                        className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M15 19l-7-7 7-7"
+                                        />
+                                      </svg>
+                                    </button>
+                                  )}
+
+                                  {/* Right Chevron Button (Next Image) */}
+                                  {node.screenshots.length > 1 && (
+                                    <button
+                                      type="button"
+                                      onClick={handleNextScreenshot}
+                                      className="absolute right-2.5 sm:right-3.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#080a12]/90 hover:bg-black border border-white/30 hover:border-accent-lime text-zinc-100 hover:text-accent-lime flex items-center justify-center transition-all cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.9)] active:scale-90 select-none group pointer-events-auto"
+                                      aria-label="Next screenshot"
+                                      title="Next image (→)"
+                                    >
+                                      <svg
+                                        className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth="2.5"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          d="M9 5l7 7-7 7"
+                                        />
+                                      </svg>
+                                    </button>
+                                  )}
+
+                                  {/* Pagination indicator badge */}
+                                  {node.screenshots.length > 1 && (
+                                    <div className="absolute top-2.5 right-2.5 z-20 px-2 py-0.5 rounded-full bg-black/85 border border-white/25 text-[9px] font-mono text-zinc-200 flex items-center gap-1 pointer-events-none shadow-md">
+                                      <span className="text-accent-lime font-bold">
+                                        {selectedScreenshotIdx + 1}
+                                      </span>
+                                      <span>/ {node.screenshots.length}</span>
+                                    </div>
+                                  )}
+                                </div>
+
                                 <div className="p-3 bg-[#0a0d17]/95 border-t border-white/10">
                                   <div className="flex items-center justify-between gap-2 mb-1">
                                     <span className="font-display text-xs font-bold text-white">
