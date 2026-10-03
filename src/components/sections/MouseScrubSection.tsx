@@ -422,7 +422,7 @@ export const MouseScrubSection: React.FC = () => {
     <section
       ref={containerRef}
       id="section-scrub"
-      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-between p-3 xs:p-4 sm:p-6 lg:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint] touch-pan-y"
+      className="relative w-full h-[100dvh] max-h-[100dvh] flex flex-col justify-between p-2.5 xs:p-3 sm:p-6 lg:p-12 overflow-hidden bg-[#050508] select-none [contain:layout_style_paint] touch-pan-y"
       onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
@@ -430,7 +430,7 @@ export const MouseScrubSection: React.FC = () => {
       aria-label="Kinetic Frame Interaction Section"
     >
       {/* Video Element: Responsive framing for mobile (aspect-video docked directly above console) and desktop (h-full object-cover) */}
-      <div className="absolute top-8 xs:top-9 inset-x-0 w-full aspect-video max-h-[40dvh] xs:max-h-[42dvh] sm:top-0 sm:inset-x-0 sm:h-full sm:max-h-none sm:aspect-auto overflow-hidden [mask-image:linear-gradient(to_bottom,black_88%,transparent_100%)] sm:[mask-image:none] pointer-events-none z-0">
+      <div className="absolute top-8 xs:top-9 inset-x-0 w-full aspect-video max-h-[30dvh] xs:max-h-[32dvh] sm:top-0 sm:inset-x-0 sm:h-full sm:max-h-none sm:aspect-auto overflow-hidden [mask-image:linear-gradient(to_bottom,black_88%,transparent_100%)] sm:[mask-image:none] pointer-events-none z-0">
         <video
           ref={videoRef}
           muted
@@ -467,11 +467,11 @@ export const MouseScrubSection: React.FC = () => {
 
       {/* MOBILE VIEW (< lg): Integrated Turntable Apparatus - Direct Base Console Attached to Video */}
       <div className="flex lg:hidden flex-col items-center flex-1 w-full min-h-0 pt-0 pb-1 relative z-20">
-        {/* Upper Robot Chamber: Responsive Spacing over Video - Sized ~10% bigger */}
-        <div className="relative w-full aspect-video max-h-[39dvh] xs:max-h-[41dvh] pointer-events-none shrink-0" />
+        {/* Upper Robot Chamber: Responsive Spacing over Video */}
+        <div className="relative w-full aspect-video max-h-[29dvh] xs:max-h-[31dvh] pointer-events-none shrink-0" />
 
         {/* Integrated Console Deck: Positioned right below the video, fills lower stage seamlessly to eliminate voids */}
-        <div className="w-full max-w-sm xs:max-w-md flex-1 flex flex-col justify-between pointer-events-auto relative z-20 space-y-2 -mt-1 xs:-mt-2 pb-1 min-h-0">
+        <div className="w-full max-w-sm xs:max-w-md flex-1 flex flex-col justify-between pointer-events-auto relative z-20 space-y-1.5 xs:space-y-2 -mt-1 xs:-mt-2 pb-0.5 min-h-0">
           {/* Integrated Hardware Scrubbing HUD */}
           <div className="w-full px-3 py-2 rounded-xl bg-[#080a12]/90 border border-accent-lime/25 flex items-center justify-between gap-2.5 text-zinc-300 font-mono text-[9.5px] xs:text-[10px] shadow-[0_4px_24px_rgba(0,0,0,0.8)]">
             <button
@@ -512,70 +512,70 @@ export const MouseScrubSection: React.FC = () => {
           </div>
 
           {/* Hardware Telemetry Deck: Unified Methodology + Shipped Systems Display (Fills Lower Stage Seamlessly with Zero Voids) */}
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-0.5">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-0.5 overscroll-contain">
             {/* Section 1: AI-Augmented Methodology */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[7.5px] xs:text-[8px] font-mono text-zinc-400 uppercase tracking-widest">
+            <div className="space-y-1 xs:space-y-1.5">
+              <div className="flex items-center justify-between text-[7px] xs:text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest">
                 <span className="text-accent-lime font-bold">01 // METHODOLOGY</span>
                 <span>4 CORE PILLARS</span>
               </div>
-              <div className="font-display text-[15px] xs:text-[17px] font-bold text-white tracking-tight leading-snug">
+              <div className="font-display text-[14px] xs:text-[16px] font-bold text-white tracking-tight leading-snug">
                 The AI-Augmented Engineering Workflow
               </div>
-              <p className="font-sans text-[10px] xs:text-[11px] text-zinc-300 leading-snug">
+              <p className="font-sans text-[9px] xs:text-[10px] text-zinc-300 leading-snug">
                 Harnessing autonomous AI agents as an engineering force-multiplier to rapidly scaffold systems and deliver enterprise-grade software at 10x velocity.
               </p>
-              <div className="grid grid-cols-2 gap-1.5 pt-0.5 font-mono text-[8px] xs:text-[8.5px]">
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10">
-                  <span className="text-accent-lime uppercase block text-[7.5px] xs:text-[8px] font-bold mb-1">01 • AI SCAFFOLDING</span>
-                  <span className="text-zinc-200 block leading-tight text-[8px] xs:text-[8.5px]">Rapid prototype generation &amp; boilerplate reduction</span>
+              <div className="grid grid-cols-2 gap-1 xs:gap-1.5 pt-0.5 font-mono text-[7.5px] xs:text-[8px]">
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10">
+                  <span className="text-accent-lime uppercase block text-[7px] xs:text-[7.5px] font-bold mb-0.5 truncate">01 • AI SCAFFOLDING</span>
+                  <span className="text-zinc-200 block leading-tight text-[7.5px] xs:text-[8px]">Rapid prototype gen &amp; boilerplate reduction</span>
                 </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10">
-                  <span className="text-accent-lime uppercase block text-[7.5px] xs:text-[8px] font-bold mb-1">02 • ARCH RIGOR</span>
-                  <span className="text-zinc-200 block leading-tight text-[8px] xs:text-[8.5px]">Human ownership of schema &amp; financial math</span>
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10">
+                  <span className="text-accent-lime uppercase block text-[7px] xs:text-[7.5px] font-bold mb-0.5 truncate">02 • ARCH RIGOR</span>
+                  <span className="text-zinc-200 block leading-tight text-[7.5px] xs:text-[8px]">Human ownership of schema &amp; financial math</span>
                 </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10">
-                  <span className="text-accent-lime uppercase block text-[7.5px] xs:text-[8px] font-bold mb-1">03 • FRONTEND POLISH</span>
-                  <span className="text-zinc-200 block leading-tight text-[8px] xs:text-[8.5px]">120 FPS compositor &amp; zero DOM reflows</span>
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10">
+                  <span className="text-accent-lime uppercase block text-[7px] xs:text-[7.5px] font-bold mb-0.5 truncate">03 • FRONTEND POLISH</span>
+                  <span className="text-zinc-200 block leading-tight text-[7.5px] xs:text-[8px]">120 FPS compositor &amp; zero DOM reflows</span>
                 </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10">
-                  <span className="text-accent-lime uppercase block text-[7.5px] xs:text-[8px] font-bold mb-1">04 • MECH SYMPATHY</span>
-                  <span className="text-zinc-200 block leading-tight text-[8px] xs:text-[8.5px]">All-Intra seek &amp; directional intent filter</span>
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10">
+                  <span className="text-accent-lime uppercase block text-[7px] xs:text-[7.5px] font-bold mb-0.5 truncate">04 • MECH SYMPATHY</span>
+                  <span className="text-zinc-200 block leading-tight text-[7.5px] xs:text-[8px]">All-Intra seek &amp; directional intent filter</span>
                 </div>
               </div>
             </div>
 
             {/* Section 2: Real-World Shipped Systems */}
-            <div className="space-y-1.5 pt-1.5 border-t border-white/10">
-              <div className="flex items-center justify-between text-[7.5px] xs:text-[8px] font-mono text-zinc-400 uppercase tracking-widest">
+            <div className="space-y-1 xs:space-y-1.5 pt-1.5 border-t border-white/10">
+              <div className="flex items-center justify-between text-[7px] xs:text-[7.5px] font-mono text-zinc-400 uppercase tracking-widest">
                 <span className="text-accent-lime font-bold">02 // PRODUCTION FOOTPRINT</span>
                 <span>3 SHIPPED SYSTEMS</span>
               </div>
-              <div className="space-y-1.5">
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-1">
-                  <div className="flex items-center justify-between font-mono text-[8.5px] xs:text-[9.5px]">
-                    <span className="text-accent-lime font-bold uppercase">01 • ARCFIELD DISCOVER</span>
-                    <span className="px-2 py-0.5 rounded bg-accent-lime/10 text-accent-lime text-[7px] xs:text-[7.5px] font-semibold">CTO // MVP</span>
+              <div className="space-y-1 xs:space-y-1.5">
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-0.5 xs:gap-1">
+                  <div className="flex items-center justify-between font-mono text-[8px] xs:text-[9px]">
+                    <span className="text-accent-lime font-bold uppercase truncate mr-1.5">01 • ARCFIELD DISCOVER</span>
+                    <span className="px-1.5 py-0.5 rounded bg-accent-lime/10 text-accent-lime text-[6.5px] xs:text-[7px] font-semibold shrink-0">CTO // MVP</span>
                   </div>
-                  <p className="text-zinc-300 text-[9px] xs:text-[10px] leading-snug font-sans">
+                  <p className="text-zinc-300 text-[8.5px] xs:text-[9.5px] leading-snug font-sans">
                     Hyperlocal discovery platform connecting neighborhood enterprises with consumers.
                   </p>
                 </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-1">
-                  <div className="flex items-center justify-between font-mono text-[8.5px] xs:text-[9.5px]">
-                    <span className="text-accent-lime font-bold uppercase">02 • NAYAK FURNITURE ERP</span>
-                    <span className="px-2 py-0.5 rounded bg-accent-lime/10 text-accent-lime text-[7px] xs:text-[7.5px] font-semibold">PROD READY</span>
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-0.5 xs:gap-1">
+                  <div className="flex items-center justify-between font-mono text-[8px] xs:text-[9px]">
+                    <span className="text-accent-lime font-bold uppercase truncate mr-1.5">02 • NAYAK FURNITURE ERP</span>
+                    <span className="px-1.5 py-0.5 rounded bg-accent-lime/10 text-accent-lime text-[6.5px] xs:text-[7px] font-semibold shrink-0">PROD READY</span>
                   </div>
-                  <p className="text-zinc-300 text-[9px] xs:text-[10px] leading-snug font-sans">
+                  <p className="text-zinc-300 text-[8.5px] xs:text-[9.5px] leading-snug font-sans">
                     Showroom inventory &amp; POS ERP with automated bill-of-materials margin tracking in GH₵.
                   </p>
                 </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-1">
-                  <div className="flex items-center justify-between font-mono text-[8.5px] xs:text-[9.5px]">
-                    <span className="text-accent-lime font-bold uppercase">03 • 120 FPS KINETIC COMPOSITOR</span>
-                    <span className="px-2 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan text-[7px] xs:text-[7.5px] font-semibold">FLAGSHIP</span>
+                <div className="p-2 xs:p-2.5 rounded-xl bg-white/[0.04] border border-white/10 flex flex-col gap-0.5 xs:gap-1">
+                  <div className="flex items-center justify-between font-mono text-[8px] xs:text-[9px]">
+                    <span className="text-accent-cyan font-bold uppercase truncate mr-1.5">03 • 120 FPS KINETIC COMPOSITOR</span>
+                    <span className="px-1.5 py-0.5 rounded bg-accent-cyan/10 text-accent-cyan text-[6.5px] xs:text-[7px] font-semibold shrink-0">FLAGSHIP</span>
                   </div>
-                  <p className="text-zinc-300 text-[9px] xs:text-[10px] leading-snug font-sans">
+                  <p className="text-zinc-300 text-[8.5px] xs:text-[9.5px] leading-snug font-sans">
                     3D spatial portfolio engine with sub-8ms touch response and zero DOM reflows.
                   </p>
                 </div>
@@ -584,11 +584,11 @@ export const MouseScrubSection: React.FC = () => {
           </div>
 
           {/* Bottom Cue to Finale & Contact */}
-          <div className="flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] xs:text-[9.5px] text-zinc-300 shrink-0">
+          <div className="flex items-center justify-between pt-1.5 pb-0.5 border-t border-white/10 font-mono text-[8.5px] xs:text-[9px] text-zinc-300 shrink-0">
             <span className="text-zinc-400 font-mono tracking-wide">KINETIC TURNTABLE // 60 FPS</span>
             <button
               onClick={handleToFinale}
-              className="text-accent-lime font-bold flex items-center gap-1 hover:underline cursor-pointer active:scale-95 px-3 py-1.5 rounded-lg bg-accent-lime/10 border border-accent-lime/30 shadow-[0_0_8px_rgba(204,255,0,0.15)]"
+              className="text-accent-lime font-bold flex items-center gap-1 hover:underline cursor-pointer active:scale-95 px-2.5 py-1 rounded-lg bg-accent-lime/10 border border-accent-lime/30 shadow-[0_0_8px_rgba(204,255,0,0.15)]"
             >
               <span>FINALE &amp; CONTACT</span>
               <span className="text-xs">&darr;</span>

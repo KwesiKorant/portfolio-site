@@ -599,7 +599,7 @@ export const SpatialNodeCard = forwardRef<
       className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style] ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
-          : "w-[225px] xs:w-[245px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
+          : "w-[260px] xs:w-[285px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
       onClick={handleClick}
@@ -636,7 +636,7 @@ export const SpatialNodeCard = forwardRef<
         />
 
         {/* Header Bar */}
-        <div className={`flex items-center justify-between gap-1.5 sm:gap-3 font-mono text-[7.5px] sm:text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
+        <div className={`flex items-center justify-between gap-1.5 sm:gap-3 font-mono text-[8px] sm:text-[10px] tracking-wider uppercase text-zinc-400 shrink-0 ${
           isActive ? "pb-2.5 sm:pb-3 mb-2.5 sm:mb-3 border-b border-white/10" : "mb-1.5 sm:mb-2.5"
         }`}>
           <div className="flex items-center gap-1 sm:gap-2 truncate">
@@ -1088,12 +1088,12 @@ export const SpatialNodeCard = forwardRef<
                 </div>
 
                 {/* Title */}
-                <div className="font-display text-[12px] sm:text-[16px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
+                <div className="font-display text-[13px] sm:text-[16px] font-bold text-white mb-1 sm:mb-1.5 tracking-tight group-hover:text-accent-lime transition-colors duration-150 line-clamp-1">
                   {node.title}
                 </div>
 
                 {/* Role & Key Metric */}
-                <div className="flex items-center justify-between gap-1 sm:gap-2 font-mono text-[7.5px] sm:text-[9px] mb-1.5 sm:mb-2">
+                <div className="flex items-center justify-between gap-1 sm:gap-2 font-mono text-[8px] sm:text-[9px] mb-1.5 sm:mb-2">
                   {node.role && (
                     <span className="text-accent-lime font-medium truncate flex items-center gap-1">
                       <span className="w-1 h-1 rounded-full bg-accent-lime" />

@@ -67,7 +67,7 @@ interface CurveInfo {
   highlightColor: number;
 }
 
-export const MOBILE_DEFAULT_CAMERA_Z = 1620; // ~8% closer overview zoom on mobile (was 1750; 1750 / 1620 = +8.0%)
+export const MOBILE_DEFAULT_CAMERA_Z = 1280; // ~25% closer overview zoom on mobile (was 1620; 1620 / 1280 = +26.5% zoom)
 
 export const MOBILE_NODE_ORDER = [
   "edge-gateway",
@@ -910,10 +910,23 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         uniform sampler2D uTexture;
         uniform float uDist;
         uniform float uTime;
+        uniform bool uIsMobile;
         varying vec2 vUv;
 
         void main() {
           vec4 texColor = texture2D(uTexture, vUv);
+
+          if (uIsMobile) {
+            // Option A (Mobile): Clean, crisp, high-fidelity presentation
+            // Retain full natural color depth and solid opacity (no ghostly luma holes or scanlines)
+            // Smooth perimeter edge vignette into the background (#050508) to dissolve bounding box
+            float edgeX = smoothstep(0.0, 0.07, vUv.x) * smoothstep(1.0, 0.93, vUv.x);
+            float edgeY = smoothstep(0.0, 0.07, vUv.y) * smoothstep(1.0, 0.95, vUv.y);
+            float alpha = texColor.a * edgeX * edgeY;
+            gl_FragColor = vec4(texColor.rgb, alpha);
+            return;
+          }
+
           float luma = dot(texColor.rgb, vec3(0.299, 0.587, 0.114));
 
           // Soft luma key to dissolve dark background
@@ -940,6 +953,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         }
       `;
 
+      const isMobileInit = typeof window !== "undefined" ? window.innerWidth < 768 : isMobile;
+
       const videoMaterial = new THREE.ShaderMaterial({
         vertexShader: nodeVertexShader,
         fragmentShader: nodeFragmentShader,
@@ -947,21 +962,21 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           uTexture: { value: heroTexture },
           uDist: { value: DEFAULT_CAMERA_Z },
           uTime: { value: 0.0 },
+          uIsMobile: { value: isMobileInit },
         },
         transparent: true,
         depthWrite: false,
       });
 
       let currentAspect = 1080 / 608;
-      const isMobileInit = window.innerWidth < 768;
       let cardWidth = isMobileInit
-        ? Math.min(Math.max(window.innerWidth * 1.15, 420), 540)
+        ? Math.min(Math.max(window.innerWidth * 1.30, 475), 610)
         : Math.min(window.innerWidth * 0.82, 920);
       let cardHeight = cardWidth / currentAspect;
 
       let heroMeshGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
       const heroMesh = new THREE.Mesh(heroMeshGeometry, videoMaterial);
-      const heroMeshInitY = isMobileInit ? 260 : HERO_Y;
+      const heroMeshInitY = isMobileInit ? 275 : HERO_Y;
       heroMesh.position.set(0, heroMeshInitY, 0);
       scene.add(heroMesh);
 
@@ -1161,12 +1176,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           currentAspect = 1080 / 608;
         }
         const isMobileNow = window.innerWidth < 768;
+        videoMaterial.uniforms.uIsMobile.value = isMobileNow;
         cardWidth = isMobileNow
-          ? Math.min(Math.max(window.innerWidth * 1.15, 420), 540)
+          ? Math.min(Math.max(window.innerWidth * 1.30, 475), 610)
           : Math.min(window.innerWidth * 0.82, 920);
         cardHeight = cardWidth / currentAspect;
 
-        const heroMeshCalibY = isMobileNow ? 260 : HERO_Y;
+        const heroMeshCalibY = isMobileNow ? 275 : HERO_Y;
         heroMeshGeometry.dispose();
         heroMeshGeometry = new THREE.PlaneGeometry(cardWidth, cardHeight);
         heroMesh.geometry = heroMeshGeometry;
@@ -1501,7 +1517,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         radarCtx.stroke();
 
         // Network connection lines between root and nodes
-        const heroMeshRadarY = isMobile ? 260 : HERO_Y;
+        const heroMeshRadarY = isMobile ? 275 : HERO_Y;
         const rootRadar = worldToRadar(0, heroMeshRadarY, rw, rh);
         radarCtx.strokeStyle = "rgba(204, 255, 0, 0.25)";
         radarCtx.lineWidth = 1;
@@ -1862,7 +1878,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         // Perspective-project Hero Status Badge: Anchored below bottom of video at Z = 45
         const badgeEl = heroBadgeRef?.current;
         if (badgeEl) {
-          const badgeHeroY = width < 768 ? 260 : HERO_Y;
+          const badgeHeroY = width < 768 ? 275 : HERO_Y;
           const badgeWorldY = badgeHeroY - cardHeight * 0.5 - 28;
           const badgeProj = projectToScreen(0, badgeWorldY, 45);
           const shouldBeVis = badgeProj.isVisible && !isNodeFocused;
