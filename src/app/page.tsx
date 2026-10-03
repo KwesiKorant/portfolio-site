@@ -153,6 +153,10 @@ export default function SpatialPortfolioPage() {
       currentStageRef.current = targetIndex;
       setCurrentStage(targetIndex);
 
+      if (targetIndex === 1) {
+        setActiveNodeId("root");
+      }
+
       if (fromIndex === 0 && targetIndex === 1) {
         handleEnterPortal();
         return;
@@ -408,19 +412,32 @@ export default function SpatialPortfolioPage() {
       // Prevent uncoordinated free-scroll blowout
       e.preventDefault();
 
-      // If currently on Stage 1 and a card is zoomed in, un-zoom to root overview first
-      if (currentStageRef.current === 1 && activeNodeIdRef.current !== "root") {
-        if (Math.abs(e.deltaY) > 20) {
-          handleFocusNode("root");
-          transitionStateRef.current = "COOLDOWN";
-          if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-          cooldownTimerRef.current = setTimeout(() => {
-            transitionStateRef.current = "IDLE";
-          }, 350);
+      // STAGE 03 (Index 1): Coordinate with SpatialCanvas 3D Dolly Zoom
+      if (currentStageRef.current === 1) {
+        // If a node card is currently zoomed in, smoothly pull out into root overview first
+        if (activeNodeIdRef.current !== "root") {
+          if (Math.abs(e.deltaY) > 15) {
+            handleFocusNode("root");
+            transitionStateRef.current = "COOLDOWN";
+            if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+            cooldownTimerRef.current = setTimeout(() => {
+              transitionStateRef.current = "IDLE";
+            }, 200);
+          }
+          return;
+        }
+
+        // Overview mode: Delegate wheel directly to 3D camera dolly zoom
+        const dollyResult = canvasHandleRef.current?.handleWheelDolly(e.deltaY);
+        if (dollyResult === "overscroll-down") {
+          navigateToStage(2);
+        } else if (dollyResult === "overscroll-up") {
+          navigateToStage(0);
         }
         return;
       }
 
+      // STAGES 00, 02, 03: Direct stage-to-stage navigation
       wheelAccumulatorRef.current += e.deltaY;
       if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
       wheelResetTimerRef.current = setTimeout(() => {

@@ -26,6 +26,7 @@ import {
 export interface SpatialCanvasHandle {
   focusNode: (nodeId: string) => void;
   dollyBy: (deltaZ: number) => void;
+  handleWheelDolly: (deltaY: number) => "stay" | "overscroll-down" | "overscroll-up";
   warpToCoords: (wx: number, wy: number) => void;
   panBy: (deltaX: number, deltaY: number) => void;
   rotateBy: (deltaYaw: number, deltaPitch: number) => void;
@@ -132,6 +133,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
     const highlightConnRef = useRef<
       ((nodeId: string, isHovered: boolean) => void) | null
     >(null);
+    const overscrollDownRef = useRef(0);
+    const overscrollUpRef = useRef(0);
+    const overscrollResetTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const focusNodeInternal = useCallback(
       (nodeId: string) => {
@@ -191,6 +195,58 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
             Math.max(targetCamRef.current.z + deltaZ, MIN_CAMERA_Z),
             MAX_CAMERA_Z
           );
+        },
+        handleWheelDolly: (deltaY: number): "stay" | "overscroll-down" | "overscroll-up" => {
+          const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+          const defaultZ = isMobile ? MOBILE_DEFAULT_CAMERA_Z : DEFAULT_CAMERA_Z;
+          const boundaryDownZ = MAX_CAMERA_Z - 30; // 2770
+          const boundaryUpZ = defaultZ - (boundaryDownZ - defaultZ); // 990 on desktop
+
+          const distFromCenter = Math.abs(currentCamRef.current.z - defaultZ);
+          const maxSpan = boundaryDownZ - defaultZ;
+          const speedFactor = Math.min(1.0, distFromCenter / Math.max(maxSpan, 1));
+          const normalizedDelta = Math.min(Math.max(Math.abs(deltaY) / 50, 0.7), 2.4);
+          const dollySpeed = (175 + speedFactor * 75) * normalizedDelta;
+
+          if (overscrollResetTimerRef.current) clearTimeout(overscrollResetTimerRef.current);
+          overscrollResetTimerRef.current = setTimeout(() => {
+            overscrollDownRef.current = 0;
+            overscrollUpRef.current = 0;
+          }, 250);
+
+          if (deltaY > 0) {
+            // Scrolling DOWN: dolly back towards Stage 04
+            if (targetCamRef.current.z < boundaryDownZ) {
+              targetCamRef.current.z = Math.min(boundaryDownZ, targetCamRef.current.z + dollySpeed);
+              overscrollDownRef.current = 0;
+              return "stay";
+            } else {
+              // Reached boundary: accumulate overscroll
+              overscrollDownRef.current += Math.abs(deltaY);
+              if (overscrollDownRef.current > 45) {
+                overscrollDownRef.current = 0;
+                return "overscroll-down";
+              }
+              return "stay";
+            }
+          } else if (deltaY < 0) {
+            // Scrolling UP: dolly forward towards Stage 01
+            if (targetCamRef.current.z > boundaryUpZ) {
+              targetCamRef.current.z = Math.max(boundaryUpZ, targetCamRef.current.z - dollySpeed);
+              overscrollUpRef.current = 0;
+              return "stay";
+            } else {
+              // Reached boundary: accumulate overscroll
+              overscrollUpRef.current += Math.abs(deltaY);
+              if (overscrollUpRef.current > 45) {
+                overscrollUpRef.current = 0;
+                return "overscroll-up";
+              }
+              return "stay";
+            }
+          }
+
+          return "stay";
         },
         warpToCoords: (wx: number, wy: number) => {
           targetCamRef.current.x = Math.max(
@@ -2031,6 +2087,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       animate();
 
       return () => {
+        if (overscrollResetTimerRef.current) clearTimeout(overscrollResetTimerRef.current);
         viewportObserver.disconnect();
         if (animFrameId) cancelAnimationFrame(animFrameId);
         window.removeEventListener("mousedown", handleMouseDown);
