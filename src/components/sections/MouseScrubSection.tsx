@@ -375,21 +375,7 @@ export const MouseScrubSection: React.FC = () => {
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (touchIntent.current === "vertical" && touchStartY.current !== null && e.changedTouches.length === 1) {
-      const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-      const deltaX = Math.abs((touchStartX.current ?? e.changedTouches[0].clientX) - e.changedTouches[0].clientX);
-      // Clean vertical swipe transitions between full stages on mobile
-      if (Math.abs(deltaY) > 50 && Math.abs(deltaY) > deltaX * 1.15) {
-        if (deltaY < 0) {
-          // Swipe up: advance cleanly to Stage 05 (Finale)
-          document.getElementById("section-finale")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          // Swipe down: return cleanly to Stage 03 (Spatial Matrix)
-          document.getElementById("section-spatial")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }
-    }
+  const handleTouchEnd = () => {
     isTouchDragging.current = false;
     touchIntent.current = null;
     touchStartX.current = null;
@@ -431,79 +417,6 @@ export const MouseScrubSection: React.FC = () => {
     const el = document.getElementById("section-finale");
     el?.scrollIntoView({ behavior: "smooth" });
   };
-
-  // Wheel navigation: Smooth scroll transitions to Stage 03 (scroll up) and Stage 05 (scroll down)
-  useEffect(() => {
-    let overscrollUp = 0;
-    let overscrollDown = 0;
-    let overscrollTimer: NodeJS.Timeout | null = null;
-    let isNavigating = false;
-
-    const handleWheel = (e: WheelEvent) => {
-      if (!isInViewRef.current) return;
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      // Ensure Stage 04 is currently occupying the primary viewport window (not when user is on Stage 05)
-      const isStage4Active =
-        rect.top <= window.innerHeight * 0.35 &&
-        rect.bottom >= window.innerHeight * 0.65;
-      if (!isStage4Active) return;
-
-      const target = e.target as HTMLElement | null;
-      if (target?.closest("button, a, input, select, textarea")) {
-        return;
-      }
-
-      // Prevent native free-scroll blowout while Stage 04 is active
-      e.preventDefault();
-
-      // Prevent residual momentum scroll from skipping Stage 04 when arriving from Stage 05 or Stage 03
-      if (Date.now() - lastEntryTimeRef.current < 750) return;
-
-      // Scrolling UP towards Stage 03 (3D Spatial Deck)
-      if (e.deltaY < 0) {
-        overscrollUp += Math.abs(e.deltaY);
-        if (overscrollUp > 130 && !isNavigating) {
-          isNavigating = true;
-          const spatialEl = document.getElementById("section-spatial");
-          if (spatialEl) {
-            spatialEl.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          setTimeout(() => {
-            isNavigating = false;
-            overscrollUp = 0;
-          }, 1100);
-        }
-      } else if (e.deltaY > 0) {
-        // Scrolling DOWN towards Stage 05 (Finale)
-        overscrollDown += Math.abs(e.deltaY);
-        if (overscrollDown > 130 && !isNavigating) {
-          isNavigating = true;
-          const finaleEl = document.getElementById("section-finale");
-          if (finaleEl) {
-            finaleEl.scrollIntoView({ behavior: "smooth", block: "start" });
-          }
-          setTimeout(() => {
-            isNavigating = false;
-            overscrollDown = 0;
-          }, 1100);
-        }
-      }
-
-      if (overscrollTimer) clearTimeout(overscrollTimer);
-      overscrollTimer = setTimeout(() => {
-        overscrollUp = 0;
-        overscrollDown = 0;
-      }, 350);
-    };
-
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      if (overscrollTimer) clearTimeout(overscrollTimer);
-    };
-  }, []);
 
   return (
     <section
@@ -554,8 +467,8 @@ export const MouseScrubSection: React.FC = () => {
 
       {/* MOBILE VIEW (< lg): Integrated Turntable Apparatus - Direct Base Console Attached to Video */}
       <div className="flex lg:hidden flex-col items-center flex-1 w-full min-h-0 pt-0 pb-1 relative z-20">
-        {/* Upper Robot Chamber: Gesture Scrub Surface over Video (touch-none) - Sized ~10% bigger */}
-        <div className="relative w-full aspect-video max-h-[39dvh] xs:max-h-[41dvh] touch-none shrink-0" />
+        {/* Upper Robot Chamber: Responsive Spacing over Video - Sized ~10% bigger */}
+        <div className="relative w-full aspect-video max-h-[39dvh] xs:max-h-[41dvh] pointer-events-none shrink-0" />
 
         {/* Integrated Console Deck: Positioned right below the video, fills lower stage seamlessly to eliminate voids */}
         <div className="w-full max-w-sm xs:max-w-md flex-1 flex flex-col justify-between pointer-events-auto relative z-20 space-y-2 -mt-1 xs:-mt-2 pb-1 min-h-0">

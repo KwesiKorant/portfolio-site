@@ -20,43 +20,6 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
   const [isHovered, setIsHovered] = useState(false);
   const [hasCustomAssets, setHasCustomAssets] = useState(true);
 
-  const wheelAccumulator = useRef(0);
-  const wheelResetTimer = useRef<NodeJS.Timeout | null>(null);
-
-  // Wheel listener to trigger seamless portal gateway on downward scroll from Stage 01
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      const heroEl = document.getElementById("section-hero");
-      if (!heroEl) return;
-      const rect = heroEl.getBoundingClientRect();
-      const isHeroActive =
-        rect.top >= -50 && rect.bottom >= window.innerHeight * 0.5;
-
-      if (isHeroActive && e.deltaY > 0) {
-        e.preventDefault();
-        wheelAccumulator.current += e.deltaY;
-        if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
-        wheelResetTimer.current = setTimeout(() => {
-          wheelAccumulator.current = 0;
-        }, 300);
-
-        if (wheelAccumulator.current > 15) {
-          wheelAccumulator.current = 0;
-          if (onEnterPortal) {
-            onEnterPortal();
-          } else if (onScrollNext) {
-            onScrollNext();
-          }
-        }
-      }
-    };
-    window.addEventListener("wheel", handleWheel, { passive: false });
-    return () => {
-      window.removeEventListener("wheel", handleWheel);
-      if (wheelResetTimer.current) clearTimeout(wheelResetTimer.current);
-    };
-  }, [onEnterPortal, onScrollNext]);
-
   // Mouse coordinate refs for zero-reflow rAF throttle
   const targetX = useRef<number>(0);
   const targetY = useRef<number>(0);
@@ -214,19 +177,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (touchStartY.current !== null && e.changedTouches.length === 1) {
-      const deltaY = touchStartY.current - e.changedTouches[0].clientY;
-      const deltaX = Math.abs((touchStartX.current || 0) - e.changedTouches[0].clientX);
-      // Intentional swipe up on hero triggers cinematic portal warp into Stage 03
-      if (deltaY > 60 && deltaY > deltaX * 1.2) {
-        if (onEnterPortal) {
-          onEnterPortal();
-        } else if (onScrollNext) {
-          onScrollNext();
-        }
-      }
-    }
+  const handleTouchEnd = () => {
     touchStartY.current = null;
     touchStartX.current = null;
 

@@ -1204,106 +1204,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         return { screenX, screenY, scale, isVisible };
       }
 
-      // State for boundary overscroll transitions between stages
-      let overscrollDown = 0;
-      let overscrollUp = 0;
-      let isNavigatingStage = false;
-      let overscrollTimer: NodeJS.Timeout | null = null;
 
-      // Input interactions: Wheel dolly along Z-axis (Natural 3D camera flight within Stage 03, seamless handoff at bounds)
-      const handleWheel = (e: WheelEvent) => {
-        // If not actively looking at Stage 03, do not intercept wheel
-        const spatialEl = document.getElementById("section-spatial");
-        if (!spatialEl) return;
-        const rect = spatialEl.getBoundingClientRect();
-        const isInSpatialFocus =
-          rect.top <= window.innerHeight * 0.45 &&
-          rect.bottom >= window.innerHeight * 0.55;
-
-        if (!isInSpatialFocus) {
-          return;
-        }
-
-        const target = e.target as HTMLElement | null;
-        if (isInteractiveTarget(target)) {
-          return;
-        }
-
-        // Always prevent native free-scroll leak when focused on Stage 03
-        e.preventDefault();
-
-        const isNodeFocused = activeNodeIdRef.current !== "root";
-
-        // Symmetrical transition boundaries: exactly 890 units from DEFAULT_CAMERA_Z (1880)
-        const BOUNDARY_DOWN_Z = MAX_CAMERA_Z - 30; // 2770
-        const BOUNDARY_UP_Z = DEFAULT_CAMERA_Z - (MAX_CAMERA_Z - 30 - DEFAULT_CAMERA_Z); // 990
-
-        const distFromCenter = Math.abs(currentCamRef.current.z - DEFAULT_CAMERA_Z);
-        const speedFactor = Math.min(1.0, distFromCenter / 890);
-        const dollySpeed = 165 + speedFactor * 65;
-
-        // User scrolling DOWN (dollying back/out towards Stage 04)
-        if (e.deltaY > 0) {
-          if (targetCamRef.current.z < BOUNDARY_DOWN_Z) {
-            targetCamRef.current.z = Math.min(
-              MAX_CAMERA_Z,
-              targetCamRef.current.z + dollySpeed
-            );
-            overscrollDown = 0;
-          } else {
-            // Reached outer camera boundary -> smooth scroll transition to Stage 04
-            overscrollDown += Math.abs(e.deltaY);
-            if (overscrollDown > 75 && !isNavigatingStage) {
-              isNavigatingStage = true;
-              document
-                .getElementById("section-scrub")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              setTimeout(() => {
-                isNavigatingStage = false;
-                overscrollDown = 0;
-              }, 1200);
-            }
-          }
-        } else if (e.deltaY < 0) {
-          // User scrolling UP (dollying in towards Stage 01)
-          if (isNodeFocused) {
-            // If zoomed into a card, scrolling up or back returns to overview
-            focusNodeInternal("root");
-            overscrollUp = 0;
-          } else if (targetCamRef.current.z > BOUNDARY_UP_Z) {
-            // Smoothly dolly in towards inner stage boundary with symmetrical speed
-            targetCamRef.current.z = Math.max(
-              BOUNDARY_UP_Z,
-              targetCamRef.current.z - dollySpeed
-            );
-            overscrollUp = 0;
-          } else {
-            // Reached inner camera boundary -> smooth transition back to Stage 01 via portal reverse
-            overscrollUp += Math.abs(e.deltaY);
-            if (overscrollUp > 75 && !isNavigatingStage) {
-              isNavigatingStage = true;
-              if (onExitToPortal) {
-                onExitToPortal();
-              } else {
-                document
-                  .getElementById("section-hero")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
-              setTimeout(() => {
-                isNavigatingStage = false;
-                overscrollUp = 0;
-              }, 1200);
-            }
-          }
-        }
-
-        if (overscrollTimer) clearTimeout(overscrollTimer);
-        overscrollTimer = setTimeout(() => {
-          overscrollDown = 0;
-          overscrollUp = 0;
-        }, 400);
-      };
-      window.addEventListener("wheel", handleWheel, { passive: false });
 
       // Input interactions: Mouse drag pan
       let isDragging = false;
@@ -1476,32 +1377,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const duration = performance.now() - touchStartTime;
 
           if (activeNodeIdRef.current === "root") {
-            // Vertical swipe UP (finger dragged upward): Cleanly scroll down to Stage 04 (#section-scrub)
-            if (deltaY < -50 && absDy > absDx * 1.15 && duration < 750 && !isNavigatingStage) {
-              isNavigatingStage = true;
-              document
-                .getElementById("section-scrub")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              setTimeout(() => {
-                isNavigatingStage = false;
-              }, 1100);
-            }
-            // Vertical swipe DOWN (finger dragged downward): Cleanly return to Stage 01 (#section-hero / Portal)
-            else if (deltaY > 50 && absDy > absDx * 1.15 && duration < 750 && !isNavigatingStage) {
-              isNavigatingStage = true;
-              if (onExitToPortal) {
-                onExitToPortal();
-              } else {
-                document
-                  .getElementById("section-hero")
-                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
-              }
-              setTimeout(() => {
-                isNavigatingStage = false;
-              }, 1100);
-            }
             // Clean horizontal swipe: step 3D cylindrical carousel
-            else if (absDx > 40 && absDy < 50 && duration < 650) {
+            if (absDx > 40 && absDy < 50 && duration < 650) {
               if (deltaX < 0) {
                 targetCarouselAngleRef.current -= (2 * Math.PI) / 6;
                 playKeyClick();
@@ -1511,11 +1388,6 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 playKeyClick();
                 onStepMobileOrbit?.(-1);
               }
-            }
-          } else {
-            // When a node card is focused on mobile: swipe down or away returns to overview root
-            if (deltaY > 60 && absDy > absDx * 1.15 && duration < 700) {
-              focusNodeInternal("root");
             }
           }
         }
@@ -2159,10 +2031,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       animate();
 
       return () => {
-        if (overscrollTimer) clearTimeout(overscrollTimer);
         viewportObserver.disconnect();
         if (animFrameId) cancelAnimationFrame(animFrameId);
-        window.removeEventListener("wheel", handleWheel);
         window.removeEventListener("mousedown", handleMouseDown);
         window.removeEventListener("mousemove", handleMouseMove);
         window.removeEventListener("mouseup", handleMouseUp);

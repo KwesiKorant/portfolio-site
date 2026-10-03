@@ -43,12 +43,29 @@ const ShortcutsModal = dynamic(
   { ssr: false }
 );
 
+const STAGE_IDS = [
+  "section-hero",
+  "section-spatial",
+  "section-scrub",
+  "section-finale",
+] as const;
+
+function isInteractiveTarget(target: HTMLElement | null): boolean {
+  if (!target) return false;
+  return Boolean(
+    target.closest(
+      "button, a, input, select, textarea, [role='button'], [role='slider'], .hud-controls, #shortcuts-modal, #project-drawer, [data-prevent-stage-nav='true']"
+    )
+  );
+}
+
 export default function SpatialPortfolioPage() {
   const [activeNodeId, setActiveNodeId] = useState<string>("root");
   const [mobileOrbitIndex, setMobileOrbitIndex] = useState(0);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [temporaryHint, setTemporaryHint] = useState<string | null>(null);
   const [isWarping, setIsWarping] = useState(false);
+  const [currentStage, setCurrentStage] = useState(0);
 
   // Refs for zero-reflow 120 FPS updates
   const canvasHandleRef = useRef<SpatialCanvasHandle | null>(null);
@@ -57,6 +74,21 @@ export default function SpatialPortfolioPage() {
   const telemetryRef = useRef<HTMLDivElement | null>(null);
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const nodeRefs = useRef<Map<string, SpatialNodeElement>>(new Map());
+
+  // Navigation engine coordination refs
+  const currentStageRef = useRef(0);
+  const isWarpingRef = useRef(isWarping);
+  isWarpingRef.current = isWarping;
+  const activeNodeIdRef = useRef(activeNodeId);
+  activeNodeIdRef.current = activeNodeId;
+
+  const transitionStateRef = useRef<"IDLE" | "TRANSITIONING" | "COOLDOWN">("IDLE");
+  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const wheelAccumulatorRef = useRef(0);
+  const wheelResetTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
 
   const handleStepMobileOrbit = useCallback((step: 1 | -1) => {
     setMobileOrbitIndex((prev) => (prev + step + 6) % 6);
@@ -72,8 +104,15 @@ export default function SpatialPortfolioPage() {
   const handleBreachStage3 = useCallback(() => {
     canvasHandleRef.current?.triggerDimensionalBreach("enter");
     setActiveNodeId("root");
+    currentStageRef.current = 1;
+    setCurrentStage(1);
     setTimeout(() => {
       setIsWarping(false);
+      transitionStateRef.current = "COOLDOWN";
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+      cooldownTimerRef.current = setTimeout(() => {
+        transitionStateRef.current = "IDLE";
+      }, 300);
     }, 380);
   }, []);
 
@@ -85,14 +124,67 @@ export default function SpatialPortfolioPage() {
 
   const handleArriveStage1 = useCallback(() => {
     setActiveNodeId("root");
+    currentStageRef.current = 0;
+    setCurrentStage(0);
     setTimeout(() => {
       setIsWarping(false);
+      transitionStateRef.current = "COOLDOWN";
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+      cooldownTimerRef.current = setTimeout(() => {
+        transitionStateRef.current = "IDLE";
+      }, 250);
     }, 200);
   }, []);
 
   const handleWarmupPortal = useCallback(() => {
     portalGatewayRef.current?.preloadVideo();
   }, []);
+
+  // Centralized Stage Navigator with Momentum Isolation
+  const navigateToStage = useCallback(
+    (targetIndex: number) => {
+      if (targetIndex < 0 || targetIndex >= STAGE_IDS.length) return;
+      if (targetIndex === currentStageRef.current) return;
+      if (transitionStateRef.current !== "IDLE" || isWarpingRef.current) return;
+
+      const fromIndex = currentStageRef.current;
+      transitionStateRef.current = "TRANSITIONING";
+      wheelAccumulatorRef.current = 0;
+      currentStageRef.current = targetIndex;
+      setCurrentStage(targetIndex);
+
+      if (fromIndex === 0 && targetIndex === 1) {
+        handleEnterPortal();
+        return;
+      }
+
+      if (fromIndex === 1 && targetIndex === 0) {
+        handleExitToPortal();
+        return;
+      }
+
+      const targetEl = document.getElementById(STAGE_IDS[targetIndex]);
+      if (targetEl) {
+        const prefersReducedMotion =
+          typeof window !== "undefined" &&
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        targetEl.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start",
+        });
+      }
+
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = setTimeout(() => {
+        transitionStateRef.current = "COOLDOWN";
+        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+        cooldownTimerRef.current = setTimeout(() => {
+          transitionStateRef.current = "IDLE";
+        }, 250);
+      }, 800);
+    },
+    [handleEnterPortal, handleExitToPortal]
+  );
 
   // Lock scroll propagation during cinematic portal warp (Stage 02) to prevent momentum leakage
   useEffect(() => {
@@ -107,6 +199,36 @@ export default function SpatialPortfolioPage() {
       window.removeEventListener("touchmove", preventScroll);
     };
   }, [isWarping]);
+
+  // Viewport synchronization: align stage index if navigated via buttons or links
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    STAGE_IDS.forEach((id, index) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (
+              entry.isIntersecting &&
+              transitionStateRef.current === "IDLE" &&
+              !isWarpingRef.current
+            ) {
+              currentStageRef.current = index;
+              setCurrentStage(index);
+            }
+          }
+        },
+        { threshold: 0.55 }
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+
+    return () => {
+      observers.forEach((obs) => obs.disconnect());
+    };
+  }, []);
 
   const activeCluster: ClusterType =
     NODE_GRAPH.find((n) => n.id === activeNodeId)?.cluster || "root";
@@ -232,6 +354,20 @@ export default function SpatialPortfolioPage() {
             handleFocusNode(order[prevIdx]);
           }
         }
+      } else if (e.key === "ArrowDown" || e.key === "PageDown") {
+        if (!isGuideOpen && transitionStateRef.current === "IDLE" && !isWarpingRef.current) {
+          e.preventDefault();
+          if (currentStageRef.current < STAGE_IDS.length - 1) {
+            navigateToStage(currentStageRef.current + 1);
+          }
+        }
+      } else if (e.key === "ArrowUp" || e.key === "PageUp") {
+        if (!isGuideOpen && transitionStateRef.current === "IDLE" && !isWarpingRef.current) {
+          e.preventDefault();
+          if (currentStageRef.current > 0) {
+            navigateToStage(currentStageRef.current - 1);
+          }
+        }
       } else if (e.key === "?") {
         setIsGuideOpen((prev) => !prev);
       }
@@ -239,10 +375,160 @@ export default function SpatialPortfolioPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleFocusNode, handleExitToPortal, isGuideOpen, activeNodeId]);
+  }, [handleFocusNode, handleExitToPortal, isGuideOpen, activeNodeId, navigateToStage]);
+
+  // Centralized Wheel Navigation with Zero-Jank Momentum Absorption
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Allow modal internal scrolling without triggering stage transitions
+      if (isGuideOpen) return;
+
+      // If warping or transitioning, absorb all wheel events to swallow kinetic momentum
+      if (isWarpingRef.current || transitionStateRef.current === "TRANSITIONING") {
+        e.preventDefault();
+        return;
+      }
+
+      // If in cooldown, absorb and reset cooldown timer (so lingering trackpad momentum dies completely)
+      if (transitionStateRef.current === "COOLDOWN") {
+        e.preventDefault();
+        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+        cooldownTimerRef.current = setTimeout(() => {
+          transitionStateRef.current = "IDLE";
+        }, 250);
+        return;
+      }
+
+      // Check if event occurred inside an interactive UI element
+      const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) {
+        return;
+      }
+
+      // Prevent uncoordinated free-scroll blowout
+      e.preventDefault();
+
+      // If currently on Stage 1 and a card is zoomed in, un-zoom to root overview first
+      if (currentStageRef.current === 1 && activeNodeIdRef.current !== "root") {
+        if (Math.abs(e.deltaY) > 20) {
+          handleFocusNode("root");
+          transitionStateRef.current = "COOLDOWN";
+          if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+          cooldownTimerRef.current = setTimeout(() => {
+            transitionStateRef.current = "IDLE";
+          }, 350);
+        }
+        return;
+      }
+
+      wheelAccumulatorRef.current += e.deltaY;
+      if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
+      wheelResetTimerRef.current = setTimeout(() => {
+        wheelAccumulatorRef.current = 0;
+      }, 250);
+
+      const WHEEL_THRESHOLD = 60;
+
+      if (wheelAccumulatorRef.current > WHEEL_THRESHOLD) {
+        wheelAccumulatorRef.current = 0;
+        if (currentStageRef.current < STAGE_IDS.length - 1) {
+          navigateToStage(currentStageRef.current + 1);
+        }
+      } else if (wheelAccumulatorRef.current < -WHEEL_THRESHOLD) {
+        wheelAccumulatorRef.current = 0;
+        if (currentStageRef.current > 0) {
+          navigateToStage(currentStageRef.current - 1);
+        }
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+      if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+    };
+  }, [navigateToStage, handleFocusNode, isGuideOpen]);
+
+  // Centralized Touch Navigation for Natural Mobile Viewport Transitions
+  useEffect(() => {
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      if (isGuideOpen) return;
+      if (isWarpingRef.current || transitionStateRef.current !== "IDLE") return;
+      const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) return;
+
+      touchStartYRef.current = e.touches[0].clientY;
+      touchStartXRef.current = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (touchStartYRef.current === null || touchStartXRef.current === null) return;
+      if (e.changedTouches.length !== 1) return;
+      if (isGuideOpen) return;
+      if (isWarpingRef.current || transitionStateRef.current !== "IDLE") return;
+
+      const target = e.target as HTMLElement | null;
+      if (isInteractiveTarget(target)) {
+        touchStartYRef.current = null;
+        touchStartXRef.current = null;
+        return;
+      }
+
+      const currentY = e.changedTouches[0].clientY;
+      const currentX = e.changedTouches[0].clientX;
+      const deltaY = touchStartYRef.current - currentY; // positive = swipe up (advance forward)
+      const deltaX = currentX - touchStartXRef.current;
+      const absDy = Math.abs(deltaY);
+      const absDx = Math.abs(deltaX);
+
+      touchStartYRef.current = null;
+      touchStartXRef.current = null;
+
+      // Relaxed natural threshold; directional guard guarantees horizontal carousel or scrub gestures are respected
+      const TOUCH_THRESHOLD = 45;
+      if (absDy < TOUCH_THRESHOLD || absDy <= absDx * 1.15) {
+        return;
+      }
+
+      // If on Stage 1 and a card is zoomed in, un-zoom to root first
+      if (currentStageRef.current === 1 && activeNodeIdRef.current !== "root") {
+        handleFocusNode("root");
+        transitionStateRef.current = "COOLDOWN";
+        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
+        cooldownTimerRef.current = setTimeout(() => {
+          transitionStateRef.current = "IDLE";
+        }, 350);
+        return;
+      }
+
+      if (deltaY > 0) {
+        // Swipe UP (finger dragged upward) -> move to next stage
+        if (currentStageRef.current < STAGE_IDS.length - 1) {
+          navigateToStage(currentStageRef.current + 1);
+        }
+      } else {
+        // Swipe DOWN (finger dragged downward) -> move to previous stage
+        if (currentStageRef.current > 0) {
+          navigateToStage(currentStageRef.current - 1);
+        }
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [navigateToStage, handleFocusNode, isGuideOpen]);
 
   const handleSelectProjectFromHero = useCallback(
     (projectId: string) => {
+      currentStageRef.current = 1;
+      setCurrentStage(1);
       const el = document.getElementById("section-spatial");
       el?.scrollIntoView({ behavior: "smooth" });
       setTimeout(() => {
