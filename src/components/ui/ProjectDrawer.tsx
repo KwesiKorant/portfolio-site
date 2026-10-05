@@ -230,7 +230,7 @@ export const ProjectDrawer: React.FC<ProjectDrawerProps> = ({
       <div className="flex flex-col gap-2 mt-auto pt-5 border-t border-white/10">
         <div className="flex gap-2 font-mono text-[10px]">
           <a
-            href="https://wa.me/233204563873"
+            href="https://wa.me/233592595429"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 py-2 px-3 rounded-lg text-center cursor-pointer bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/12 transition-all flex items-center justify-center gap-1.5"

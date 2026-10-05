@@ -92,32 +92,32 @@ export const ShortcutsModal: React.FC<ShortcutsModalProps> = ({
               Touch &amp; Cockpit Gestures
             </h4>
             <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
-              <span>Pan 3D Viewport</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">1-Finger Drag</span>
+              <span>Rotate Carousel</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-accent-lime font-bold">Swipe ↔ On Cards</span>
             </div>
             <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
-              <span>Fly-Through Dolly</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Pinch or (+ / −)</span>
+              <span>Card Deep Dive</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-300">Tap Card or Count Pill</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
+              <span>Inspect Screenshots</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Swipe ↔ In Modal</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
+              <span>Zoom Out / Close</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Tap Outside / (✕)</span>
+            </div>
+            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
+              <span>Stage Transit</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Swipe &uarr; &darr; Across Stages</span>
             </div>
             <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
               <span>Radar Mini-Map</span>
               <span className="font-mono text-[9px] sm:text-[10px] text-accent-lime">Tap Grid Warp</span>
             </div>
-            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
-              <span>Rotate / Gimbal</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Hold Diagonals (↖ ↗)</span>
-            </div>
-            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
-              <span>Reset Overview</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Tap Center (⟳)</span>
-            </div>
-            <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-1.5 sm:mb-2">
-              <span>Card Deep Dive</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Tap Card to Zoom</span>
-            </div>
             <div className="flex justify-between items-center text-[10px] sm:text-[11px] text-zinc-300 mb-0.5 sm:mb-1">
-              <span>Stage Transit</span>
-              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Swipe &uarr; &darr; Across Stages</span>
+              <span>Fly-Through Dolly</span>
+              <span className="font-mono text-[9px] sm:text-[10px] text-zinc-400">Pinch or (+ / −)</span>
             </div>
           </div>
         </div>

@@ -54,7 +54,7 @@ function isInteractiveTarget(target: HTMLElement | null): boolean {
   if (!target) return false;
   return Boolean(
     target.closest(
-      "button, a, input, select, textarea, [role='button'], [role='slider'], .hud-controls, #shortcuts-modal, #project-drawer, [data-prevent-stage-nav='true']"
+      "button, a, input, select, textarea, [role='button'], [role='slider'], .hud-controls, #shortcuts-modal, #project-drawer, [data-prevent-stage-nav='true'], .spatial-node-scroll, [data-node-inspect='true']"
     )
   );
 }
@@ -82,9 +82,10 @@ export default function SpatialPortfolioPage() {
   const activeNodeIdRef = useRef(activeNodeId);
   activeNodeIdRef.current = activeNodeId;
 
-  const transitionStateRef = useRef<"IDLE" | "TRANSITIONING" | "COOLDOWN">("IDLE");
-  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionStateRef = useRef<"IDLE" | "TRANSITIONING">("IDLE");
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transitionStartTimeRef = useRef<number>(0);
+  const lastNavDirectionRef = useRef<1 | -1>(1);
   const wheelAccumulatorRef = useRef(0);
   const wheelResetTimerRef = useRef<NodeJS.Timeout | null>(null);
   const touchStartYRef = useRef<number | null>(null);
@@ -108,12 +109,9 @@ export default function SpatialPortfolioPage() {
     setCurrentStage(1);
     setTimeout(() => {
       setIsWarping(false);
-      transitionStateRef.current = "COOLDOWN";
-      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-      cooldownTimerRef.current = setTimeout(() => {
-        transitionStateRef.current = "IDLE";
-      }, 300);
-    }, 380);
+      transitionStateRef.current = "IDLE";
+      wheelAccumulatorRef.current = 0;
+    }, 280);
   }, []);
 
   const handleExitToPortal = useCallback(() => {
@@ -128,27 +126,36 @@ export default function SpatialPortfolioPage() {
     setCurrentStage(0);
     setTimeout(() => {
       setIsWarping(false);
-      transitionStateRef.current = "COOLDOWN";
-      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-      cooldownTimerRef.current = setTimeout(() => {
-        transitionStateRef.current = "IDLE";
-      }, 250);
-    }, 200);
+      transitionStateRef.current = "IDLE";
+      wheelAccumulatorRef.current = 0;
+    }, 180);
   }, []);
 
   const handleWarmupPortal = useCallback(() => {
     portalGatewayRef.current?.preloadVideo();
   }, []);
 
-  // Centralized Stage Navigator with Momentum Isolation
+  // Centralized Stage Navigator with Non-Extending Momentum Isolation
   const navigateToStage = useCallback(
     (targetIndex: number) => {
       if (targetIndex < 0 || targetIndex >= STAGE_IDS.length) return;
       if (targetIndex === currentStageRef.current) return;
-      if (transitionStateRef.current !== "IDLE" || isWarpingRef.current) return;
+      if (isWarpingRef.current) return;
 
       const fromIndex = currentStageRef.current;
+      const direction: 1 | -1 = targetIndex > fromIndex ? 1 : -1;
+
+      // If already transitioning, allow immediate reversal if user deliberately changed directions after initial motion
+      if (transitionStateRef.current !== "IDLE") {
+        const timeSinceStart = Date.now() - transitionStartTimeRef.current;
+        if (direction === lastNavDirectionRef.current || timeSinceStart < 160) {
+          return;
+        }
+      }
+
       transitionStateRef.current = "TRANSITIONING";
+      transitionStartTimeRef.current = Date.now();
+      lastNavDirectionRef.current = direction;
       wheelAccumulatorRef.current = 0;
       currentStageRef.current = targetIndex;
       setCurrentStage(targetIndex);
@@ -178,14 +185,25 @@ export default function SpatialPortfolioPage() {
         });
       }
 
+      const unlockTransition = () => {
+        if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+        transitionTimerRef.current = null;
+        transitionStateRef.current = "IDLE";
+        wheelAccumulatorRef.current = 0;
+      };
+
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
-      transitionTimerRef.current = setTimeout(() => {
-        transitionStateRef.current = "COOLDOWN";
-        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-        cooldownTimerRef.current = setTimeout(() => {
-          transitionStateRef.current = "IDLE";
-        }, 250);
-      }, 800);
+      // Fast, non-extending safety fallback: 420ms (visual scroll takes ~380ms)
+      transitionTimerRef.current = setTimeout(unlockTransition, 420);
+
+      // Instant release as soon as browser finishes smooth scroll
+      if (typeof window !== "undefined" && "onscrollend" in window) {
+        const onScrollEnd = () => {
+          window.removeEventListener("scrollend", onScrollEnd);
+          unlockTransition();
+        };
+        window.addEventListener("scrollend", onScrollEnd, { once: true });
+      }
     },
     [handleEnterPortal, handleExitToPortal]
   );
@@ -387,19 +405,9 @@ export default function SpatialPortfolioPage() {
       // Allow modal internal scrolling without triggering stage transitions
       if (isGuideOpen) return;
 
-      // If warping or transitioning, absorb all wheel events to swallow kinetic momentum
-      if (isWarpingRef.current || transitionStateRef.current === "TRANSITIONING") {
+      // If cinematic portal warp is in progress, absorb wheel
+      if (isWarpingRef.current) {
         e.preventDefault();
-        return;
-      }
-
-      // If in cooldown, absorb and reset cooldown timer (so lingering trackpad momentum dies completely)
-      if (transitionStateRef.current === "COOLDOWN") {
-        e.preventDefault();
-        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-        cooldownTimerRef.current = setTimeout(() => {
-          transitionStateRef.current = "IDLE";
-        }, 250);
         return;
       }
 
@@ -409,25 +417,43 @@ export default function SpatialPortfolioPage() {
         return;
       }
 
-      // Prevent uncoordinated free-scroll blowout
-      e.preventDefault();
+      // During active stage transition, absorb decaying trackpad inertia to prevent multi-stage skipping
+      if (transitionStateRef.current === "TRANSITIONING") {
+        const wheelDirection: 1 | -1 = e.deltaY > 0 ? 1 : -1;
+        const timeSinceStart = Date.now() - transitionStartTimeRef.current;
+        // Directional reversal bypass: If user deliberately scrolled in the opposite direction
+        if (
+          wheelDirection !== lastNavDirectionRef.current &&
+          timeSinceStart > 160 &&
+          Math.abs(e.deltaY) > 25
+        ) {
+          transitionStateRef.current = "IDLE";
+          wheelAccumulatorRef.current = 0;
+        } else {
+          // Simply absorb the decaying momentum without pushing any timers back!
+          e.preventDefault();
+          return;
+        }
+      }
 
       // STAGE 03 (Index 1): Coordinate with SpatialCanvas 3D Dolly Zoom
       if (currentStageRef.current === 1) {
-        // If a node card is currently zoomed in, smoothly pull out into root overview first
+        // If a node card is currently zoomed in:
         if (activeNodeIdRef.current !== "root") {
+          // If the wheel occurred INSIDE the inspect card, let the internal card container scroll freely!
+          if (target && target.closest(".spatial-node")) {
+            return;
+          }
+          // Only if scrolling OUTSIDE the card on the canvas backdrop, pull out into root overview
+          e.preventDefault();
           if (Math.abs(e.deltaY) > 15) {
             handleFocusNode("root");
-            transitionStateRef.current = "COOLDOWN";
-            if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-            cooldownTimerRef.current = setTimeout(() => {
-              transitionStateRef.current = "IDLE";
-            }, 200);
           }
           return;
         }
 
-        // Overview mode: Delegate wheel directly to 3D camera dolly zoom
+        // Overview mode: Prevent window scroll and delegate wheel directly to 3D camera dolly zoom
+        e.preventDefault();
         const dollyResult = canvasHandleRef.current?.handleWheelDolly(e.deltaY);
         if (dollyResult === "overscroll-down") {
           navigateToStage(2);
@@ -438,13 +464,14 @@ export default function SpatialPortfolioPage() {
       }
 
       // STAGES 00, 02, 03: Direct stage-to-stage navigation
+      e.preventDefault();
       wheelAccumulatorRef.current += e.deltaY;
       if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
       wheelResetTimerRef.current = setTimeout(() => {
         wheelAccumulatorRef.current = 0;
-      }, 250);
+      }, 160);
 
-      const WHEEL_THRESHOLD = 60;
+      const WHEEL_THRESHOLD = 48;
 
       if (wheelAccumulatorRef.current > WHEEL_THRESHOLD) {
         wheelAccumulatorRef.current = 0;
@@ -464,7 +491,6 @@ export default function SpatialPortfolioPage() {
       window.removeEventListener("wheel", handleWheel);
       if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
-      if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
     };
   }, [navigateToStage, handleFocusNode, isGuideOpen]);
 
@@ -473,10 +499,18 @@ export default function SpatialPortfolioPage() {
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 1) return;
       if (isGuideOpen) return;
-      if (isWarpingRef.current || transitionStateRef.current !== "IDLE") return;
+      if (isWarpingRef.current) return;
       const target = e.target as HTMLElement | null;
       if (isInteractiveTarget(target)) return;
+      if (
+        currentStageRef.current === 1 &&
+        activeNodeIdRef.current !== "root" &&
+        target?.closest(".spatial-node")
+      ) {
+        return;
+      }
 
+      // Unconditionally record touch start coordinates so mobile gestures are never lost!
       touchStartYRef.current = e.touches[0].clientY;
       touchStartXRef.current = e.touches[0].clientX;
     };
@@ -484,8 +518,11 @@ export default function SpatialPortfolioPage() {
     const handleTouchEnd = (e: TouchEvent) => {
       if (touchStartYRef.current === null || touchStartXRef.current === null) return;
       if (e.changedTouches.length !== 1) return;
-      if (isGuideOpen) return;
-      if (isWarpingRef.current || transitionStateRef.current !== "IDLE") return;
+      if (isGuideOpen || isWarpingRef.current) {
+        touchStartYRef.current = null;
+        touchStartXRef.current = null;
+        return;
+      }
 
       const target = e.target as HTMLElement | null;
       if (isInteractiveTarget(target)) {
@@ -505,19 +542,17 @@ export default function SpatialPortfolioPage() {
       touchStartXRef.current = null;
 
       // Relaxed natural threshold; directional guard guarantees horizontal carousel or scrub gestures are respected
-      const TOUCH_THRESHOLD = 45;
+      const TOUCH_THRESHOLD = 38;
       if (absDy < TOUCH_THRESHOLD || absDy <= absDx * 1.15) {
         return;
       }
 
-      // If on Stage 1 and a card is zoomed in, un-zoom to root first
+      // If on Stage 1 and a card is zoomed in, un-zoom to root only if swipe was OUTSIDE the card
       if (currentStageRef.current === 1 && activeNodeIdRef.current !== "root") {
+        if (target && target.closest(".spatial-node")) {
+          return;
+        }
         handleFocusNode("root");
-        transitionStateRef.current = "COOLDOWN";
-        if (cooldownTimerRef.current) clearTimeout(cooldownTimerRef.current);
-        cooldownTimerRef.current = setTimeout(() => {
-          transitionStateRef.current = "IDLE";
-        }, 350);
         return;
       }
 

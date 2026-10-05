@@ -40,21 +40,21 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       setIsActive(true);
       setOpacity(1);
 
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-      const targetSrc = isMobile ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
+      const isPortrait = typeof window !== "undefined" && (window.innerWidth < window.innerHeight || window.innerWidth < 840);
+      const targetSrc = isPortrait ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
       if (!video.src.endsWith(targetSrc)) {
         video.src = targetSrc;
       }
       video.currentTime = 0;
-      video.playbackRate = isMobile ? 1.0 : 2.0 / 1.5;
+      video.playbackRate = isPortrait ? 1.0 : 2.0 / 1.5;
 
       const playPromise = video.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => console.warn("Portal forward play blocked:", err));
       }
 
-      const breachDelay = isMobile ? 1450 : 1240;
-      const finishDelay = isMobile ? 1800 : 1500;
+      const breachDelay = isPortrait ? 1450 : 1240;
+      const finishDelay = isPortrait ? 1800 : 1500;
 
       // Breach 3D dimension and align Stage 03
       setTimeout(() => {
@@ -91,10 +91,10 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       setIsActive(true);
       setOpacity(1);
 
-      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const isPortrait = typeof window !== "undefined" && (window.innerWidth < window.innerHeight || window.innerWidth < 840);
 
-      if (isMobile) {
-        // Mobile: native forward playback of pre-rendered reverse warp
+      if (isPortrait) {
+        // Mobile & Portrait Tablet: native forward playback of pre-rendered reverse warp
         video.src = "/portal_warp_reverse_mobile.mp4";
         video.currentTime = 0;
         video.playbackRate = 1.0;
@@ -190,8 +190,8 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
       const warmUp = () => {
         const video = videoRef.current;
         if (video) {
-          const isMobile = window.innerWidth < 768;
-          const targetSrc = isMobile ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
+          const isPortrait = window.innerWidth < window.innerHeight || window.innerWidth < 840;
+          const targetSrc = isPortrait ? "/portal_warp_mobile.mp4" : "/portal_warp.mp4";
           if (!video.src.endsWith(targetSrc)) {
             video.src = targetSrc;
           }
@@ -237,9 +237,9 @@ export const PortalGateway = forwardRef<PortalGatewayHandle, PortalGatewayProps>
           muted
           playsInline
           preload="none"
-          className="w-full h-full object-cover pointer-events-none"
+          className="w-full h-full object-cover object-[50%_12%] sm:object-center pointer-events-none"
         >
-          <source src="/portal_warp_mobile.mp4" type="video/mp4" media="(max-width: 767px)" />
+          <source src="/portal_warp_mobile.mp4" type="video/mp4" media="(orientation: portrait), (max-width: 839px)" />
           <source src="/portal_warp.mp4" type="video/mp4" />
         </video>
 

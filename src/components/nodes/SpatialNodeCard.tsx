@@ -552,9 +552,44 @@ export const SpatialNodeCard = forwardRef<
     onHoverConnection(node.id, false);
   }, [isActive, node.id, onHoverConnection]);
 
+  // Touch tracking for swipe vs tap discrimination on mobile carousel
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const dragOccurred = useRef(false);
+
+  const handleCardTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      if (isActive) return;
+      if (e.touches.length === 1) {
+        touchStartPos.current = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
+        dragOccurred.current = false;
+      }
+    },
+    [isActive]
+  );
+
+  const handleCardTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (isActive || !touchStartPos.current) return;
+      const dx = e.touches[0].clientX - touchStartPos.current.x;
+      const dy = e.touches[0].clientY - touchStartPos.current.y;
+      // Movement exceeding 10px marks swipe gesture to prevent accidental zoom into inspect mode
+      if (Math.hypot(dx, dy) > 10) {
+        dragOccurred.current = true;
+      }
+    },
+    [isActive]
+  );
+
   const handleClick = useCallback(
     (e: React.MouseEvent) => {
       e.stopPropagation();
+      if (dragOccurred.current) {
+        dragOccurred.current = false;
+        return;
+      }
       playKeyClick();
       if (!isActive) {
         onFocusNode(node.id);
@@ -571,6 +606,46 @@ export const SpatialNodeCard = forwardRef<
     },
     [onFocusNode]
   );
+
+  // Inspect mode scroll detection & cue
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) {
+      setCanScrollDown(false);
+      return;
+    }
+    // Content exists below if scrollable height exceeds clientHeight + scrollTop with 14px threshold
+    const hasMore = el.scrollHeight - el.scrollTop - el.clientHeight > 14;
+    setCanScrollDown(hasMore);
+  }, []);
+
+  useEffect(() => {
+    if (!isActive) {
+      setCanScrollDown(false);
+      return;
+    }
+    const t1 = setTimeout(checkScroll, 60);
+    const t2 = setTimeout(checkScroll, 250);
+    window.addEventListener("resize", checkScroll, { passive: true });
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [isActive, checkScroll, node.id]);
+
+  const handleScrollDownCue = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        top: 220,
+        behavior: "smooth",
+      });
+    }
+  }, []);
 
   const handleCopyCode = useCallback(
     (e: React.MouseEvent) => {
@@ -596,10 +671,10 @@ export const SpatialNodeCard = forwardRef<
     <div
       ref={ref}
       id={`node-${node.id}`}
-      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none [contain:layout_style] ${
+      className={`spatial-node absolute top-0 left-0 pointer-events-auto origin-center select-none bg-[#0c0d14] rounded-2xl [contain:layout_style] ${
         isActive
           ? "w-[94vw] sm:w-[1040px] max-w-[94vw] max-h-[86dvh] sm:max-h-[86vh] z-50 cursor-default flex flex-col"
-          : "w-[260px] xs:w-[285px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer"
+          : "w-[260px] xs:w-[285px] sm:w-[330px] max-w-[88vw] z-20 cursor-pointer touch-pan-y"
       }`}
       style={{ opacity: 0, pointerEvents: "none" }}
       onClick={handleClick}
@@ -607,6 +682,8 @@ export const SpatialNodeCard = forwardRef<
       onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleCardTouchStart}
+      onTouchMove={handleCardTouchMove}
     >
       {/* Inner Card: 3D tilt when idle on desktop, crisp 2D flat rendering when active or on mobile */}
       <div
@@ -673,8 +750,15 @@ export const SpatialNodeCard = forwardRef<
         {isActive ? (
           node.subsystemType === "skills" ? (
             /* Dedicated Minimalist Skills Modal (Zero fluff, zero pipeline) */
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+              <div
+                ref={scrollContainerRef}
+                onScroll={checkScroll}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                data-node-inspect="true"
+                className="spatial-node-scroll flex-1 overflow-y-auto overflow-x-hidden pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-4 touch-pan-y pb-10 sm:pb-8"
+              >
                 {/* Header Info */}
                 <div>
                   <h2 className="font-display text-[18px] sm:text-[26px] font-bold text-white tracking-tight mb-1">
@@ -715,9 +799,16 @@ export const SpatialNodeCard = forwardRef<
             </div>
           ) : (
             /* Standard Project Case Study Layout */
-            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
               {/* Scrollable Content Area without visible scrollbar */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-3 sm:space-y-4 touch-pan-y">
+              <div
+                ref={scrollContainerRef}
+                onScroll={checkScroll}
+                onWheel={(e) => e.stopPropagation()}
+                onTouchMove={(e) => e.stopPropagation()}
+                data-node-inspect="true"
+                className="spatial-node-scroll flex-1 overflow-y-auto overflow-x-hidden pr-1 sm:pr-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden overscroll-contain space-y-3 sm:space-y-4 touch-pan-y pb-10 sm:pb-8"
+              >
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 lg:gap-5">
                 {/* Left Column: Specs, Metrics, Description */}
                 <div className="lg:col-span-5 flex flex-col justify-between space-y-2.5 sm:space-y-3.5">
@@ -1186,6 +1277,42 @@ export const SpatialNodeCard = forwardRef<
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Floating Scroll Indicator Arrow (Appears when content overflows below, disappears when fully scrolled) */}
+        {isActive && (
+          <div
+            className={`absolute bottom-3 left-1/2 -translate-x-1/2 z-30 transition-[opacity,transform] duration-300 pointer-events-auto ${
+              canScrollDown
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-2 pointer-events-none"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={handleScrollDownCue}
+              aria-label="Scroll down for more content"
+              title="More content below (Click to scroll)"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#0a0c16]/95 hover:bg-[#121524] border border-white/20 hover:border-accent-lime/60 text-zinc-300 hover:text-white shadow-[0_4px_20px_rgba(0,0,0,0.85),0_0_12px_rgba(204,255,0,0.15)] cursor-pointer group active:scale-95 select-none"
+            >
+              <span className="font-mono text-[9px] uppercase tracking-widest text-zinc-400 group-hover:text-accent-lime transition-colors">
+                Scroll
+              </span>
+              <svg
+                className="w-3.5 h-3.5 text-accent-lime animate-bounce"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.2}
+                  d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                />
+              </svg>
+            </button>
           </div>
         )}
       </div>

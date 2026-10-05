@@ -325,113 +325,75 @@ export const HUD = forwardRef<HTMLDivElement, HUDProps>(
           </div>
         </header>
 
-        <footer className="flex flex-col md:flex-row justify-between items-center md:items-end gap-2.5 sm:gap-5 w-full">
-          {/* Mobile Portrait 3D Node Orbit Deck (1-Thumb Step Navigation: Visible only in overview) */}
+        <footer className="flex flex-col lg:flex-row justify-between items-center lg:items-end gap-2.5 sm:gap-5 w-full">
+          {/* Mobile & Tablet 3D Node Counter & Gesture Hint (Visible only in overview) */}
           {onFocusNode && activeNodeId === "root" && (
-            <div className="md:hidden flex items-center justify-between w-full max-w-[340px] px-2.5 py-1.5 bg-[#0a0c16]/96 backdrop-blur-md border border-white/18 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.85),0_0_20px_rgba(204,255,0,0.1)] pointer-events-auto -translate-y-3">
-              <button
-                onClick={() => {
-                  playKeyClick();
-                  if (onStepMobileOrbit) {
-                    onStepMobileOrbit(-1);
-                  } else {
-                    const curr = mobileOrbitIndex ?? 0;
-                    const prev = (curr - 1 + 6) % 6;
-                    onFocusNode(MOBILE_NODE_ORDER[prev]);
-                  }
-                }}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-zinc-200 hover:text-accent-lime font-mono text-[9px] font-bold active:scale-90 transition-all cursor-pointer shrink-0 shadow-sm"
-                aria-label="Previous Project"
-              >
-                ◀ PREV
-              </button>
-
+            <div className="lg:hidden flex flex-col items-center gap-1.5 pointer-events-auto -translate-y-1 sm:translate-y-0 select-none">
               <button
                 onClick={() => {
                   playKeyClick();
                   onFocusNode(activeNode?.id || "edge-gateway");
                 }}
-                className="flex flex-col items-center px-1 text-center cursor-pointer min-w-0 max-w-[190px]"
+                className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0a0c16]/95 border border-white/20 hover:border-accent-lime/60 shadow-[0_4px_24px_rgba(0,0,0,0.85),0_0_16px_rgba(204,255,0,0.12)] active:scale-95 transition-all cursor-pointer group"
+                aria-label={`Inspect ${activeNode?.title || "active project"}`}
               >
-                <div className="flex items-center gap-1 font-mono text-[7.5px] tracking-wider uppercase text-accent-lime font-bold truncate">
-                  <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse shrink-0" />
-                  <span className="truncate">{`0${(mobileOrbitIndex ?? 0) + 1} / 06 • ${activeNode?.badge || "ACTIVE"}`}</span>
-                </div>
-                <div className="font-display text-[11px] font-bold text-white tracking-tight truncate max-w-[180px]">
-                  {activeNode?.title || "SELECT PROJECT ▾"}
-                </div>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse shrink-0" />
+                <span className="font-mono text-[11px] sm:text-[12px] font-bold tracking-widest text-accent-lime">
+                  {`0${(mobileOrbitIndex ?? 0) + 1} / 06`}
+                </span>
+                <span className="w-[1px] h-3 bg-white/20" />
+                <span className="font-display text-[11px] sm:text-[12px] font-semibold text-zinc-200 group-hover:text-white truncate max-w-[150px] xs:max-w-[200px]">
+                  {activeNode?.title || "PROJECT"}
+                </span>
               </button>
 
-              <button
-                onClick={() => {
-                  playKeyClick();
-                  if (onStepMobileOrbit) {
-                    onStepMobileOrbit(1);
-                  } else {
-                    const curr = mobileOrbitIndex ?? 0;
-                    const next = (curr + 1) % 6;
-                    onFocusNode(MOBILE_NODE_ORDER[next]);
-                  }
-                }}
-                className="px-2.5 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 text-zinc-200 hover:text-accent-lime font-mono text-[9px] font-bold active:scale-90 transition-all cursor-pointer shrink-0 shadow-sm"
-                aria-label="Next Project"
-              >
-                NEXT ▶
-              </button>
+              <div className="flex items-center gap-1.5 font-mono text-[8px] xs:text-[8.5px] font-medium tracking-widest text-zinc-400 uppercase">
+                <span className="text-accent-lime/80 font-bold">↔</span>
+                <span>SWIPE OR TAP TO INSPECT</span>
+              </div>
             </div>
           )}
 
           {/* Left spacer: clean view without bottom-left stage descriptions */}
-          <div className="hidden md:block flex-1 pointer-events-none" />
+          <div className="hidden lg:block flex-1 pointer-events-none" />
 
           {/* Center spacer: leaves bottom-center completely clear for ProHintsBanner */}
-          <div className="hidden md:block flex-1 pointer-events-none" />
+          <div className="hidden lg:block flex-1 pointer-events-none" />
 
           {/* Right: Tactical Radar Navigation Pod & High-Contrast Flight Controls */}
-          <div className="pointer-events-auto self-end md:self-auto">
-            {/* Mobile Collapsed Pod Trigger: enhanced with radar sweep beacon to capture attention */}
+          <div className="pointer-events-auto self-end lg:self-auto">
+            {/* Mobile & Tablet Collapsed Pod Trigger */}
             {!isMobilePodOpen && (
-              <div className="md:hidden relative group pointer-events-auto">
-                {/* Ambient radar ping beacon glow (Compositor-only) */}
-                <div className="absolute -inset-1 rounded-2xl bg-accent-lime/20 blur-sm opacity-80 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
+              <div className="lg:hidden relative pointer-events-auto">
                 <button
                   onClick={() => {
                     playKeyClick();
                     setIsMobilePodOpen(true);
                   }}
-                  className="relative flex items-center gap-2 font-mono text-[9.5px] tracking-wider uppercase font-bold text-white bg-gradient-to-r from-[#0d1020]/98 via-[#131933]/98 to-[#0d1020]/98 border border-accent-lime/60 hover:border-accent-lime px-3 py-1.5 rounded-xl cursor-pointer shadow-[0_0_22px_rgba(204,255,0,0.3),0_8px_24px_rgba(0,0,0,0.9)] ring-1 ring-accent-lime/30 active:scale-95 transition-all"
+                  className="bg-accent-lime/10 border border-accent-lime/45 text-accent-lime font-mono text-[9px] sm:text-[10px] px-2.5 sm:px-3 py-1.5 min-h-[34px] sm:min-h-[36px] rounded-xl cursor-pointer flex items-center gap-1.5 hover:bg-accent-lime/20 hover:border-accent-lime hover:text-white transition-all shadow-sm active:scale-95 select-none group"
                   aria-label="Open 3D Radar and Cockpit"
                 >
-                  {/* Tactical Radar Reticle with Sweeping Beam */}
-                  <span className="relative flex items-center justify-center w-4 h-4 rounded-full bg-[#161c36] border border-accent-lime/70 shrink-0 overflow-hidden shadow-[0_0_8px_#ccff00]">
-                    <span className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0deg,transparent_270deg,rgba(204,255,0,0.75)_360deg)] animate-[spin_2s_linear_infinite]" />
-                    <span className="relative w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] z-10" />
-                    <span className="absolute inset-0 rounded-full border border-accent-lime/60 animate-ping opacity-50 pointer-events-none" />
-                  </span>
-
-                  <span className="text-zinc-100 group-hover:text-white transition-colors tracking-wide">RADAR & COCKPIT</span>
-
-                  <span className="px-1.5 py-0.5 rounded-md bg-accent-lime/20 border border-accent-lime/50 text-accent-lime text-[7.5px] font-black tracking-wider animate-pulse flex items-center gap-0.5">
-                    <span>▲</span>
+                  <span className="font-bold tracking-wider">RADAR & COCKPIT</span>
+                  <span className="px-1 py-0.5 rounded bg-accent-lime/20 border border-accent-lime/40 text-accent-lime group-hover:text-white text-[7px] sm:text-[7.5px] font-bold transition-colors">
+                    ▲
                   </span>
                 </button>
               </div>
             )}
 
-            {/* Tactical Pod Container: always flex on desktop md:, toggled on mobile */}
+            {/* Tactical Pod Container: always flex on desktop lg:, toggled on mobile/tablet */}
             <div
               className={`${
-                isMobilePodOpen ? "flex" : "hidden md:flex"
-              } flex-col items-end gap-2 bg-[#0a0c16] border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group max-h-[70dvh] md:max-h-none overflow-hidden`}
+                isMobilePodOpen ? "flex" : "hidden lg:flex"
+              } flex-col items-end gap-2 bg-[#0a0c16] border border-white/25 hover:border-accent-lime/70 p-2.5 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.95),0_0_30px_rgba(204,255,0,0.15)] ring-1 ring-white/10 transition-all group max-h-[70dvh] lg:max-h-none overflow-hidden`}
             >
-              {/* Mobile-only Close Header inside Cockpit */}
+              {/* Mobile/Tablet Close Header inside Cockpit */}
               {isMobilePodOpen && (
-                <div className="w-full flex md:hidden items-center justify-between pb-1.5 mb-0.5 border-b border-white/10 font-mono text-[9px]">
+                <div className="w-full flex lg:hidden items-center justify-between pb-1.5 mb-0.5 border-b border-white/10 font-mono text-[9px] sm:text-[10px]">
                   <span className="text-accent-lime font-bold tracking-wider">TACTICAL COCKPIT</span>
                   <button
                     onClick={() => setIsMobilePodOpen(false)}
-                    className="text-zinc-400 hover:text-white px-2 py-0.5 rounded bg-white/[0.06] border border-white/12 cursor-pointer font-bold"
+                    className="text-zinc-400 hover:text-white px-2.5 py-1 rounded-lg bg-white/[0.06] border border-white/12 cursor-pointer font-bold"
                   >
                     ✕ HIDE
                   </button>

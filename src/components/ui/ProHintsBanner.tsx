@@ -25,7 +25,7 @@ export const ProHintsBanner: React.FC<ProHintsBannerProps> = ({
 
   return (
     <div
-      className="hidden md:flex absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto bg-[#0c0d14] border border-accent-lime/45 hover:border-accent-lime rounded-full px-5.5 py-2.5 items-center gap-3 font-mono text-[11px] text-zinc-100 shadow-[0_10px_35px_rgba(0,0,0,0.85),0_0_20px_rgba(204,255,0,0.2)] cursor-pointer hover:scale-[1.02] transition-[border-color,box-shadow,transform] duration-200 ease-out whitespace-nowrap max-w-[90vw] z-10 select-none"
+      className="hidden lg:flex absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-auto bg-[#0c0d14] border border-accent-lime/45 hover:border-accent-lime rounded-full px-5.5 py-2.5 items-center gap-3 font-mono text-[11px] text-zinc-100 shadow-[0_10px_35px_rgba(0,0,0,0.85),0_0_20px_rgba(204,255,0,0.2)] cursor-pointer hover:scale-[1.02] transition-[border-color,box-shadow,transform] duration-200 ease-out whitespace-nowrap max-w-[90vw] z-10 select-none"
       id="pro-hint-banner"
       onClick={onOpenGuide}
       title="Click to view navigation cheatsheet (?)"

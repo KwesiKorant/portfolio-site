@@ -308,263 +308,235 @@ export const FinaleSection: React.FC = () => {
       <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-[#050508] via-[#050508]/80 to-transparent pointer-events-none z-[1]" />
 
       {/* Top Navigation Bar: Smooth return links and section indicator */}
-      <div className="relative z-20 flex justify-between items-center gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px] pb-2 sm:pb-4 w-full shrink-0">
-        <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] sm:text-[9.5px] font-mono bg-[#080a12] border border-white/10 px-2.5 py-1 rounded-full">
+      <div className="relative z-20 flex justify-between items-center gap-1.5 sm:gap-2 font-mono text-[9px] sm:text-[10px] pb-2 sm:pb-3 w-full shrink-0">
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[8px] sm:text-[9.5px] font-mono bg-[#080a12] border border-white/10 px-3 py-1.5 rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
           <span>DOSSIER &amp; UPLINK</span>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <button
             onClick={handleToScrub}
-            className="text-zinc-400 hover:text-white px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg border border-white/12 hover:border-accent-lime/40 bg-[#0a0c14]/90 hover:bg-white/[0.08] transition-all cursor-pointer active:scale-95"
+            className="min-h-[44px] text-zinc-400 hover:text-white px-3.5 sm:px-4 py-2 rounded-xl border border-white/12 hover:border-accent-lime/40 bg-[#0a0c14]/90 hover:bg-white/[0.08] transition-all cursor-pointer active:scale-95 flex items-center gap-1.5"
             title="Return to Kinetic Turntable"
           >
-            &uarr; <span className="hidden sm:inline">KINETIC </span>TURNTABLE
+            <span>&uarr;</span>
+            <span><span className="hidden sm:inline">KINETIC </span>TURNTABLE</span>
           </button>
           <button
             onClick={handleBackToTop}
-            className="text-accent-lime/90 hover:text-accent-lime px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-lg border border-accent-lime/30 hover:border-accent-lime bg-accent-lime/[0.05] hover:bg-accent-lime/[0.1] transition-all cursor-pointer active:scale-95"
+            className="min-h-[44px] text-zinc-300 hover:text-white px-3.5 sm:px-4 py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12] hover:bg-[#0c0e18] transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 shadow-md"
           >
-            &uarr; TOP HERO
+            <span className="text-accent-lime text-xs">&uarr;</span>
+            <span>TOP HERO</span>
           </button>
         </div>
       </div>
 
-      {/* MOBILE VIEW (< lg): Natural Editorial Stage Flow */}
-      <div className="flex lg:hidden flex-col items-center justify-between flex-1 w-full max-w-sm sm:max-w-md mx-auto pt-2 pb-2 relative z-20">
-        {/* Flow Content: Overhead Badge -> Headline -> Narrative -> Telemetry Dossier -> Centered Contact Header -> Channels */}
-        <div className="w-full flex-1 min-h-0 flex flex-col items-center text-center space-y-2 pointer-events-auto">
+      {/* MOBILE & TABLET PORTRAIT VIEW (< lg): Editorial Layout without Nested Scroll Trap */}
+      <div className="flex lg:hidden flex-col items-center justify-between flex-1 w-full max-w-md sm:max-w-xl md:max-w-2xl mx-auto pt-1 sm:pt-2 pb-1 relative z-20 min-h-0">
+        <div className="w-full flex-1 flex flex-col items-center justify-center text-center space-y-2 sm:space-y-3 pointer-events-auto min-h-0">
           {/* Direct Engagement Status Pill */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8px] xs:text-[8.5px] text-accent-lime tracking-widest uppercase">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
             <span>DIRECT ENGAGEMENT // OPEN FOR ROLES</span>
           </div>
 
           {/* Headline */}
-          <h2 className="font-display text-[19px] xs:text-[22px] sm:text-[25px] font-bold text-white tracking-tight leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-sm">
+          <h2 className="font-display text-[20px] xs:text-[23px] sm:text-[28px] md:text-[32px] font-bold text-white tracking-tight leading-snug drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] max-w-xl">
             Bridging tactile design engineering &amp; scalable software.
           </h2>
 
           {/* Mission / Thesis Subtitle */}
-          <p className="font-sans text-[10.5px] xs:text-[11.5px] text-zinc-300 leading-relaxed max-w-sm drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
+          <p className="font-sans text-[11px] sm:text-[13px] md:text-[14px] text-zinc-300 leading-relaxed max-w-lg drop-shadow-[0_1px_6px_rgba(0,0,0,0.9)]">
             Kwesi Ankomah-Koranteng, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences &amp; resilient systems.
           </p>
 
-          {/* Content Scroll Flow: Dossier First, Then Centered Contact Header, Then Channels (Fills Stage Seamlessly) */}
-          <div className="w-full flex-1 min-h-0 overflow-y-auto space-y-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden pr-0.5 text-left pt-1">
-            {/* 01 // Technical Dossier & Telemetry Profile */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-[7.5px] xs:text-[8px] font-mono text-zinc-400 uppercase tracking-widest px-0.5">
-                <span className="text-accent-lime font-bold">SYSTEM TELEMETRY</span>
-                <span>VERIFIED SPEC</span>
-              </div>
-              <div className="space-y-1.5 font-mono text-[8.5px] xs:text-[9.5px]">
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
-                  <span className="text-zinc-400 font-semibold">ENGINEER:</span>
-                  <span className="text-zinc-100 font-medium">KWESI ANKOMAH-KORANTENG</span>
-                </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
-                  <span className="text-zinc-400 font-semibold">TARGET ROLE:</span>
-                  <span className="text-accent-lime font-medium">DESIGN ENG // CREATIVE TECH</span>
-                </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
-                  <span className="text-zinc-400 font-semibold">STARTUP:</span>
-                  <span className="text-zinc-200 font-medium">ARCFIELD // CO-FOUNDER &amp; CTO</span>
-                </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
-                  <span className="text-zinc-400 font-semibold">COMPOSITOR:</span>
-                  <span className="text-accent-lime font-medium">120 FPS ZERO REFLOW</span>
-                </div>
-                <div className="p-2.5 xs:p-3 rounded-xl bg-white/[0.04] border border-white/10 flex justify-between items-center">
-                  <span className="text-zinc-400 font-semibold">LOCATION:</span>
-                  <span className="text-zinc-200 font-medium">GHANA // WORLDWIDE REMOTE</span>
-                </div>
-              </div>
-            </div>
+          {/* Sleek single-strip telemetry pill row (replaces duplicate table) */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 font-mono text-[7.5px] sm:text-[9px] text-zinc-400 py-0.5">
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-zinc-300">
+              ACCRA // WORLDWIDE REMOTE
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-accent-lime font-semibold">
+              120 FPS ZERO REFLOW
+            </span>
+            <span className="px-2.5 py-1 rounded-lg bg-white/[0.04] border border-white/10 text-zinc-300">
+              ARCFIELD CTO
+            </span>
+          </div>
 
-            {/* Centered Header Labelled CONTACT */}
-            <div className="w-full pt-3 pb-1 flex items-center justify-center gap-3">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent to-accent-lime/30" />
-              <h3 className="font-mono text-[10px] xs:text-[11px] font-bold tracking-[0.25em] text-accent-lime uppercase">
-                CONTACT
-              </h3>
-              <div className="h-px flex-1 bg-gradient-to-l from-transparent to-accent-lime/30" />
-            </div>
-
-            {/* Direct Contact Channels: Positioned Below the Dossier & Centered Contact Header */}
-            <div className="space-y-2">
-              {/* 1. Email */}
-              <button
-                type="button"
-                onClick={handleCopyEmail}
-                className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98] ${
-                  copiedEmail
-                    ? "bg-accent-lime/15 border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.2)]"
-                    : "bg-white/[0.04] hover:bg-white/[0.08] border-white/10 hover:border-accent-lime/50"
-                }`}
-                title="Click to copy email address"
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <rect width="20" height="16" x="2" y="4" rx="2" />
-                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                    </svg>
+          {/* Direct Contact Channels: Positioned with Apple HIG touch targets */}
+          <div className="w-full max-w-lg space-y-2 sm:space-y-2.5 pt-1 text-left">
+            {/* 1. Email */}
+            <button
+              type="button"
+              onClick={handleCopyEmail}
+              className={`w-full text-left min-h-[48px] sm:min-h-[52px] p-2.5 sm:p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98] ${
+                copiedEmail
+                  ? "bg-accent-lime/15 border-accent-lime shadow-[0_0_15px_rgba(204,255,0,0.2)]"
+                  : "bg-white/[0.04] hover:bg-white/[0.08] border-white/10 hover:border-accent-lime/50"
+              }`}
+              title="Click to copy email address"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect width="20" height="16" x="2" y="4" rx="2" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">
+                    EMAIL // INBOX
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[8px] xs:text-[8.5px] uppercase tracking-wider text-zinc-400">
-                      EMAIL // INBOX
-                    </div>
-                    <div className="font-mono text-[11px] xs:text-[12px] text-white truncate font-medium">
-                      {email}
-                    </div>
+                  <div className="font-mono text-[11px] sm:text-[13px] text-white truncate font-medium">
+                    {email}
                   </div>
                 </div>
-                <span className={`font-mono text-[8.5px] xs:text-[9px] px-2.5 py-1 rounded-md transition-colors shrink-0 ${
-                  copiedEmail
-                    ? "bg-accent-lime text-black font-bold"
-                    : "bg-white/[0.08] text-zinc-300 group-hover:text-accent-lime"
-                }`}>
-                  {copiedEmail ? "COPIED ✓" : "COPY"}
-                </span>
-              </button>
+              </div>
+              <span className={`min-h-[32px] font-mono text-[8.5px] sm:text-[9.5px] px-3 py-1.5 rounded-lg transition-colors shrink-0 flex items-center justify-center ${
+                copiedEmail
+                  ? "bg-accent-lime text-black font-bold"
+                  : "bg-white/[0.08] text-zinc-300 group-hover:text-accent-lime"
+              }`}>
+                {copiedEmail ? "COPIED ✓" : "COPY"}
+              </span>
+            </button>
 
-              {/* 2. WhatsApp */}
+            {/* 2. WhatsApp */}
+            <a
+              href="https://wa.me/233592595429"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => playKeyClick()}
+              className="w-full text-left min-h-[48px] sm:min-h-[52px] p-2.5 sm:p-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-emerald-500/[0.1] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
+              title="Direct WhatsApp chat"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0">
+                  <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400">
+                    WHATSAPP // MESSAGING
+                  </div>
+                  <div className="font-mono text-[11px] sm:text-[13px] text-white truncate font-medium">
+                    +233 59 259 5429
+                  </div>
+                </div>
+              </div>
+              <span className="min-h-[32px] font-mono text-[8.5px] sm:text-[9.5px] px-3 py-1.5 rounded-lg bg-white/[0.08] text-zinc-300 group-hover:text-emerald-300 transition-colors shrink-0 flex items-center justify-center">
+                CHAT ↗
+              </span>
+            </a>
+
+            {/* 3. LinkedIn & GitHub */}
+            <div className="grid grid-cols-2 gap-2 pt-0.5">
               <a
-                href="https://wa.me/233204563873"
+                href="https://www.linkedin.com/in/kaykorant"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => playKeyClick()}
-                className="w-full text-left p-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-emerald-500/[0.1] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
-                title="Direct WhatsApp chat"
+                className="min-h-[46px] sm:min-h-[48px] p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-[#0A66C2]/[0.15] hover:border-[#0A66C2]/60 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
+                title="Connect on LinkedIn"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0">
-                    <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-md bg-[#0A66C2]/20 flex items-center justify-center shrink-0">
+                    <svg className="w-3.5 h-3.5 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
                     </svg>
                   </div>
-                  <div className="min-w-0">
-                    <div className="font-mono text-[8px] xs:text-[8.5px] uppercase tracking-wider text-zinc-400">
-                      WHATSAPP // MESSAGING
-                    </div>
-                    <div className="font-mono text-[11px] xs:text-[12px] text-white truncate font-medium">
-                      +233 20 456 3873
-                    </div>
-                  </div>
+                  <div className="font-mono text-[9px] sm:text-[10px] text-white truncate font-medium">LINKEDIN</div>
                 </div>
-                <span className="font-mono text-[8.5px] xs:text-[9px] px-2.5 py-1 rounded-md bg-white/[0.08] text-zinc-300 group-hover:text-emerald-300 transition-colors shrink-0">
-                  CHAT ↗
-                </span>
+                <span className="font-mono text-[8.5px] sm:text-[9.5px] text-zinc-400 group-hover:text-sky-300">↗</span>
               </a>
 
-              {/* 3. LinkedIn & GitHub row */}
-              <div className="grid grid-cols-2 gap-2 pt-0.5">
-                <a
-                  href="https://www.linkedin.com/in/kaykorant"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => playKeyClick()}
-                  className="p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-[#0A66C2]/[0.15] hover:border-[#0A66C2]/60 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
-                  title="Connect on LinkedIn"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-md bg-[#0A66C2]/20 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
-                      </svg>
-                    </div>
-                    <div className="font-mono text-[9px] xs:text-[9.5px] text-white truncate font-medium">LINKEDIN</div>
+              <a
+                href="https://github.com/KwesiKorant"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => playKeyClick()}
+                className="min-h-[46px] sm:min-h-[48px] p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.12] hover:border-white/30 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
+                title="Explore GitHub Repositories"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-7 h-7 rounded-md bg-white/[0.1] flex items-center justify-center shrink-0">
+                    <svg className="w-3.5 h-3.5 text-zinc-100" viewBox="0 0 24 24" fill="currentColor">
+                      <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
+                    </svg>
                   </div>
-                  <span className="font-mono text-[8px] text-zinc-400 group-hover:text-sky-300">↗</span>
-                </a>
-
-                <a
-                  href="https://github.com/KwesiKorant"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => playKeyClick()}
-                  className="p-2.5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.12] hover:border-white/30 transition-all flex items-center justify-between gap-1.5 group active:scale-[0.98]"
-                  title="Explore GitHub Repositories"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-6 h-6 rounded-md bg-white/[0.1] flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-zinc-100" viewBox="0 0 24 24" fill="currentColor">
-                        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
-                      </svg>
-                    </div>
-                    <div className="font-mono text-[9px] xs:text-[9.5px] text-white truncate font-medium">GITHUB</div>
-                  </div>
-                  <span className="font-mono text-[8px] text-zinc-400 group-hover:text-white">↗</span>
-                </a>
-              </div>
+                  <div className="font-mono text-[9px] sm:text-[10px] text-white truncate font-medium">GITHUB</div>
+                </div>
+                <span className="font-mono text-[8.5px] sm:text-[9.5px] text-zinc-400 group-hover:text-white">↗</span>
+              </a>
             </div>
           </div>
         </div>
 
         {/* Bottom Dock Status & Back to Top */}
-        <div className="w-full flex items-center justify-between pt-2.5 border-t border-white/10 font-mono text-[9px] xs:text-[9.5px] text-zinc-300">
+        <div className="w-full flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] sm:text-[10px] text-zinc-300 shrink-0">
           <span className="text-zinc-400 font-mono">&copy; 2026 KWESI</span>
           <button
             onClick={handleBackToTop}
-            className="text-accent-lime font-bold flex items-center gap-1 hover:underline cursor-pointer active:scale-95 px-3.5 py-1.5 rounded-lg bg-accent-lime/10 border border-accent-lime/30 shadow-[0_0_8px_rgba(204,255,0,0.15)]"
+            className="min-h-[44px] text-zinc-200 hover:text-white font-medium flex items-center gap-1.5 cursor-pointer active:scale-95 px-4 py-2 rounded-xl bg-[#080a12] hover:bg-[#0c0e18] border border-white/15 hover:border-accent-lime/50 shadow-md transition-all"
           >
             <span>RETURN TO TOP</span>
-            <span className="text-xs">&uarr;</span>
+            <span className="text-accent-lime text-xs">&uarr;</span>
           </button>
         </div>
       </div>
 
-      {/* DESKTOP VIEW (>= lg): Canonical Two-Column Grid - 100% Preserved */}
-      <div className="hidden lg:grid relative z-10 w-full max-w-6xl mx-auto my-auto py-4 sm:py-8 md:py-12 grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-10 items-stretch">
-        {/* Left Column: Mission Narrative & Transparent Telemetry Card at Bottom Left */}
-        <div className="lg:col-span-7 flex flex-col justify-between space-y-4 sm:space-y-6">
+      {/* DESKTOP & LANDSCAPE VIEW (>= lg): Compact, Non-Clipping Two-Column Grid */}
+      <div className="hidden lg:grid relative z-10 w-full max-w-6xl mx-auto my-auto py-2 xl:py-6 grid-cols-1 lg:grid-cols-12 gap-5 xl:gap-8 items-stretch flex-1 min-h-0">
+        {/* Left Column: Mission Narrative & Telemetry Footprint */}
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-3 xl:space-y-5">
           <div>
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8.5px] sm:text-[10px] text-accent-lime tracking-widest uppercase mb-2.5 sm:mb-4">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8.5px] xl:text-[9.5px] text-accent-lime tracking-widest uppercase mb-2 xl:mb-3">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
               <span>DIRECT CONTACT // OPEN FOR DESIGN ENGINEERING ROLES</span>
             </div>
 
-            <h2 className="font-display text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white mb-2.5 sm:mb-5 leading-[1.15]">
+            <h2 className="font-display text-2xl xl:text-4xl font-bold tracking-tight text-white mb-2 xl:mb-3 leading-tight">
               Bridging tactile design engineering &amp; scalable software.
             </h2>
 
-            <p className="font-sans text-[11.5px] sm:text-sm md:text-base text-zinc-300 leading-relaxed max-w-2xl">
+            <p className="font-sans text-xs xl:text-sm text-zinc-300 leading-relaxed max-w-2xl">
               Kwesi Ankomah-Koranteng, Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Crafting hardware-accelerated web experiences, 120 FPS compositor architectures, and resilient full-stack systems. Open for Design Engineering roles, creative technologist positions, and high-impact software builds.
             </p>
           </div>
 
-          {/* Technical System Footprint Grid: Applied Stage 4 Card Transparency Effect */}
-          <div className="p-3 sm:p-5 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[9px] sm:text-[10px] text-zinc-300 space-y-1.5 sm:space-y-2.5">
-            <div className="flex items-center justify-between pb-1.5 sm:pb-2 mb-1 border-b border-white/10">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-accent-lime font-mono text-[8px] sm:text-[9px] tracking-wider uppercase font-semibold">
+          {/* Technical System Footprint Grid */}
+          <div className="p-3 xl:p-4 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] font-mono text-[8.5px] xl:text-[9.5px] text-zinc-300 space-y-1.5 xl:space-y-2">
+            <div className="flex items-center justify-between pb-1.5 border-b border-white/10">
+              <div className="flex items-center gap-1.5 text-accent-lime font-mono text-[8px] xl:text-[9px] tracking-wider uppercase font-semibold">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
                 <span>SYSTEM TELEMETRY // FOOTPRINT</span>
               </div>
-              <span className="font-mono text-[7.5px] sm:text-[8.5px] text-zinc-400 px-1.5 sm:px-2 py-0.5 rounded bg-white/[0.05] border border-white/10">
+              <span className="font-mono text-[7.5px] xl:text-[8px] text-zinc-400 px-2 py-0.5 rounded bg-white/[0.05] border border-white/10">
                 VERIFIED SPEC
               </span>
             </div>
 
-            <div className="space-y-1.5 pt-0.5">
-              <div className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 sm:gap-2 transition-colors hover:bg-white/[0.06] text-[8.5px] sm:text-[10px]">
+            <div className="space-y-1 pt-0.5">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">ENGINEER:</span>
                 <span className="text-zinc-100 font-mono font-medium">KWESI ANKOMAH-KORANTENG</span>
               </div>
-              <div className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 sm:gap-2 transition-colors hover:bg-white/[0.06] text-[8.5px] sm:text-[10px]">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">TARGET ROLE:</span>
-                <span className="text-accent-lime font-mono font-medium">DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
+                <span className="text-accent-lime font-mono font-medium">DESIGN ENGINEER // CREATIVE TECH</span>
               </div>
-              <div className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 sm:gap-2 transition-colors hover:bg-white/[0.06] text-[8.5px] sm:text-[10px]">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">STARTUP // ROLE:</span>
                 <span className="text-zinc-200 font-mono font-medium">ARCFIELD SYSTEMS // CO-FOUNDER &amp; CTO</span>
               </div>
-              <div className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 sm:gap-2 transition-colors hover:bg-white/[0.06] text-[8.5px] sm:text-[10px]">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">COMPOSITOR STANDARD:</span>
                 <span className="text-accent-lime font-medium">120 FPS ZERO REFLOW MANDATE</span>
               </div>
-              <div className="px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 sm:gap-2 transition-colors hover:bg-white/[0.06] text-[8.5px] sm:text-[10px]">
+              <div className="px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/10 flex justify-between items-center flex-wrap gap-1 transition-colors hover:bg-white/[0.06]">
                 <span className="text-zinc-400 font-semibold">LOCATION:</span>
                 <span className="text-zinc-200">GHANA // WORLDWIDE REMOTE</span>
               </div>
@@ -572,60 +544,59 @@ export const FinaleSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Right Column: Contact Card with Original Brand Icons */}
+        {/* Right Column: Contact Card */}
         <div className="lg:col-span-5 flex flex-col">
-          <div className="p-3.5 sm:p-6 md:p-7 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
+          <div className="p-3.5 xl:p-6 rounded-2xl bg-[#080a12]/60 border border-white/15 shadow-[0_8px_32px_rgba(0,0,0,0.5)] flex flex-col justify-between h-full">
             <div>
               {/* Header Stating Contact */}
-              <div className="flex items-center justify-between gap-2.5 mb-2">
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8.5px] sm:text-[9px] text-accent-lime tracking-widest uppercase">
+              <div className="flex items-center justify-between gap-2.5 mb-1.5">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-accent-lime/10 border border-accent-lime/30 font-mono text-[8px] xl:text-[8.5px] text-accent-lime tracking-widest uppercase">
                   <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
                   <span>DIRECT CHANNELS</span>
                 </div>
-                <span className="font-mono text-[8.5px] sm:text-[9px] text-emerald-400 flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <span className="font-mono text-[8px] xl:text-[8.5px] text-emerald-400 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                   AVAILABLE
                 </span>
               </div>
 
-              <h3 className="font-display text-xl sm:text-3xl font-bold tracking-tight text-white mb-1.5 sm:mb-2">
+              <h3 className="font-display text-lg xl:text-2xl font-bold tracking-tight text-white mb-1">
                 CONTACT
               </h3>
-              <p className="font-sans text-[11px] sm:text-xs text-zinc-300 leading-relaxed mb-3.5 sm:mb-5">
+              <p className="font-sans text-[10.5px] xl:text-xs text-zinc-300 leading-snug mb-2.5 xl:mb-4">
                 Initiate a direct conversation, request an engineering walkthrough, or discuss high-impact roles.
               </p>
 
               {/* 4 Social Channels with Original Icons */}
-              <div className="space-y-2 sm:space-y-2.5">
+              <div className="space-y-2 xl:space-y-2.5">
                 {/* 1. Email */}
                 <button
                   type="button"
                   onClick={handleCopyEmail}
-                  className={`w-full text-left p-2.5 sm:p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group ${
+                  className={`w-full text-left min-h-[44px] p-2.5 xl:p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98] ${
                     copiedEmail
                       ? "bg-accent-lime/15 border-accent-lime shadow-[0_0_20px_rgba(204,255,0,0.25)]"
                       : "bg-white/[0.03] hover:bg-white/[0.07] border-white/10 hover:border-accent-lime/50"
                   }`}
                   title="Click to copy email address"
                 >
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {/* Original Mail SVG Icon */}
-                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-accent-lime/10 border border-accent-lime/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <svg className="w-3.5 h-3.5 text-accent-lime" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <rect width="20" height="16" x="2" y="4" rx="2" />
                         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400 group-hover:text-accent-lime transition-colors">
+                      <div className="font-mono text-[8px] xl:text-[8.5px] uppercase tracking-wider text-zinc-400 group-hover:text-accent-lime transition-colors">
                         EMAIL // INBOX
                       </div>
-                      <div className="font-mono text-[11px] sm:text-xs text-white truncate font-medium">
+                      <div className="font-mono text-[11px] xl:text-xs text-white truncate font-medium">
                         {email}
                       </div>
                     </div>
                   </div>
-                  <span className={`font-mono text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md transition-colors shrink-0 ${
+                  <span className={`font-mono text-[8.5px] xl:text-[9.5px] px-2.5 py-1 rounded-md transition-colors shrink-0 ${
                     copiedEmail
                       ? "bg-accent-lime text-black font-bold"
                       : "bg-white/[0.06] text-zinc-300 group-hover:text-white group-hover:bg-accent-lime/20 group-hover:text-accent-lime"
@@ -636,30 +607,29 @@ export const FinaleSection: React.FC = () => {
 
                 {/* 2. WhatsApp */}
                 <a
-                  href="https://wa.me/233204563873"
+                  href="https://wa.me/233592595429"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => playKeyClick()}
-                  className="w-full text-left p-2.5 sm:p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-emerald-500/[0.08] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group"
+                  className="w-full text-left min-h-[44px] p-2.5 xl:p-3 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-emerald-500/[0.08] hover:border-emerald-400/50 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
                   title="Direct WhatsApp chat"
                 >
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {/* Original WhatsApp Brand Icon */}
-                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#25D366]/15 border border-[#25D366]/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <svg className="w-3.5 h-3.5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400 group-hover:text-emerald-400 transition-colors">
+                      <div className="font-mono text-[8px] xl:text-[8.5px] uppercase tracking-wider text-zinc-400 group-hover:text-emerald-400 transition-colors">
                         WHATSAPP // MESSAGING
                       </div>
-                      <div className="font-mono text-[11px] sm:text-xs text-white truncate font-medium">
-                        +233 20 456 3873
+                      <div className="font-mono text-[11px] xl:text-xs text-white truncate font-medium">
+                        +233 59 259 5429
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors shrink-0 flex items-center gap-1">
+                  <span className="font-mono text-[8.5px] xl:text-[9.5px] px-2.5 py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-emerald-500/20 group-hover:text-emerald-300 transition-colors shrink-0 flex items-center gap-1">
                     CHAT ↗
                   </span>
                 </a>
@@ -670,26 +640,25 @@ export const FinaleSection: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => playKeyClick()}
-                  className="w-full text-left p-2.5 sm:p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#0A66C2]/[0.1] hover:border-[#0A66C2]/60 transition-all cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group"
+                  className="w-full text-left min-h-[44px] p-2.5 xl:p-3 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-[#0A66C2]/[0.1] hover:border-[#0A66C2]/60 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
                   title="Connect on LinkedIn"
                 >
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-[#0A66C2]/15 border border-[#0A66C2]/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {/* Original LinkedIn Brand Icon */}
-                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-[#0A66C2]/15 border border-[#0A66C2]/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <svg className="w-3.5 h-3.5 text-[#38bdf8]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z" />
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400 group-hover:text-[#38bdf8] transition-colors">
+                      <div className="font-mono text-[8px] xl:text-[8.5px] uppercase tracking-wider text-zinc-400 group-hover:text-[#38bdf8] transition-colors">
                         LINKEDIN // PROFILE
                       </div>
-                      <div className="font-mono text-[11px] sm:text-xs text-white truncate font-medium">
+                      <div className="font-mono text-[11px] xl:text-xs text-white truncate font-medium">
                         linkedin.com/in/kaykorant
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-[#0A66C2]/20 group-hover:text-sky-300 transition-colors shrink-0 flex items-center gap-1">
+                  <span className="font-mono text-[8.5px] xl:text-[9.5px] px-2.5 py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-[#0A66C2]/20 group-hover:text-sky-300 transition-colors shrink-0 flex items-center gap-1">
                     CONNECT ↗
                   </span>
                 </a>
@@ -700,26 +669,25 @@ export const FinaleSection: React.FC = () => {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => playKeyClick()}
-                  className="w-full text-left p-2.5 sm:p-3.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/30 transition-all cursor-pointer flex items-center justify-between gap-2.5 sm:gap-3 group"
+                  className="w-full text-left min-h-[44px] p-2.5 xl:p-3 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-white/30 transition-all cursor-pointer flex items-center justify-between gap-2.5 group active:scale-[0.98]"
                   title="Explore GitHub Repositories"
                 >
-                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-white/[0.08] border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      {/* Original GitHub Octocat Icon */}
-                      <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-white/[0.08] border border-white/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <svg className="w-3.5 h-3.5 text-zinc-100" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
                       </svg>
                     </div>
                     <div className="min-w-0">
-                      <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">
+                      <div className="font-mono text-[8px] xl:text-[8.5px] uppercase tracking-wider text-zinc-400 group-hover:text-white transition-colors">
                         GITHUB // CODEBASE
                       </div>
-                      <div className="font-mono text-[11px] sm:text-xs text-white truncate font-medium">
+                      <div className="font-mono text-[11px] xl:text-xs text-white truncate font-medium">
                         github.com/KwesiKorant
                       </div>
                     </div>
                   </div>
-                  <span className="font-mono text-[9px] sm:text-[10px] px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-white/[0.15] group-hover:text-white transition-colors shrink-0 flex items-center gap-1">
+                  <span className="font-mono text-[8.5px] xl:text-[9.5px] px-2.5 py-1 rounded-md bg-white/[0.06] text-zinc-300 group-hover:bg-white/[0.15] group-hover:text-white transition-colors shrink-0 flex items-center gap-1">
                     SOURCE ↗
                   </span>
                 </a>
@@ -727,7 +695,7 @@ export const FinaleSection: React.FC = () => {
             </div>
 
             {/* Footer status inside Contact Card */}
-            <div className="pt-3.5 sm:pt-5 mt-3.5 sm:mt-5 border-t border-white/10 flex items-center justify-between text-zinc-400 font-mono text-[8.5px] sm:text-[9.5px]">
+            <div className="pt-2.5 xl:pt-4 mt-2 xl:mt-4 border-t border-white/10 flex items-center justify-between text-zinc-400 font-mono text-[8px] xl:text-[9px]">
               <span className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent-lime/80" />
                 SLA: &lt; 24H RESPONSE
@@ -738,21 +706,21 @@ export const FinaleSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Grounded Terminal Footer Strip (Definitive End of Site) - Desktop canonical */}
-      <div className="hidden lg:block relative z-10 w-full pt-5 sm:pt-8 border-t border-white/10 space-y-2.5 sm:space-y-4">
-        <div className="flex justify-end items-center gap-4 font-mono text-[9px] sm:text-[10px]">
+      {/* Grounded Terminal Footer Strip (Definitive End of Site) */}
+      <div className="hidden lg:block relative z-10 w-full pt-2 xl:pt-4 border-t border-white/10 space-y-1.5 xl:space-y-2 shrink-0">
+        <div className="flex justify-end items-center gap-4 font-mono text-[8.5px] xl:text-[9.5px]">
           <button
             onClick={handleBackToTop}
-            className="cursor-pointer group flex items-center gap-2 text-zinc-400 hover:text-accent-lime transition-colors"
+            className="min-h-[44px] px-4 py-2 rounded-xl border border-white/12 hover:border-accent-lime/50 bg-[#080a12] hover:bg-[#0c0e18] cursor-pointer group flex items-center gap-2 text-zinc-300 hover:text-white transition-all active:scale-95 shadow-md"
           >
             <span>RETURN TO TOP</span>
-            <span className="text-xs group-hover:-translate-y-0.5 transition-transform">&uarr;</span>
+            <span className="text-accent-lime text-xs group-hover:-translate-y-0.5 transition-transform">&uarr;</span>
           </button>
         </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2.5 sm:gap-3 font-mono text-[8.5px] sm:text-[10px] text-zinc-500">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 font-mono text-[8px] xl:text-[9px] text-zinc-500">
           <div>&copy; 2026 KWESI ANKOMAH-KORANTENG &bull; ALL RIGHTS RESERVED</div>
-          <div className="flex items-center flex-wrap gap-2 sm:gap-3">
+          <div className="flex items-center flex-wrap gap-2 sm:gap-2.5">
             <span>THREE.JS WEBGL</span>
             <span>&bull;</span>
             <span>NEXT.JS 15</span>
