@@ -379,131 +379,67 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </div>
       </div>
 
-      {/* DESKTOP VIEW (>= lg): Canonical Editorial Hero - 100% Preserved */}
-      <div className="hidden lg:flex flex-col justify-center my-auto py-6 sm:py-10 w-full max-w-2xl lg:max-w-3xl pointer-events-none relative z-10">
-        {/* Role tag pill */}
-        <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#080a12]/60 border border-accent-lime/40 mb-4 sm:mb-5 text-accent-lime font-mono text-[11px] tracking-wider font-semibold shadow-[0_0_20px_rgba(204,255,0,0.15)] self-start">
-          <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_8px_#ccff00] animate-pulse" />
-          <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
-        </div>
-
-        {/* Captivating Bold Header */}
-        <h1 className="font-display text-[32px] sm:text-5xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-4 break-words">
-          KWESI ANKOMAH-KORANTENG
-        </h1>
-
-        {/* Punchy Subtitle */}
-        <p className="font-sans text-sm sm:text-lg md:text-xl text-zinc-100 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)] mb-3.5 sm:mb-4">
-          Bridging tactile digital craft, 120 FPS compositor architecture, and scalable product engineering.
-        </p>
-
-        {/* Engaging Contextual Narrative */}
-        <p className="font-sans text-xs sm:text-sm text-zinc-300 leading-relaxed max-w-xl drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] mb-4 sm:mb-5">
-          Ghanaian software engineer, Co-founder &amp; CTO at Arcfield Systems. Designing software with deep mechanical sympathy from commercial inventory ERPs and hyperlocal discovery platforms to hardware-accelerated 3D spatial web canvases.
-        </p>
-
-        {/* Venture & Capabilities Highlight Strip: 3-column grid on desktop */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-2.5 max-w-xl mb-4 sm:mb-5">
-          <div
-            onClick={() => onSelectProject && onSelectProject("hyperscale")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
-              onSelectProject
-                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
-                : ""
-            }`}
-            title="Inspect Arcfield Discover in 3D Dimension"
-          >
-            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
-              STARTUP // CTO
-            </div>
-            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
-              Arcfield Discover
-            </div>
-            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
-              Business &amp; Service Discovery MVP
-            </div>
+      {/* DESKTOP VIEW (>= lg): Canonical Editorial Hero */}
+      <div className="hidden lg:flex flex-col justify-between w-full h-full relative z-20 pointer-events-none">
+        {/* Middle Text: Elegant, scannable editorial block vertically centered */}
+        <div className="my-auto w-full max-w-2xl lg:max-w-3xl flex flex-col justify-center space-y-3 lg:space-y-4 items-start text-left pointer-events-auto relative z-20">
+          {/* Identity & Company Tag */}
+          <div className="flex items-center gap-2.5 font-mono text-xs lg:text-[13px] text-zinc-300">
+            <span className="text-accent-lime font-bold tracking-wider uppercase">DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
+            <span className="text-zinc-600">&bull;</span>
+            <span className="text-zinc-300 font-mono tracking-wide">ARCFIELD SYSTEMS</span>
           </div>
 
-          <div
-            onClick={() => onSelectProject && onSelectProject("edge-gateway")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
-              onSelectProject
-                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
-                : ""
-            }`}
-            title="Inspect Nayak Furniture ERP Screenshots & Specs"
-          >
-            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
-              ENTERPRISE POS
-            </div>
-            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
-              Nayak Furniture ERP
-            </div>
-            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
-              Inventory &amp; P&amp;L Engine
-            </div>
-          </div>
+          {/* Captivating Bold Header */}
+          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-black tracking-tight text-white leading-[0.94] drop-shadow-[0_4px_36px_rgba(0,0,0,0.95)] break-words">
+            KWESI ANKOMAH-KORANTENG
+          </h1>
 
-          <div
-            onClick={() => onSelectProject && onSelectProject("event-stream")}
-            className={`p-2.5 sm:py-2.5 sm:px-3.5 rounded-xl bg-[#0a0c14]/60 border border-white/12 transition-all active:scale-[0.98] ${
-              onSelectProject
-                ? "pointer-events-auto cursor-pointer hover:border-accent-lime/60 hover:bg-black/85"
-                : ""
-            }`}
-            title="Inspect 120 FPS Compositor Architecture"
-          >
-            <div className="font-mono text-[8px] sm:text-[9px] text-accent-lime tracking-widest uppercase mb-0.5">
-              CORE SPECIALTY
-            </div>
-            <div className="font-sans text-[11.5px] sm:text-xs font-semibold text-white truncate">
-              120 FPS Compositor
-            </div>
-            <div className="font-sans text-[9.5px] sm:text-[10.5px] text-zinc-400 truncate">
-              Zero-Reflow Spatial UI
-            </div>
+          {/* Punchy Thesis */}
+          <p className="font-sans text-base sm:text-lg md:text-xl text-zinc-200 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
+            Crafting tactile digital craft, hardware-accelerated compositor architecture, and resilient enterprise software.
+          </p>
+
+          {/* Curated Architecture Cues */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-2 font-mono text-xs text-zinc-300">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-zinc-200 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
+              <span>6 SHIPPED SYSTEMS</span>
+            </span>
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-white/[0.06] border border-white/15 text-zinc-300 shadow-sm">
+              <span>120 FPS ZERO REFLOW</span>
+            </span>
+            <span className="text-zinc-500">&bull;</span>
+            <span className="text-zinc-400 font-mono">ACCRA // GLOBAL REMOTE</span>
           </div>
         </div>
 
-        {/* Focus Badges */}
-        <div className="flex flex-wrap gap-2 font-mono text-[9px] sm:text-[10px] max-w-full">
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-white/20 text-zinc-200 shadow-md">
-            120 FPS COMPOSITOR
-          </span>
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-white/20 text-zinc-200 shadow-md">
-            THREE.JS // WEBGL
-          </span>
-          <span className="px-2.5 sm:px-3 py-1 rounded-lg bg-[#0a0c14] border border-accent-lime/30 text-accent-lime shadow-md">
-            ACCRA // REMOTE
-          </span>
+        {/* Bottom Bar: Downward Scroll Cue */}
+        <div className="w-full flex items-center justify-end pt-4 font-mono text-xs text-zinc-300 pointer-events-auto shrink-0">
+          <button
+            onPointerEnter={onWarmupPortal}
+            onFocus={onWarmupPortal}
+            onClick={() => {
+              if (onEnterPortal) {
+                onEnterPortal();
+              } else if (onScrollNext) {
+                onScrollNext();
+              } else {
+                const el = document.getElementById("section-spatial");
+                el?.scrollIntoView({ behavior: "smooth" });
+              }
+            }}
+            className="group cursor-pointer flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-[#080a12] hover:bg-[#0c0e18] border border-white/15 hover:border-accent-lime/50 text-zinc-200 hover:text-white font-medium shadow-md transition-all active:scale-95"
+            aria-label="Scroll to Portal Section"
+          >
+            <span className="font-mono text-xs tracking-wider">
+              ENTER PORTAL GATE
+            </span>
+            <span className="text-accent-lime text-sm group-hover:translate-y-0.5 transition-transform">
+              &darr;
+            </span>
+          </button>
         </div>
-      </div>
-
-      {/* Desktop Hero Bottom Bar & Downward Scroll Cue */}
-      <div className="hidden lg:flex relative z-10 justify-end items-center w-full pt-4">
-        <button
-          onPointerEnter={onWarmupPortal}
-          onFocus={onWarmupPortal}
-          onClick={() => {
-            if (onEnterPortal) {
-              onEnterPortal();
-            } else if (onScrollNext) {
-              onScrollNext();
-            } else {
-              const el = document.getElementById("section-spatial");
-              el?.scrollIntoView({ behavior: "smooth" });
-            }
-          }}
-          className="group cursor-pointer flex items-center gap-2 sm:gap-3 px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl bg-[#0a0c14]/90 hover:bg-accent-lime/10 border border-white/15 hover:border-accent-lime text-zinc-200 hover:text-white transition-all shadow-lg active:scale-95"
-          aria-label="Scroll to Portal Section"
-        >
-          <span className="font-mono text-[10px] sm:text-xs tracking-wider font-semibold">
-            ENTER PORTAL GATE
-          </span>
-          <span className="text-accent-lime text-xs sm:text-sm group-hover:translate-y-1 transition-transform">
-            &darr;
-          </span>
-        </button>
       </div>
 
       {/* Seamless bottom fade handoff into Stage 02 (Desktop only - mobile console is docked) */}
