@@ -307,7 +307,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         <div className="w-full flex items-center justify-between pt-1 px-1 pointer-events-auto shrink-0">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-accent-lime/30 font-mono text-[8px] xs:text-[8.5px] text-accent-lime font-semibold shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
-            <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
+            <span>DESIGN ENGINEER</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-white/15 font-mono text-[8px] xs:text-[8.5px] text-zinc-300 shadow-sm">
