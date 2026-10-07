@@ -2,7 +2,19 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 
-export const MouseScrubSection: React.FC = () => {
+export interface MouseScrubSectionHandle {
+  handleWheelScrub: (deltaY: number) => "stay" | "overscroll-down" | "overscroll-up";
+  setArrivalDirection: (direction: "forward" | "reverse") => void;
+  resetScrubProgress: () => void;
+}
+
+export interface MouseScrubSectionProps {
+  onRegisterHandle?: (handle: MouseScrubSectionHandle | null) => void;
+}
+
+export const MouseScrubSection: React.FC<MouseScrubSectionProps> = ({
+  onRegisterHandle,
+}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const progressBarRef = useRef<HTMLDivElement | null>(null);
@@ -21,6 +33,14 @@ export const MouseScrubSection: React.FC = () => {
   const lastClientX = useRef<number>(-1);
   const lastClientY = useRef<number>(-1);
   const lastCommittedTimeRef = useRef<number>(-1);
+
+  // Asymmetric scroll-scrub state refs
+  const hasCompletedForwardScrubRef = useRef<boolean>(false);
+  const arrivedFromReverseRef = useRef<boolean>(false);
+  const overscrollDownAccumulatorRef = useRef<number>(0);
+  const overscrollUpAccumulatorRef = useRef<number>(0);
+  const overscrollResetTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastWheelScrubTimeRef = useRef<number>(0);
 
   // Touch scrubbing state with directional intent separation
   const touchStartX = useRef<number | null>(null);
@@ -276,6 +296,20 @@ export const MouseScrubSection: React.FC = () => {
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (isAutoOrbit) return;
 
+    // Option 2: Lock mouse hover scrubbing until forward scroll discovery is completed.
+    // Vertical trackpad/wheel scroll strictly owns the turntable journey from 0° -> 360°.
+    if (!hasCompletedForwardScrubRef.current) {
+      lastClientX.current = -1;
+      lastClientY.current = -1;
+      return;
+    }
+
+    // Ignore mouse tracking when hovering over interactive UI controls (buttons, links, inputs)
+    const target = e.target as HTMLElement | null;
+    if (target && target.closest("button, a, input, select")) {
+      return;
+    }
+
     const video = videoRef.current;
     if (!video || !video.duration) return;
 
@@ -301,6 +335,13 @@ export const MouseScrubSection: React.FC = () => {
     if (dy > dx * 1.5 && dx < 3.5) {
       lastClientY.current = e.clientY;
       return;
+    }
+
+    // Ignore small mouse moves if user recently scrolled with trackpad/wheel to prevent cursor wiggle from overriding scroll scrub
+    if (Date.now() - lastWheelScrubTimeRef.current < 250) {
+      if (Math.abs(e.clientX - lastClientX.current) < 15) {
+        return;
+      }
     }
 
     lastClientX.current = e.clientX;
@@ -392,11 +433,205 @@ export const MouseScrubSection: React.FC = () => {
   const handleReset = () => {
     setIsAutoOrbit(false);
     targetTimeRef.current = 0;
+    hasCompletedForwardScrubRef.current = false;
+    lastClientX.current = -1;
+    lastClientY.current = -1;
     if (isSettled.current || !rafId.current) {
       isSettled.current = false;
       rafId.current = requestAnimationFrame(easeScrub);
     }
   };
+
+  // Asymmetric Scroll-Scrub Controller:
+  // Downward entry requires 360° rotation discovery before overscrolling to Finale;
+  // Reverse entry from Finale omits mandatory scrub for frictionless return to 3D Canvas.
+  const handleWheelScrub = useCallback(
+    (deltaY: number): "stay" | "overscroll-down" | "overscroll-up" => {
+      lastWheelScrubTimeRef.current = Date.now();
+
+      // Disengage auto-orbit if active so scroll scrub takes priority
+      if (isAutoOrbit) {
+        setIsAutoOrbit(false);
+      }
+
+      // Detect device signature: continuous trackpad vs notched mouse wheel
+      const isTrackpad =
+        Math.abs(deltaY) % 100 !== 0 &&
+        Math.abs(deltaY) % 120 !== 0;
+
+      // Reset overscroll accumulators on scroll quiet
+      if (overscrollResetTimerRef.current) clearTimeout(overscrollResetTimerRef.current);
+      overscrollResetTimerRef.current = setTimeout(() => {
+        overscrollDownAccumulatorRef.current = 0;
+        overscrollUpAccumulatorRef.current = 0;
+      }, isTrackpad ? 240 : 180);
+
+      // CASE A: REVERSE JOURNEY (Arrived upward from Stage 3 Finale into Stage 2)
+      // Per asymmetric journey specification: omit mandatory scrub when returning up
+      if (arrivedFromReverseRef.current) {
+        if (deltaY < 0) {
+          // Scrolling UP -> glide straight back to Stage 1 (3D Space)
+          overscrollUpAccumulatorRef.current += Math.abs(deltaY);
+          const reverseUpThreshold = isTrackpad ? 120 : 90;
+          if (overscrollUpAccumulatorRef.current >= reverseUpThreshold) {
+            overscrollUpAccumulatorRef.current = 0;
+            return "overscroll-up";
+          }
+        } else {
+          // Scrolling DOWN -> return to Finale
+          overscrollDownAccumulatorRef.current += deltaY;
+          const reverseDownThreshold = isTrackpad ? 140 : 100;
+          if (overscrollDownAccumulatorRef.current >= reverseDownThreshold) {
+            overscrollDownAccumulatorRef.current = 0;
+            return "overscroll-down";
+          }
+        }
+        return "stay";
+      }
+
+      // CASE B: FORWARD JOURNEY (Arrived downward from Stage 1 into Stage 2)
+      const video = videoRef.current;
+      if (!video || !video.duration) {
+        // Fallback before video metadata loads
+        if (deltaY > 0) {
+          overscrollDownAccumulatorRef.current += deltaY;
+          if (overscrollDownAccumulatorRef.current >= (isTrackpad ? 180 : 120)) {
+            overscrollDownAccumulatorRef.current = 0;
+            return "overscroll-down";
+          }
+        } else {
+          overscrollUpAccumulatorRef.current += Math.abs(deltaY);
+          if (overscrollUpAccumulatorRef.current >= (isTrackpad ? 140 : 100)) {
+            overscrollUpAccumulatorRef.current = 0;
+            return "overscroll-up";
+          }
+        }
+        return "stay";
+      }
+
+      // If user already completed forward scrub earlier in this session,
+      // allow fluid bypass while still scrubbing video interactively
+      if (hasCompletedForwardScrubRef.current) {
+        const scrubDelta = (deltaY / 420) * video.duration;
+        targetTimeRef.current = Math.max(0, Math.min(video.duration, targetTimeRef.current + scrubDelta));
+        if (isSettled.current || !rafId.current) {
+          isSettled.current = false;
+          rafId.current = requestAnimationFrame(easeScrub);
+        }
+
+        if (deltaY > 0) {
+          overscrollDownAccumulatorRef.current += deltaY;
+          const repeatDownThreshold = isTrackpad ? 180 : 120;
+          if (overscrollDownAccumulatorRef.current >= repeatDownThreshold) {
+            overscrollDownAccumulatorRef.current = 0;
+            return "overscroll-down";
+          }
+        } else {
+          overscrollUpAccumulatorRef.current += Math.abs(deltaY);
+          const repeatUpThreshold = isTrackpad ? 140 : 100;
+          if (overscrollUpAccumulatorRef.current >= repeatUpThreshold) {
+            overscrollUpAccumulatorRef.current = 0;
+            return "overscroll-up";
+          }
+        }
+        return "stay";
+      }
+
+      // FIRST-TIME FORWARD DISCOVERY:
+      // Mandatory 360° scrub forward, with fluid mid-scrub reversal support
+      if (deltaY > 0) {
+        // Scrolling DOWN
+        const isAtEnd = targetTimeRef.current >= video.duration * 0.96;
+        if (!isAtEnd) {
+          // Advance rotation smoothly (~420px total scroll travel for full 360°)
+          overscrollDownAccumulatorRef.current = 0;
+          const scrubDelta = (deltaY / 420) * video.duration;
+          targetTimeRef.current = Math.min(video.duration, targetTimeRef.current + scrubDelta);
+          if (targetTimeRef.current >= video.duration * 0.96) {
+            hasCompletedForwardScrubRef.current = true;
+          }
+          if (isSettled.current || !rafId.current) {
+            isSettled.current = false;
+            rafId.current = requestAnimationFrame(easeScrub);
+          }
+          return "stay";
+        } else {
+          // Video reached end: mark scrub complete and accumulate overscroll detent to Finale
+          hasCompletedForwardScrubRef.current = true;
+          overscrollDownAccumulatorRef.current += deltaY;
+          const finishDownThreshold = isTrackpad ? 160 : 110;
+          if (overscrollDownAccumulatorRef.current >= finishDownThreshold) {
+            overscrollDownAccumulatorRef.current = 0;
+            return "overscroll-down";
+          }
+          return "stay";
+        }
+      } else {
+        // Scrolling UP (Mid-Scrub Reversal)
+        const isAtStart = targetTimeRef.current <= 0.04;
+        if (!isAtStart) {
+          // Rewind video back toward 0%
+          overscrollUpAccumulatorRef.current = 0;
+          const scrubDelta = (deltaY / 420) * video.duration; // deltaY is negative
+          targetTimeRef.current = Math.max(0, targetTimeRef.current + scrubDelta);
+          if (isSettled.current || !rafId.current) {
+            isSettled.current = false;
+            rafId.current = requestAnimationFrame(easeScrub);
+          }
+          return "stay";
+        } else {
+          // Video is fully rewound to 0%: accumulate upward overscroll to return to Stage 1
+          overscrollUpAccumulatorRef.current += Math.abs(deltaY);
+          const exitUpThreshold = isTrackpad ? 140 : 100;
+          if (overscrollUpAccumulatorRef.current >= exitUpThreshold) {
+            overscrollUpAccumulatorRef.current = 0;
+            return "overscroll-up";
+          }
+          return "stay";
+        }
+      }
+    },
+    [isAutoOrbit, easeScrub]
+  );
+
+  // Register imperative handle with parent page orchestrator
+  useEffect(() => {
+    if (onRegisterHandle) {
+      onRegisterHandle({
+        handleWheelScrub,
+        setArrivalDirection: (direction: "forward" | "reverse") => {
+          arrivedFromReverseRef.current = direction === "reverse";
+          overscrollDownAccumulatorRef.current = 0;
+          overscrollUpAccumulatorRef.current = 0;
+          lastClientX.current = -1;
+          lastClientY.current = -1;
+          if (direction === "forward" && !hasCompletedForwardScrubRef.current) {
+            targetTimeRef.current = 0;
+            if (isSettled.current || !rafId.current) {
+              isSettled.current = false;
+              rafId.current = requestAnimationFrame(easeScrub);
+            }
+          }
+        },
+        resetScrubProgress: () => {
+          targetTimeRef.current = 0;
+          hasCompletedForwardScrubRef.current = false;
+          if (isSettled.current || !rafId.current) {
+            isSettled.current = false;
+            rafId.current = requestAnimationFrame(easeScrub);
+          }
+        },
+      });
+    }
+    return () => {
+      if (onRegisterHandle) {
+        onRegisterHandle(null);
+      }
+      if (overscrollResetTimerRef.current) {
+        clearTimeout(overscrollResetTimerRef.current);
+      }
+    };
+  }, [onRegisterHandle, handleWheelScrub, easeScrub]);
 
   const handleToSpatial = () => {
     const el = document.getElementById("section-spatial");
@@ -562,7 +797,7 @@ export const MouseScrubSection: React.FC = () => {
           </div>
 
           {/* Bottom Cue to Finale & Contact - Pill Outer */}
-          <div className="flex items-center justify-between pt-1.5 pb-0.5 border-t border-white/10 font-mono text-[8.5px] xs:text-[9px] sm:text-[9.5px] text-zinc-300 shrink-0">
+          <div className="flex items-center justify-between pt-1.5 pb-0.5 font-mono text-[8.5px] xs:text-[9px] sm:text-[9.5px] text-zinc-300 shrink-0">
             <span className="text-zinc-400 font-mono tracking-wide">
               KINETIC TURNTABLE // 60 FPS
             </span>

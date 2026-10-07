@@ -307,7 +307,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         <div className="w-full flex items-center justify-between pt-1 px-1 pointer-events-auto shrink-0">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-accent-lime/30 font-mono text-[8px] xs:text-[8.5px] text-accent-lime font-semibold shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shadow-[0_0_6px_#ccff00] animate-pulse" />
-            <span>DESIGN ENGINEER // CTO</span>
+            <span>DESIGN ENGINEER // CREATIVE TECHNOLOGIST</span>
           </div>
 
           <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#080a12]/70 border border-white/15 font-mono text-[8px] xs:text-[8.5px] text-zinc-300 shadow-sm">
@@ -336,7 +336,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
             {/* Punchy Thesis */}
             <p className="font-sans text-[11px] xs:text-[12.5px] sm:text-[14.5px] text-zinc-300 leading-snug sm:leading-relaxed max-w-sm sm:max-w-lg text-left drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)]">
-              Crafting tactile digital craft, hardware-accelerated compositor architecture, and resilient enterprise software.
+              Crafting tactile digital experiences, hardware-accelerated compositor architectures, and resilient enterprise software.
             </p>
           </div>
 
@@ -355,7 +355,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
         </div>
 
         {/* Bottom Bar: Touch Target Compliant (min-h-[46px]) */}
-        <div className="w-full flex items-center justify-between pt-3 pb-1 xs:pb-2 border-t border-white/10 font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] text-zinc-300 pointer-events-auto mt-auto shrink-0">
+        <div className="w-full flex items-center justify-between pt-3 pb-1 xs:pb-2 font-mono text-[9px] xs:text-[9.5px] sm:text-[11px] text-zinc-300 pointer-events-auto mt-auto shrink-0">
           <span className="text-zinc-400 font-mono tracking-wide">ACCRA // GLOBAL REMOTE</span>
           <button
             onPointerEnter={onWarmupPortal}
@@ -397,7 +397,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
 
           {/* Punchy Thesis */}
           <p className="font-sans text-base sm:text-lg md:text-xl text-zinc-200 font-medium leading-relaxed max-w-2xl drop-shadow-[0_2px_16px_rgba(0,0,0,0.95)]">
-            Crafting tactile digital craft, hardware-accelerated compositor architecture, and resilient enterprise software.
+            Crafting tactile digital experiences, hardware-accelerated compositor architecture, and resilient enterprise software.
           </p>
 
           {/* Curated Architecture Cues */}

@@ -476,7 +476,7 @@ export const FinaleSection: React.FC = () => {
         </div>
 
         {/* Bottom Dock Status & Back to Top */}
-        <div className="w-full flex items-center justify-between pt-2 border-t border-white/10 font-mono text-[9px] sm:text-[10px] text-zinc-300 shrink-0">
+        <div className="w-full flex items-center justify-between pt-2 font-mono text-[9px] sm:text-[10px] text-zinc-300 shrink-0">
           <span className="text-zinc-400 font-mono">&copy; 2026 KWESI</span>
           <button
             onClick={handleBackToTop}

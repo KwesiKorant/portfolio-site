@@ -218,18 +218,27 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const defaultZ = typeof window !== "undefined" ? getEffectiveDefaultCameraZ(window.innerWidth, window.innerHeight) : DEFAULT_CAMERA_Z;
           const boundaryDownZ = MAX_CAMERA_Z - 30; // 2770
           const boundaryUpZ = defaultZ - (boundaryDownZ - defaultZ); // 990 on desktop
+          const OVERSCROLL_DETENT = 300; // Requires explicit, intentional effort to leave Stage 03
 
           const distFromCenter = Math.abs(currentCamRef.current.z - defaultZ);
           const maxSpan = boundaryDownZ - defaultZ;
           const speedFactor = Math.min(1.0, distFromCenter / Math.max(maxSpan, 1));
-          const normalizedDelta = Math.min(Math.max(Math.abs(deltaY) / 50, 0.7), 2.4);
-          const dollySpeed = (175 + speedFactor * 75) * normalizedDelta;
+          
+          // Weighted, tactile dolly velocity curve: 45 to 65 units per normalized tick
+          const normalizedDelta = Math.min(Math.max(Math.abs(deltaY) / 45, 0.6), 1.8);
+          const dollySpeed = (48 + speedFactor * 24) * normalizedDelta;
 
           if (overscrollResetTimerRef.current) clearTimeout(overscrollResetTimerRef.current);
           overscrollResetTimerRef.current = setTimeout(() => {
             overscrollDownRef.current = 0;
             overscrollUpRef.current = 0;
-          }, 250);
+            // Elastic boundary recoil: if camera was slightly compressed past boundary, spring back cleanly
+            if (targetCamRef.current.z > boundaryDownZ) {
+              targetCamRef.current.z = boundaryDownZ;
+            } else if (targetCamRef.current.z < boundaryUpZ) {
+              targetCamRef.current.z = boundaryUpZ;
+            }
+          }, 240);
 
           if (deltaY > 0) {
             // Scrolling DOWN: dolly back towards Stage 04
@@ -238,10 +247,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               overscrollDownRef.current = 0;
               return "stay";
             } else {
-              // Reached boundary: accumulate overscroll
+              // Reached boundary: apply subtle elastic compression & accumulate overscroll
               overscrollDownRef.current += Math.abs(deltaY);
-              if (overscrollDownRef.current > 45) {
+              const elasticCompression = Math.min(45, (overscrollDownRef.current / OVERSCROLL_DETENT) * 45);
+              targetCamRef.current.z = boundaryDownZ + elasticCompression;
+
+              if (overscrollDownRef.current >= OVERSCROLL_DETENT) {
                 overscrollDownRef.current = 0;
+                targetCamRef.current.z = boundaryDownZ;
                 return "overscroll-down";
               }
               return "stay";
@@ -253,10 +266,14 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               overscrollUpRef.current = 0;
               return "stay";
             } else {
-              // Reached boundary: accumulate overscroll
+              // Reached boundary: apply subtle elastic compression & accumulate overscroll
               overscrollUpRef.current += Math.abs(deltaY);
-              if (overscrollUpRef.current > 45) {
+              const elasticCompression = Math.min(45, (overscrollUpRef.current / OVERSCROLL_DETENT) * 45);
+              targetCamRef.current.z = boundaryUpZ - elasticCompression;
+
+              if (overscrollUpRef.current >= OVERSCROLL_DETENT) {
                 overscrollUpRef.current = 0;
+                targetCamRef.current.z = boundaryUpZ;
                 return "overscroll-up";
               }
               return "stay";
@@ -381,11 +398,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
 
       const renderer = new THREE.WebGLRenderer({
         canvas,
-        antialias: !isMobile,
+        antialias: !isCompact,
         powerPreference: "high-performance",
+        stencil: false,
+        depth: true,
       });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : (isTablet ? 1.5 : 2)));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.0 : (isTablet ? 1.25 : 2)));
 
       // Cybernetic Ground Floor Plane (Perspective floor on X-Z axis at Y_FLOOR = -500)
       const Y_FLOOR = -500;
@@ -919,12 +938,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           const slotZ = Math.cos(angle) * R * 0.65;
 
           // 1. Outer reticle ring
-          const outerGeo = new THREE.RingGeometry(isTabletNow ? 32 : 26, isTabletNow ? 44 : 36, 32);
+          const outerGeo = new THREE.RingGeometry(isTabletNow ? 32 : 26, isTabletNow ? 44 : 36, 24);
           const outerMat = new THREE.MeshBasicMaterial({
             color,
             transparent: true,
             opacity: outerOpacity,
-            side: THREE.DoubleSide,
+            side: THREE.FrontSide,
             depthWrite: false,
           });
           const outerMesh = new THREE.Mesh(outerGeo, outerMat);
@@ -934,12 +953,12 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           mobileFloorBeaconGroup.add(outerMesh);
 
           // 2. Inner ring
-          const innerGeo = new THREE.RingGeometry(isTabletNow ? 16 : 12, isTabletNow ? 24 : 18, 24);
+          const innerGeo = new THREE.RingGeometry(isTabletNow ? 16 : 12, isTabletNow ? 24 : 18, 20);
           const innerMat = new THREE.MeshBasicMaterial({
             color,
             transparent: true,
             opacity: innerOpacity,
-            side: THREE.DoubleSide,
+            side: THREE.FrontSide,
             depthWrite: false,
           });
           const innerMesh = new THREE.Mesh(innerGeo, innerMat);
@@ -949,13 +968,13 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           mobileFloorBeaconGroup.add(innerMesh);
 
           // 3. Core contact disc
-          const discGeo = new THREE.CircleGeometry(isTabletNow ? 10 : 8, 24);
+          const discGeo = new THREE.CircleGeometry(isTabletNow ? 10 : 8, 20);
           const discMat = new THREE.MeshBasicMaterial({
             color,
             transparent: true,
             blending: THREE.AdditiveBlending,
             opacity: outerOpacity * 0.85,
-            side: THREE.DoubleSide,
+            side: THREE.FrontSide,
             depthWrite: false,
           });
           const discMesh = new THREE.Mesh(discGeo, discMat);
@@ -999,8 +1018,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
       }
       rebuildMobileFloorBeacons();
 
-      // Atmospheric starfield (desktop: 1,800 points, mobile: 400 to reduce fill-rate pressure from additive blending)
-      const particleCount = isMobile ? 400 : 1800;
+      // Atmospheric starfield (desktop: 1,800 points, compact mobile/tablet: 350 to reduce fill-rate pressure from additive blending)
+      const particleCount = isCompact ? 350 : 1800;
       const starGeo = new THREE.BufferGeometry();
       const starPos = new Float32Array(particleCount * 3);
       const starColors = new Float32Array(particleCount * 3);
@@ -1777,7 +1796,7 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
         camera.fov = aspect < 1.0 ? Math.min(74, (50 / aspect) * 0.68) : 50;
         camera.updateProjectionMatrix();
         renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 768 ? 1.0 : 2));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, width < 768 ? 1.0 : (width < 1024 ? 1.25 : 2)));
         calibrateVideoDimensions();
         cachedActiveDims = null;
       };
@@ -2106,7 +2125,8 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           cardsSettledCount = Math.min(10, cardsSettledCount + 1);
         }
 
-        const shouldProjectCards = true;
+        // Snappy card sleep discipline: when camera and orbit are settled, sleep DOM projection loop
+        const shouldProjectCards = cardsSettledCount < 6;
 
         // Perspective-project all spatial node cards with Compositor-Only 120 FPS standard
         if (nodeRefs.current && shouldProjectCards) {
@@ -2175,43 +2195,47 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
                 el._lastZIndex = targetZIndex;
               }
 
-              if (isThisNodeActive) {
-                if (!cachedActiveDims || cachedActiveDims.id !== node.id) {
-                  cachedActiveDims = {
-                    id: node.id,
-                    w: el.offsetWidth || (window.innerWidth < 640 ? Math.round(window.innerWidth * 0.94) : 1040),
-                    h: el.offsetHeight || 500,
-                  };
-                }
-                const cardW = cachedActiveDims.w;
-                const cardH = cachedActiveDims.h;
-                const halfW = Math.round(cardW * 0.5);
-                const halfH = Math.round(cardH * 0.5);
-                const posX = Math.round(proj.screenX) - halfW;
-                const posY = Math.round(proj.screenY) - halfH;
-                const clampedX = Math.max(12, Math.min(window.innerWidth - cardW - 12, posX));
-                const clampedY = Math.max(12, Math.min(window.innerHeight - cardH - 12, posY));
-                const dx = Math.abs(clampedX - (el._lastX ?? -999));
-                const dy = Math.abs(clampedY - (el._lastY ?? -999));
-                if (dx > 0.08 || dy > 0.08) {
-                  el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
-                  el._lastX = clampedX;
-                  el._lastY = clampedY;
-                }
-                if (el._lastZIndex !== "50") {
-                  el.style.zIndex = "50";
-                  el._lastZIndex = "50";
-                }
-              } else {
-                const cardScale = isCompactView ? (isTabletView ? proj.scale * 0.92 : proj.scale * 0.80) : proj.scale;
-                const dx = Math.abs(proj.screenX - (el._lastX ?? -999));
-                const dy = Math.abs(proj.screenY - (el._lastY ?? -999));
-                const ds = Math.abs(cardScale - (el._lastS ?? -999));
-                if (dx > 0.08 || dy > 0.08 || ds > 0.001) {
-                  el.style.transform = `translate3d(${proj.screenX.toFixed(1)}px, ${proj.screenY.toFixed(1)}px, 0) translate(-50%, -50%) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
-                  el._lastX = proj.screenX;
-                  el._lastY = proj.screenY;
-                  el._lastS = cardScale;
+              // Occlusion Culling: If the card is completely invisible (targetOpacity === "0"),
+              // SKIP the heavy string-serialized CSS transform mutation!
+              if (targetOpacity !== "0") {
+                if (isThisNodeActive) {
+                  if (!cachedActiveDims || cachedActiveDims.id !== node.id) {
+                    cachedActiveDims = {
+                      id: node.id,
+                      w: el.offsetWidth || (window.innerWidth < 640 ? Math.round(window.innerWidth * 0.94) : 1040),
+                      h: el.offsetHeight || 500,
+                    };
+                  }
+                  const cardW = cachedActiveDims.w;
+                  const cardH = cachedActiveDims.h;
+                  const halfW = Math.round(cardW * 0.5);
+                  const halfH = Math.round(cardH * 0.5);
+                  const posX = Math.round(proj.screenX) - halfW;
+                  const posY = Math.round(proj.screenY) - halfH;
+                  const clampedX = Math.max(12, Math.min(window.innerWidth - cardW - 12, posX));
+                  const clampedY = Math.max(12, Math.min(window.innerHeight - cardH - 12, posY));
+                  const dx = Math.abs(clampedX - (el._lastX ?? -999));
+                  const dy = Math.abs(clampedY - (el._lastY ?? -999));
+                  if (dx > 0.08 || dy > 0.08) {
+                    el.style.transform = `translate3d(${clampedX}px, ${clampedY}px, 0) scale3d(1, 1, 1)`;
+                    el._lastX = clampedX;
+                    el._lastY = clampedY;
+                  }
+                  if (el._lastZIndex !== "50") {
+                    el.style.zIndex = "50";
+                    el._lastZIndex = "50";
+                  }
+                } else {
+                  const cardScale = isCompactView ? (isTabletView ? proj.scale * 0.92 : proj.scale * 0.80) : proj.scale;
+                  const dx = Math.abs(proj.screenX - (el._lastX ?? -999));
+                  const dy = Math.abs(proj.screenY - (el._lastY ?? -999));
+                  const ds = Math.abs(cardScale - (el._lastS ?? -999));
+                  if (dx > 0.08 || dy > 0.08 || ds > 0.001) {
+                    el.style.transform = `translate3d(${proj.screenX.toFixed(1)}px, ${proj.screenY.toFixed(1)}px, 0) translate(-50%, -50%) scale3d(${cardScale.toFixed(3)}, ${cardScale.toFixed(3)}, 1)`;
+                    el._lastX = proj.screenX;
+                    el._lastY = proj.screenY;
+                    el._lastS = cardScale;
+                  }
                 }
               }
             } else {
@@ -2240,9 +2264,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
           }
         }
 
-        // Throttle radar render (desktop: ~40 FPS, mobile: ~10 FPS to reduce 2D canvas shadow rasterization)
+        // Throttle radar render (desktop: ~30 FPS, compact mobile/tablet: ~12 FPS to reduce 2D canvas rasterization)
         radarFrameCounter++;
-        const radarInterval = isMobile ? 6 : 3;
+        const radarInterval = isCompact ? 8 : 4;
         if (radarFrameCounter % radarInterval === 0) {
           drawRadar();
         }
@@ -2259,6 +2283,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               isVisible = nowVisible;
               if (isVisible) {
                 lastFrameTime = performance.now();
+                if (video && video.paused) {
+                  video.play().catch(() => {});
+                }
                 if (!animFrameId) {
                   animFrameId = requestAnimationFrame(animate);
                 }
@@ -2275,6 +2302,9 @@ export const SpatialCanvas = forwardRef<SpatialCanvasHandle, SpatialCanvasProps>
               } else if (animFrameId) {
                 cancelAnimationFrame(animFrameId);
                 animFrameId = null;
+                if (video && !video.paused) {
+                  video.pause();
+                }
               }
             }
           });

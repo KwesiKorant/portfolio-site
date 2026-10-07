@@ -21,6 +21,7 @@ import {
   PortalGateway,
   type PortalGatewayHandle,
 } from "@/components/sections/PortalGateway";
+import type { MouseScrubSectionHandle } from "@/components/sections/MouseScrubSection";
 
 // Offscreen sections dynamically imported for ultra-lean initial bundle (Vercel React Best Practices)
 const MouseScrubSection = dynamic(
@@ -70,6 +71,7 @@ export default function SpatialPortfolioPage() {
   // Refs for zero-reflow 120 FPS updates
   const canvasHandleRef = useRef<SpatialCanvasHandle | null>(null);
   const portalGatewayRef = useRef<PortalGatewayHandle | null>(null);
+  const mouseScrubHandleRef = useRef<MouseScrubSectionHandle | null>(null);
   const statementRef = useRef<HTMLDivElement | null>(null);
   const telemetryRef = useRef<HTMLDivElement | null>(null);
   const radarCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -82,8 +84,11 @@ export default function SpatialPortfolioPage() {
   const activeNodeIdRef = useRef(activeNodeId);
   activeNodeIdRef.current = activeNodeId;
 
-  const transitionStateRef = useRef<"IDLE" | "TRANSITIONING">("IDLE");
+  const transitionStateRef = useRef<"IDLE" | "TRANSITIONING" | "QUENCHING">("IDLE");
   const transitionTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const quenchingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const quenchingSafetyTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const stage2ArrivalRef = useRef<number>(0);
   const transitionStartTimeRef = useRef<number>(0);
   const lastNavDirectionRef = useRef<1 | -1>(1);
   const wheelAccumulatorRef = useRef(0);
@@ -94,6 +99,32 @@ export default function SpatialPortfolioPage() {
   const handleStepMobileOrbit = useCallback((step: 1 | -1) => {
     setMobileOrbitIndex((prev) => (prev + step + 6) % 6);
     canvasHandleRef.current?.stepMobileOrbit(step);
+  }, []);
+
+  // Centralized Inertia Quenching Phase (prevents cascading skips from trailing trackpad momentum)
+  const beginQuenching = useCallback(() => {
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    transitionTimerRef.current = null;
+    transitionStateRef.current = "QUENCHING";
+    wheelAccumulatorRef.current = 0;
+
+    if (quenchingTimerRef.current) clearTimeout(quenchingTimerRef.current);
+    if (quenchingSafetyTimerRef.current) clearTimeout(quenchingSafetyTimerRef.current);
+
+    const settleToIdle = () => {
+      if (quenchingTimerRef.current) clearTimeout(quenchingTimerRef.current);
+      if (quenchingSafetyTimerRef.current) clearTimeout(quenchingSafetyTimerRef.current);
+      quenchingTimerRef.current = null;
+      quenchingSafetyTimerRef.current = null;
+      transitionStateRef.current = "IDLE";
+      wheelAccumulatorRef.current = 0;
+    };
+
+    // If no wheel events occur for 180ms after visual scroll finishes, transition safely to IDLE
+    quenchingTimerRef.current = setTimeout(settleToIdle, 180);
+
+    // Maximum quenching safety fallback: unconditionally release after 650ms
+    quenchingSafetyTimerRef.current = setTimeout(settleToIdle, 650);
   }, []);
 
   // Portal Gateway Forward & Reverse Transitions
@@ -109,10 +140,9 @@ export default function SpatialPortfolioPage() {
     setCurrentStage(1);
     setTimeout(() => {
       setIsWarping(false);
-      transitionStateRef.current = "IDLE";
-      wheelAccumulatorRef.current = 0;
+      beginQuenching();
     }, 280);
-  }, []);
+  }, [beginQuenching]);
 
   const handleExitToPortal = useCallback(() => {
     setIsWarping(true);
@@ -126,10 +156,9 @@ export default function SpatialPortfolioPage() {
     setCurrentStage(0);
     setTimeout(() => {
       setIsWarping(false);
-      transitionStateRef.current = "IDLE";
-      wheelAccumulatorRef.current = 0;
+      beginQuenching();
     }, 180);
-  }, []);
+  }, [beginQuenching]);
 
   const handleWarmupPortal = useCallback(() => {
     portalGatewayRef.current?.preloadVideo();
@@ -145,10 +174,10 @@ export default function SpatialPortfolioPage() {
       const fromIndex = currentStageRef.current;
       const direction: 1 | -1 = targetIndex > fromIndex ? 1 : -1;
 
-      // If already transitioning, allow immediate reversal if user deliberately changed directions after initial motion
+      // If already transitioning, allow immediate reversal only if user deliberately changed directions with conviction
       if (transitionStateRef.current !== "IDLE") {
         const timeSinceStart = Date.now() - transitionStartTimeRef.current;
-        if (direction === lastNavDirectionRef.current || timeSinceStart < 160) {
+        if (direction === lastNavDirectionRef.current || timeSinceStart < 180) {
           return;
         }
       }
@@ -162,6 +191,13 @@ export default function SpatialPortfolioPage() {
 
       if (targetIndex === 1) {
         setActiveNodeId("root");
+      }
+
+      // Record arrival timestamp for Stage 2 (Turntable Scrub) and notify scrub controller of direction
+      if (targetIndex === 2) {
+        stage2ArrivalRef.current = Date.now();
+        const arrivalDir: "forward" | "reverse" = fromIndex < 2 ? "forward" : "reverse";
+        mouseScrubHandleRef.current?.setArrivalDirection(arrivalDir);
       }
 
       if (fromIndex === 0 && targetIndex === 1) {
@@ -185,27 +221,20 @@ export default function SpatialPortfolioPage() {
         });
       }
 
-      const unlockTransition = () => {
-        if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
-        transitionTimerRef.current = null;
-        transitionStateRef.current = "IDLE";
-        wheelAccumulatorRef.current = 0;
-      };
-
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
-      // Fast, non-extending safety fallback: 420ms (visual scroll takes ~380ms)
-      transitionTimerRef.current = setTimeout(unlockTransition, 420);
+      // Fast, non-extending safety fallback: 480ms (visual scroll takes ~380ms)
+      transitionTimerRef.current = setTimeout(beginQuenching, 480);
 
-      // Instant release as soon as browser finishes smooth scroll
+      // Instant release into quenching as soon as browser finishes smooth scroll
       if (typeof window !== "undefined" && "onscrollend" in window) {
         const onScrollEnd = () => {
           window.removeEventListener("scrollend", onScrollEnd);
-          unlockTransition();
+          beginQuenching();
         };
         window.addEventListener("scrollend", onScrollEnd, { once: true });
       }
     },
-    [handleEnterPortal, handleExitToPortal]
+    [handleEnterPortal, handleExitToPortal, beginQuenching]
   );
 
   // Lock scroll propagation during cinematic portal warp (Stage 02) to prevent momentum leakage
@@ -399,7 +428,7 @@ export default function SpatialPortfolioPage() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFocusNode, handleExitToPortal, isGuideOpen, activeNodeId, navigateToStage]);
 
-  // Centralized Wheel Navigation with Zero-Jank Momentum Absorption
+  // Centralized Wheel Navigation with Universal Trackpad & Mouse Momentum Quenching
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       // Allow modal internal scrolling without triggering stage transitions
@@ -417,21 +446,35 @@ export default function SpatialPortfolioPage() {
         return;
       }
 
-      // During active stage transition, absorb decaying trackpad inertia to prevent multi-stage skipping
-      if (transitionStateRef.current === "TRANSITIONING") {
+      // During active stage transition or inertia quenching, absorb decaying trackpad inertia to prevent multi-stage skipping
+      if (transitionStateRef.current === "TRANSITIONING" || transitionStateRef.current === "QUENCHING") {
+        e.preventDefault();
         const wheelDirection: 1 | -1 = e.deltaY > 0 ? 1 : -1;
         const timeSinceStart = Date.now() - transitionStartTimeRef.current;
-        // Directional reversal bypass: If user deliberately scrolled in the opposite direction
+
+        // Directional reversal bypass: If user deliberately scrolled in the opposite direction with conviction
         if (
           wheelDirection !== lastNavDirectionRef.current &&
-          timeSinceStart > 160 &&
-          Math.abs(e.deltaY) > 25
+          timeSinceStart > 180 &&
+          Math.abs(e.deltaY) > 35
         ) {
+          if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+          if (quenchingTimerRef.current) clearTimeout(quenchingTimerRef.current);
+          if (quenchingSafetyTimerRef.current) clearTimeout(quenchingSafetyTimerRef.current);
           transitionStateRef.current = "IDLE";
           wheelAccumulatorRef.current = 0;
         } else {
-          // Simply absorb the decaying momentum without pushing any timers back!
-          e.preventDefault();
+          // If in QUENCHING phase, keep postponing the quiet timer until the trackpad stream actually stops
+          if (transitionStateRef.current === "QUENCHING") {
+            if (quenchingTimerRef.current) clearTimeout(quenchingTimerRef.current);
+            quenchingTimerRef.current = setTimeout(() => {
+              if (quenchingSafetyTimerRef.current) clearTimeout(quenchingSafetyTimerRef.current);
+              quenchingTimerRef.current = null;
+              quenchingSafetyTimerRef.current = null;
+              transitionStateRef.current = "IDLE";
+              wheelAccumulatorRef.current = 0;
+            }, 180);
+          }
           return;
         }
       }
@@ -463,22 +506,52 @@ export default function SpatialPortfolioPage() {
         return;
       }
 
-      // STAGES 00, 02, 03: Direct stage-to-stage navigation
+      // STAGE 02 (Index 2 - Turntable Scrub): Asymmetric Scroll-Scrub & Quenched Transitions
+      if (currentStageRef.current === 2) {
+        const timeSinceStage2Arrival = Date.now() - stage2ArrivalRef.current;
+        if (timeSinceStage2Arrival < 400 && e.deltaY > 0) {
+          // Absorb initial landing momentum so Stage 1 -> Stage 2 momentum never jerks the turntable
+          e.preventDefault();
+          return;
+        }
+
+        e.preventDefault();
+        const scrubResult = mouseScrubHandleRef.current?.handleWheelScrub(e.deltaY);
+        if (scrubResult === "overscroll-down") {
+          navigateToStage(3);
+        } else if (scrubResult === "overscroll-up") {
+          navigateToStage(1);
+        }
+        return;
+      }
+
+      // STAGES 00, 03: Direct stage-to-stage navigation with device-normalized thresholds
       e.preventDefault();
+      
+      // Determine device signature: notched mouse wheel vs continuous trackpad
+      const isTrackpad =
+        Math.abs(e.deltaY) % 100 !== 0 &&
+        Math.abs(e.deltaY) % 120 !== 0 &&
+        e.deltaMode === 0;
+
       wheelAccumulatorRef.current += e.deltaY;
       if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
       wheelResetTimerRef.current = setTimeout(() => {
         wheelAccumulatorRef.current = 0;
-      }, 160);
+      }, isTrackpad ? 220 : 180);
 
-      const WHEEL_THRESHOLD = 48;
+      // Calibrated thresholds per stage & device:
+      // Stage 0 (Hero): 120px trackpad / 90px mouse
+      // Stage 3 (Finale back to Scrub): 120px trackpad / 90px mouse
+      const forwardThreshold = isTrackpad ? 120 : 90;
+      const reverseThreshold = isTrackpad ? 120 : 90;
 
-      if (wheelAccumulatorRef.current > WHEEL_THRESHOLD) {
+      if (wheelAccumulatorRef.current > forwardThreshold) {
         wheelAccumulatorRef.current = 0;
         if (currentStageRef.current < STAGE_IDS.length - 1) {
           navigateToStage(currentStageRef.current + 1);
         }
-      } else if (wheelAccumulatorRef.current < -WHEEL_THRESHOLD) {
+      } else if (wheelAccumulatorRef.current < -reverseThreshold) {
         wheelAccumulatorRef.current = 0;
         if (currentStageRef.current > 0) {
           navigateToStage(currentStageRef.current - 1);
@@ -491,6 +564,8 @@ export default function SpatialPortfolioPage() {
       window.removeEventListener("wheel", handleWheel);
       if (wheelResetTimerRef.current) clearTimeout(wheelResetTimerRef.current);
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      if (quenchingTimerRef.current) clearTimeout(quenchingTimerRef.current);
+      if (quenchingSafetyTimerRef.current) clearTimeout(quenchingSafetyTimerRef.current);
     };
   }, [navigateToStage, handleFocusNode, isGuideOpen]);
 
@@ -701,7 +776,11 @@ export default function SpatialPortfolioPage() {
       </section>
 
       {/* STAGE 04: Interactive Turntable / Mouse-Controlled Scrub */}
-      <MouseScrubSection />
+      <MouseScrubSection
+        onRegisterHandle={(handle) => {
+          mouseScrubHandleRef.current = handle;
+        }}
+      />
 
       {/* STAGE 05: Finale / Direct Uplink & Dossier */}
       <FinaleSection />
