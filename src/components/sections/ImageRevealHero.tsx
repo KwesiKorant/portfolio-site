@@ -324,7 +324,7 @@ export const ImageRevealHero: React.FC<ImageRevealHeroProps> = ({
           {/* Identity & Thesis Block */}
           <div className="w-full space-y-1 sm:space-y-1.5">
             <div className="flex items-center gap-2 font-mono text-[8.5px] xs:text-[9.5px] sm:text-[11px]">
-              <span className="text-accent-lime font-bold tracking-wider uppercase">ARCHITECT // CTO</span>
+              <span className="text-accent-lime font-bold tracking-wider uppercase">CTO</span>
               <span className="text-zinc-600">&bull;</span>
               <span className="text-zinc-300 font-mono tracking-wide">ARCFIELD SYSTEMS</span>
             </div>
